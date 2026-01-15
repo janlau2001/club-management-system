@@ -1,0 +1,46 @@
+*.log
+.DS_Store
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+Homestead.json
+Homestead.yaml
+Thumbs.db
+
+# Test and debug files (temporary files for development)
+check_*.php
+test_*.php
+debug_*.php
+get_*.php
+cleanup.php
+clear_database.php
+create_test_data.php
+reset_member.php
+
+# Compiled storage (will be regenerated)
+/storage/framework/cache/**
+/storage/framework/sessions/**
+/storage/framework/views/**
+/storage/logs/**
+
+# Keep important structure folders
+!/storage/framework/cache/.gitignore
+!/storage/framework/sessions/.gitignore
+!/storage/framework/views/.gitignore
+!/storage/logs/.gitignore

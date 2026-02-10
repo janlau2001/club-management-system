@@ -115,9 +115,13 @@
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                             Rejected
                                         </span>
+                                    @elseif($registration->verified_by_osa)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            Ready for Dean Endorsement
+                                        </span>
                                     @else
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                            Pending Endorsement
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                            ⏳ Awaiting Head Office
                                         </span>
                                     @endif
                                 </td>
@@ -138,8 +142,6 @@
                                                     onclick="openRejectModal('{{ $registration->club_name }}', '{{ route('dean.approvals.reject', $registration) }}')">
                                                 Reject
                                             </button>
-                                        @else
-                                            <span class="text-gray-400 text-sm italic">⏳ Awaiting Head Office verification</span>
                                         @endif
                                     @elseif($registration->endorsed_by_dean)
                                         <span class="text-green-600 text-sm">✓ Already Endorsed</span>

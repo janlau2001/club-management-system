@@ -284,6 +284,10 @@
             <div class="stat-label">Total Officers</div>
         </div>
         <div class="stat-item">
+            <div class="stat-number">{{ $totalAdvisers ?? 0 }}</div>
+            <div class="stat-label">Total Advisers</div>
+        </div>
+        <div class="stat-item">
             <div class="stat-number">{{ $clubs->where('status', 'active')->count() }}</div>
             <div class="stat-label">Active Clubs</div>
         </div>
@@ -333,6 +337,37 @@
             </div>
         @endif
 
+        <!-- Advisers Table -->
+        @if($singleClub->advisers->count() > 0)
+            <div class="officers-section" style="margin-top: 15px;">
+                <div class="section-title" style="color: #059669;">Club Advisers ({{ $singleClub->advisers->count() }})</div>
+                <table class="members-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">#</th>
+                            <th style="width: 25%;">Name</th>
+                            <th style="width: 20%;">Position</th>
+                            <th style="width: 15%;">Professor ID</th>
+                            <th style="width: 15%;">Dept Office</th>
+                            <th style="width: 20%;">Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($singleClub->advisers as $index => $adviser)
+                            <tr style="background-color: #f0fdf4;">
+                                <td style="text-align: center;">{{ $index + 1 }}</td>
+                                <td><strong>{{ $adviser->name }}</strong></td>
+                                <td><span style="color: #059669; font-weight: bold;">{{ $adviser->position ?? 'Club Adviser' }}</span></td>
+                                <td>{{ $adviser->professor_id ?? 'N/A' }}</td>
+                                <td>{{ $adviser->department_office ?? 'N/A' }}</td>
+                                <td>{{ $adviser->email }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+
         <!-- Members Table -->
         <div class="members-section">
             <div class="section-title">Club Members ({{ $singleClub->members->count() }})</div>
@@ -353,7 +388,13 @@
                             <tr>
                                 <td style="text-align: center;">{{ $index + 1 }}</td>
                                 <td><strong>{{ $member->name }}</strong></td>
-                                <td>{{ $member->student_id }}</td>
+                                <td>
+                                    @if($member->role === 'adviser')
+                                        {{ $member->professor_id ?? 'N/A' }}
+                                    @else
+                                        {{ $member->student_id }}
+                                    @endif
+                                </td>
                                 <td>{{ $member->email }}</td>
                                 <td>{{ $member->year_level }}</td>
                                 <td>{{ $member->joined_date ? $member->joined_date->format('M j, Y') : 'N/A' }}</td>
@@ -416,6 +457,37 @@
                     </div>
                 @endif
 
+                <!-- Advisers Table -->
+                @if($club->advisers->count() > 0)
+                    <div class="officers-section" style="margin-top: 15px;">
+                        <div class="section-title" style="color: #059669;">Club Advisers ({{ $club->advisers->count() }})</div>
+                        <table class="members-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;">#</th>
+                                    <th style="width: 25%;">Name</th>
+                                    <th style="width: 20%;">Position</th>
+                                    <th style="width: 15%;">Professor ID</th>
+                                    <th style="width: 15%;">Dept Office</th>
+                                    <th style="width: 20%;">Email</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($club->advisers as $index => $adviser)
+                                    <tr style="background-color: #f0fdf4;">
+                                        <td style="text-align: center;">{{ $index + 1 }}</td>
+                                        <td><strong>{{ $adviser->name }}</strong></td>
+                                        <td><span style="color: #059669; font-weight: bold;">{{ $adviser->position ?? 'Club Adviser' }}</span></td>
+                                        <td>{{ $adviser->professor_id ?? 'N/A' }}</td>
+                                        <td>{{ $adviser->department_office ?? 'N/A' }}</td>
+                                        <td>{{ $adviser->email }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+
                 <!-- Members Table -->
                 <div class="members-section">
                     <div class="section-title">Club Members ({{ $club->members->count() }})</div>
@@ -436,7 +508,13 @@
                                     <tr>
                                         <td style="text-align: center;">{{ $index + 1 }}</td>
                                         <td>{{ $member->name }}</td>
-                                        <td>{{ $member->student_id }}</td>
+                                        <td>
+                                            @if($member->role === 'adviser')
+                                                {{ $member->professor_id ?? 'N/A' }}
+                                            @else
+                                                {{ $member->student_id }}
+                                            @endif
+                                        </td>
                                         <td>{{ $member->email }}</td>
                                         <td>{{ $member->year_level }}</td>
                                         <td>{{ $member->joined_date ? $member->joined_date->format('M j, Y') : 'N/A' }}</td>

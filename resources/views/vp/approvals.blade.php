@@ -154,12 +154,6 @@
                                                     onclick="openRejectModal('{{ $registration->club_name }}', '{{ route('vp.approvals.reject', $registration) }}')">
                                                 Reject
                                             </button>
-                                        @elseif(!$registration->endorsed_by_dean)
-                                            <span class="text-gray-400 text-sm italic">⏳ Awaiting Dean endorsement</span>
-                                        @elseif(!$registration->approved_by_psg_council)
-                                            <span class="text-gray-400 text-sm italic">⏳ Awaiting PSG Council approval</span>
-                                        @elseif(!$registration->noted_by_director)
-                                            <span class="text-gray-400 text-sm italic">⏳ Awaiting Director noting</span>
                                         @endif
                                     @elseif($registration->approved_by_vp)
                                         <span class="text-green-600 text-sm">✓ Club Registered</span>

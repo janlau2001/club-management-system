@@ -15,7 +15,9 @@ class ClubApplication extends Model
         'gender',
         'phone_number',
         'student_id',
+        'professor_id',
         'department',
+        'department_office',
         'year_level',
         'position',
         'email',
@@ -24,11 +26,13 @@ class ClubApplication extends Model
         'rejection_reason',
         'approved_at',
         'rejected_at',
+        'viewed_at',
     ];
 
     protected $casts = [
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
+        'viewed_at' => 'datetime',
     ];
 
     protected $hidden = [

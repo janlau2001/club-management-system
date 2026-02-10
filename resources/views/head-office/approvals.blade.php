@@ -4,8 +4,8 @@
     <div class="space-y-6">
         <div class="flex justify-between items-center">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">Registration Monitoring</h1>
-                <p class="text-gray-600 mt-1">Monitor club registration applications and their approval status</p>
+                <h1 class="text-2xl font-semibold text-gray-900">Registration Monitoring</h1>
+                <p class="text-sm text-gray-500 mt-1">Monitor club registration applications and their approval status</p>
             </div>
         </div>
 
@@ -21,21 +21,21 @@
         @endif
 
         <!-- Status Tabs -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="bg-white border border-gray-200">
             <div class="border-b border-gray-200">
                 <nav class="flex -mb-px">
                     <!-- Pending Tab -->
                     <a href="{{ route('head-office.approvals', ['status' => 'pending']) }}" 
                        class="group inline-flex items-center py-4 px-6 border-b-2 font-medium text-sm transition-colors
-                              {{ $status === 'pending' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
-                        <svg class="w-5 h-5 mr-2 {{ $status === 'pending' ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500' }}" 
+                              {{ $status === 'pending' ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                        <svg class="w-5 h-5 mr-2 {{ $status === 'pending' ? 'text-gray-900' : 'text-gray-400 group-hover:text-gray-500' }}" 
                              fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                         Pending
-                        <span class="ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium
-                                     {{ $status === 'pending' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600' }}">
+                        <span class="ml-2 py-0.5 px-2.5 text-xs font-medium border
+                                     {{ $status === 'pending' ? 'bg-gray-100 text-gray-900 border-gray-300' : 'bg-gray-50 text-gray-600 border-gray-200' }}">
                             {{ $pendingCount }}
                         </span>
                     </a>
@@ -43,15 +43,15 @@
                     <!-- Approved Tab -->
                     <a href="{{ route('head-office.approvals', ['status' => 'approved']) }}" 
                        class="group inline-flex items-center py-4 px-6 border-b-2 font-medium text-sm transition-colors
-                              {{ $status === 'approved' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
-                        <svg class="w-5 h-5 mr-2 {{ $status === 'approved' ? 'text-green-500' : 'text-gray-400 group-hover:text-gray-500' }}" 
+                              {{ $status === 'approved' ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                        <svg class="w-5 h-5 mr-2 {{ $status === 'approved' ? 'text-gray-900' : 'text-gray-400 group-hover:text-gray-500' }}" 
                              fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                                   d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                         Approved
-                        <span class="ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium
-                                     {{ $status === 'approved' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600' }}">
+                        <span class="ml-2 py-0.5 px-2.5 text-xs font-medium border
+                                     {{ $status === 'approved' ? 'bg-gray-100 text-gray-900 border-gray-300' : 'bg-gray-50 text-gray-600 border-gray-200' }}">
                             {{ $approvedCount }}
                         </span>
                     </a>
@@ -59,15 +59,15 @@
                     <!-- Rejected Tab -->
                     <a href="{{ route('head-office.approvals', ['status' => 'rejected']) }}" 
                        class="group inline-flex items-center py-4 px-6 border-b-2 font-medium text-sm transition-colors
-                              {{ $status === 'rejected' ? 'border-red-500 text-red-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
-                        <svg class="w-5 h-5 mr-2 {{ $status === 'rejected' ? 'text-red-500' : 'text-gray-400 group-hover:text-gray-500' }}" 
+                              {{ $status === 'rejected' ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                        <svg class="w-5 h-5 mr-2 {{ $status === 'rejected' ? 'text-gray-900' : 'text-gray-400 group-hover:text-gray-500' }}" 
                              fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                                   d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                         Rejected
-                        <span class="ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium
-                                     {{ $status === 'rejected' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600' }}">
+                        <span class="ml-2 py-0.5 px-2.5 text-xs font-medium border
+                                     {{ $status === 'rejected' ? 'bg-gray-100 text-gray-900 border-gray-300' : 'bg-gray-50 text-gray-600 border-gray-200' }}">
                             {{ $rejectedCount }}
                         </span>
                     </a>
@@ -91,9 +91,9 @@
         </div>
 
         @if($registrations->count() > 0)
-            <div class="grid grid-cols-1 gap-6">
+            <div class="grid grid-cols-1 gap-4">
                 @foreach($registrations as $registration)
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <div class="bg-white border border-gray-200 hover:border-gray-400 transition-colors">
                         <div class="p-6">
                             <div class="flex items-start justify-between">
                                 <div class="flex items-start space-x-4 flex-1">

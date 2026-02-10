@@ -38,29 +38,17 @@ Route::middleware(['check.auth:admin'])->group(function () {
     Route::post('/admin/change-password', [DashboardController::class, 'changePassword'])->name('admin.change-password');
 
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
-        Route::get('/', [DashboardController::class, 'index'])->name('index');
-        Route::get('/activities', [DashboardController::class, 'activities'])->name('activities');
-        Route::get('/organizations', [DashboardController::class, 'organizations'])->name('organizations');
-        Route::get('/organizations/{club}', [DashboardController::class, 'showOrganization'])->name('organization.show');
-        Route::get('/registrations', [DashboardController::class, 'registrations'])->name('registrations');
-        Route::get('/registrations/{registration}', [DashboardController::class, 'showRegistration'])->name('registrations.show');
-        Route::post('/registrations/{registration}/approve', [DashboardController::class, 'approveRegistration'])->name('registrations.approve');
-        Route::post('/registrations/{registration}/reject', [DashboardController::class, 'rejectRegistration'])->name('registrations.reject');
-        Route::get('/renewals', [DashboardController::class, 'renewals'])->name('renewals');
-        Route::get('/renewals/{renewal}', [DashboardController::class, 'showRenewal'])->name('renewals.show');
-        Route::post('/renewals/{renewal}/approve', [DashboardController::class, 'approveRenewal'])->name('renewals.approve');
-        Route::post('/renewals/{renewal}/reject', [DashboardController::class, 'rejectRenewal'])->name('renewals.reject');
-        Route::get('/admin-info', [DashboardController::class, 'getCurrentAdminInfo'])->name('admin.info');
-        Route::post('/verify-password', [DashboardController::class, 'verifyPassword'])->name('verify.password');
-        Route::post('/renewals/send-reminder', [NotificationController::class, 'sendRenewalReminder'])->name('renewals.send-reminder');
-        Route::get('/members', [DashboardController::class, 'members'])->name('members');
-        Route::get('/reports', [DashboardController::class, 'reports'])->name('reports');
-        Route::post('/reports/organizations', [DashboardController::class, 'generateOrganizationReport'])->name('reports.organizations');
-        Route::post('/reports/members', [DashboardController::class, 'generateMembersReport'])->name('reports.members');
-        Route::post('/reports/activities', [DashboardController::class, 'generateActivityReport'])->name('reports.activities');
-        Route::get('/reports/club/{club}', [DashboardController::class, 'generateSingleClubReport'])->name('reports.single-club');
-        Route::patch('/organizations/{club}/suspend', [DashboardController::class, 'suspendClub'])->name('organization.suspend');
-        Route::patch('/organizations/{club}/activate', [DashboardController::class, 'activateClub'])->name('organization.activate');
+        // Redirect all old dashboard routes to head-office equivalents
+        Route::get('/', fn() => redirect()->route('head-office.dashboard'))->name('index');
+        Route::get('/activities', fn() => redirect()->route('head-office.activities'))->name('activities');
+        Route::get('/organizations', fn() => redirect()->route('head-office.organizations'))->name('organizations');
+        Route::get('/organizations/{club}', fn($club) => redirect()->route('head-office.organization.show', $club))->name('organization.show');
+        Route::get('/registrations', fn() => redirect()->route('head-office.registrations'))->name('registrations');
+        Route::get('/registrations/{registration}', fn($registration) => redirect()->route('head-office.registrations.show', $registration))->name('registrations.show');
+        Route::get('/renewals', fn() => redirect()->route('head-office.renewals'))->name('renewals');
+        Route::get('/renewals/{renewal}', fn($renewal) => redirect()->route('head-office.renewals.show', $renewal))->name('renewals.show');
+        Route::get('/members', fn() => redirect()->route('head-office.members'))->name('members');
+        Route::get('/reports', fn() => redirect()->route('head-office.reports'))->name('reports');
     });
 });
 
@@ -241,26 +229,49 @@ Route::middleware(['check.auth:admin'])->prefix('dean')->name('dean.')->group(fu
 // Head Office Routes
 Route::middleware(['check.auth:admin'])->prefix('head-office')->name('head-office.')->group(function () {
     Route::get('/dashboard', [HeadOfficeController::class, 'dashboard'])->name('dashboard');
+    Route::get('/activities', [HeadOfficeController::class, 'activities'])->name('activities');
     Route::get('/organizations', [HeadOfficeController::class, 'organizations'])->name('organizations');
     Route::get('/organizations/{club}', [HeadOfficeController::class, 'showOrganization'])->name('organization.show');
     Route::patch('/organizations/{club}/suspend', [HeadOfficeController::class, 'suspendOrganization'])->name('organization.suspend');
     Route::patch('/organizations/{club}/activate', [HeadOfficeController::class, 'activateOrganization'])->name('organization.activate');
+    Route::get('/registrations', [HeadOfficeController::class, 'registrations'])->name('registrations');
+    Route::get('/registrations/{registration}', [HeadOfficeController::class, 'showRegistration'])->name('registrations.show');
+    Route::post('/registrations/{registration}/approve', [HeadOfficeController::class, 'approveRegistration'])->name('registrations.approve');
+    Route::post('/registrations/{registration}/reject', [HeadOfficeController::class, 'rejectRegistration'])->name('registrations.reject');
     Route::get('/approvals', [HeadOfficeController::class, 'approvals'])->name('approvals');
     Route::get('/approvals/{registration}', [HeadOfficeController::class, 'showApproval'])->name('approvals.show');
     Route::get('/approvals/{registration}/document/{type}', [HeadOfficeController::class, 'viewDocument'])->name('approvals.document');
     Route::post('/approvals/{registration}/verify', [HeadOfficeController::class, 'verify'])->name('approvals.verify');
     Route::post('/approvals/{registration}/reject', [HeadOfficeController::class, 'reject'])->name('approvals.reject');
     Route::get('/renewals', [HeadOfficeController::class, 'renewals'])->name('renewals');
-    
-    // Notification management routes
-    Route::delete('/notifications/clear-pending', [HeadOfficeController::class, 'clearPendingNotifications'])->name('notifications.clear-pending');
-    Route::delete('/notifications/clear-by-type', [HeadOfficeController::class, 'clearNotificationsByType'])->name('notifications.clear-by-type');
+    Route::get('/renewals/{renewal}', [HeadOfficeController::class, 'showRenewal'])->name('renewals.show');
+    Route::post('/renewals/{renewal}/approve', [HeadOfficeController::class, 'approveRenewal'])->name('renewals.approve');
+    Route::post('/renewals/{renewal}/reject', [HeadOfficeController::class, 'rejectRenewal'])->name('renewals.reject');
+    Route::post('/renewals/send-reminder', [NotificationController::class, 'sendRenewalReminder'])->name('renewals.send-reminder');
+
+    // Members & Reports
+    Route::get('/members', [HeadOfficeController::class, 'members'])->name('members');
+    Route::get('/reports', [HeadOfficeController::class, 'reports'])->name('reports');
+    Route::post('/reports/organizations', [HeadOfficeController::class, 'generateOrganizationReport'])->name('reports.organizations');
+    Route::post('/reports/members', [HeadOfficeController::class, 'generateMembersReport'])->name('reports.members');
+    Route::post('/reports/activities', [HeadOfficeController::class, 'generateActivityReport'])->name('reports.activities');
+    Route::get('/reports/club/{club}', [HeadOfficeController::class, 'generateSingleClubReport'])->name('reports.single-club');
+
+    // Admin utility routes
+    Route::get('/admin-info', [HeadOfficeController::class, 'getCurrentAdminInfo'])->name('admin.info');
+    Route::post('/verify-password', [HeadOfficeController::class, 'verifyPassword'])->name('verify.password');
     
     // Decision Support System routes
     Route::get('/decision-support', [HeadOfficeController::class, 'decisionSupport'])->name('decision-support');
     Route::get('/decision-support/club/{club}', [HeadOfficeController::class, 'clubViolationDetails'])->name('decision-support.club-details');
     Route::post('/decision-support/suspend/{club}', [HeadOfficeController::class, 'suspendClubWithAuthentication'])->name('decision-support.suspend');
     Route::post('/decision-support/reactivate/{club}', [HeadOfficeController::class, 'reactivateClubWithAuthentication'])->name('decision-support.reactivate');
+    
+    // Appeal Management Routes
+    Route::get('/decision-support/appeal/{appeal}', [HeadOfficeController::class, 'getAppealDetails'])->name('decision-support.appeal-details');
+    Route::get('/decision-support/appeal/{appeal}/download', [HeadOfficeController::class, 'downloadAppealAttachment'])->name('decision-support.appeal-download');
+    Route::post('/decision-support/appeal/{appeal}/accept', [HeadOfficeController::class, 'acceptAppeal'])->name('decision-support.appeal-accept');
+    Route::post('/decision-support/appeal/{appeal}/reject', [HeadOfficeController::class, 'rejectAppeal'])->name('decision-support.appeal-reject');
 });
 
 // Club Routes (New Club-Centric System)
@@ -270,12 +281,32 @@ Route::prefix('club')->name('club.')->group(function () {
     Route::post('/login', [ClubAuthController::class, 'login'])->middleware('throttle:5,1'); // 5 attempts per minute
     Route::post('/logout', [ClubAuthController::class, 'logout'])->name('logout');
 
-    // Club Registration Routes
+    // Email Verification Routes
+    Route::get('/email/verify', [App\Http\Controllers\Club\VerificationController::class, 'notice'])
+        ->name('verification.notice');
+    Route::get('/email/verify/{id}/{hash}', [App\Http\Controllers\Club\VerificationController::class, 'verify'])
+        ->middleware(['signed'])
+        ->name('verification.verify');
+    Route::post('/email/verification-notification', [App\Http\Controllers\Club\VerificationController::class, 'resend'])
+        ->middleware(['throttle:6,1'])
+        ->name('verification.resend');
+    Route::get('/verification/check-status/{officer}', [App\Http\Controllers\Club\VerificationController::class, 'checkStatus'])
+        ->name('verification.check-status');
+
+    // Club Registration Routes (Multi-step)
     Route::get('/register', [ClubAuthController::class, 'showOfficerRegistration'])->name('register');
+    Route::post('/email-registration', [ClubAuthController::class, 'storeEmailRegistration'])->name('email-registration.store');
+    
+    // Google OAuth Routes
+    Route::get('/auth/google', [ClubAuthController::class, 'redirectToGoogle'])->name('auth.google');
+    Route::get('/auth/google/callback', [ClubAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+    
     Route::post('/officer-registration', [ClubAuthController::class, 'storeOfficerRegistration'])->name('officer-registration.store');
     Route::get('/club-registration/{officer}', [ClubAuthController::class, 'showClubRegistration'])->name('club-registration.show');
     Route::post('/club-registration/{officer}', [ClubAuthController::class, 'storeClubRegistration'])->name('club-registration.store');
     Route::post('/club-registration/{officer}/cancel', [ClubAuthController::class, 'cancelRegistration'])->name('club-registration.cancel');
+    Route::delete('/registration/cleanup/{officer}', [ClubAuthController::class, 'cleanupIncompleteRegistration'])->name('registration.cleanup');
+    Route::get('/registration-summary/{officer}', [ClubAuthController::class, 'showRegistrationSummary'])->name('registration.summary');
     Route::get('/registration-complete', [ClubAuthController::class, 'showRegistrationComplete'])->name('registration.complete');
 
     // Registration Tracker Routes
@@ -307,8 +338,6 @@ Route::prefix('club')->name('club.')->group(function () {
     Route::put('/officer/update-profile', [ClubDashboardController::class, 'officerUpdateProfile'])->name('officer.update-profile');
     Route::put('/officer/update-email', [ClubDashboardController::class, 'officerUpdateEmail'])->name('officer.update-email');
     Route::post('/officer/update-password', [ClubDashboardController::class, 'officerUpdatePassword'])->name('officer.update-password');
-    Route::get('/officer/add-member', [ClubDashboardController::class, 'showAddMemberForm'])->name('officer.add-member');
-    Route::post('/officer/add-member', [ClubDashboardController::class, 'addMember'])->name('officer.add-member.store');
     Route::get('/officer/manage-members', [ClubDashboardController::class, 'manageMembers'])->name('officer.manage-members');
     Route::get('/officer/view-members', [ClubDashboardController::class, 'officerViewMembers'])->name('officer.view-members');
     Route::get('/officer/member/{clubUser}', [ClubDashboardController::class, 'viewMember'])->name('officer.member.view');
@@ -333,7 +362,9 @@ Route::prefix('club')->name('club.')->group(function () {
     Route::post('/officer/applicants/{application}/reject', [ClubDashboardController::class, 'rejectApplication'])->name('officer.applicants.reject');
 
     // Violation Appeals Routes
-    Route::get('/officer/violations', [ClubDashboardController::class, 'getClubViolations'])->name('officer.violations');
+    Route::get('/officer/violations', [ClubDashboardController::class, 'viewViolationsPage'])->name('officer.violations');
+    Route::get('/officer/violations/data', [ClubDashboardController::class, 'getClubViolations'])->name('officer.violations.data');
+    Route::get('/officer/appeal-form/{violation}', [ClubDashboardController::class, 'showAppealForm'])->name('officer.appeal-form');
     Route::post('/officer/submit-appeal', [ClubDashboardController::class, 'submitViolationAppeal'])->name('officer.submit-appeal');
     
     // Debug route removed for production security
@@ -350,14 +381,7 @@ Route::prefix('club')->name('club.')->group(function () {
         }
         return response()->json(['status' => 'ok']);
     });
-
-    // Notification Routes
-    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
-    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
 });
-
-
 
 
 

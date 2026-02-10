@@ -52,6 +52,11 @@ class Club extends Model
         return $this->hasMany(ClubUser::class)->where('role', 'officer');
     }
 
+    public function advisers()
+    {
+        return $this->hasMany(ClubUser::class)->where('role', 'adviser');
+    }
+
     public function clubMembers()
     {
         return $this->hasMany(ClubUser::class)->where('role', 'member');

@@ -112,19 +112,45 @@
                         </div>
                         
                         <div class="bg-gray-50 p-4 rounded-lg">
-                            <label class="block text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">Student ID</label>
-                            <p class="text-lg text-gray-900">{{ $clubUser->student_id ?? 'N/A' }}</p>
+                            <label class="block text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
+                                @if($clubUser->role === 'adviser')
+                                    Professor ID
+                                @else
+                                    Student ID
+                                @endif
+                            </label>
+                            <p class="text-lg text-gray-900">
+                                @if($clubUser->role === 'adviser')
+                                    {{ $clubUser->professor_id ?? 'N/A' }}
+                                @else
+                                    {{ $clubUser->student_id ?? 'N/A' }}
+                                @endif
+                            </p>
                         </div>
                         
                         <div class="bg-gray-50 p-4 rounded-lg">
-                            <label class="block text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">Department</label>
-                            <p class="text-lg text-gray-900">{{ $clubUser->department }}</p>
+                            <label class="block text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
+                                @if($clubUser->role === 'adviser')
+                                    Department Office
+                                @else
+                                    Department
+                                @endif
+                            </label>
+                            <p class="text-lg text-gray-900">
+                                @if($clubUser->role === 'adviser')
+                                    {{ $clubUser->department_office ?? 'N/A' }}
+                                @else
+                                    {{ $clubUser->department }}
+                                @endif
+                            </p>
                         </div>
                         
+                        @if($clubUser->role !== 'adviser')
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <label class="block text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">Year Level</label>
                             <p class="text-lg text-gray-900">{{ $clubUser->year_level }}</p>
                         </div>
+                        @endif
                         
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <label class="block text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">Joined Date</label>

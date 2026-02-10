@@ -54,7 +54,7 @@
                             <!-- Profile Info -->
                             <div class="px-4 py-3 border-b border-gray-100">
                                 <p class="text-sm font-medium text-gray-900">{{ $clubUser->name }}</p>
-                                <p class="text-sm text-gray-500">{{ $clubUser->email }}</p>
+                                <p class="text-sm text-gray-500 truncate">{{ $clubUser->email }}</p>
                                 <p class="text-xs text-gray-400">{{ $clubUser->year_level }} • {{ $clubUser->department }}</p>
                             </div>
 
@@ -128,16 +128,42 @@
                     <div class="p-6">
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                             <div class="text-center">
-                                <div class="text-sm font-medium text-gray-500">Student ID</div>
-                                <div class="text-lg font-semibold text-gray-900 mt-1">{{ $clubUser->student_id }}</div>
+                                <div class="text-sm font-medium text-gray-500">
+                                    @if($clubUser->role === 'adviser')
+                                        Professor ID
+                                    @else
+                                        Student ID
+                                    @endif
+                                </div>
+                                <div class="text-lg font-semibold text-gray-900 mt-1">
+                                    @if($clubUser->role === 'adviser')
+                                        {{ $clubUser->professor_id ?? 'N/A' }}
+                                    @else
+                                        {{ $clubUser->student_id }}
+                                    @endif
+                                </div>
                             </div>
+                            @if($clubUser->role !== 'adviser')
                             <div class="text-center">
                                 <div class="text-sm font-medium text-gray-500">Year Level</div>
                                 <div class="text-lg font-semibold text-gray-900 mt-1">{{ $clubUser->year_level }}</div>
                             </div>
+                            @endif
                             <div class="text-center">
-                                <div class="text-sm font-medium text-gray-500">Course</div>
-                                <div class="text-lg font-semibold text-gray-900 mt-1">{{ $clubUser->course ?? 'N/A' }}</div>
+                                <div class="text-sm font-medium text-gray-500">
+                                    @if($clubUser->role === 'adviser')
+                                        Department Office
+                                    @else
+                                        Course
+                                    @endif
+                                </div>
+                                <div class="text-lg font-semibold text-gray-900 mt-1">
+                                    @if($clubUser->role === 'adviser')
+                                        {{ $clubUser->department_office ?? 'N/A' }}
+                                    @else
+                                        {{ $clubUser->course ?? 'N/A' }}
+                                    @endif
+                                </div>
                             </div>
                             <div class="text-center">
                                 <div class="text-sm font-medium text-gray-500">Member Since</div>

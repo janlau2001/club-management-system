@@ -115,6 +115,18 @@
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                             Rejected
                                         </span>
+                                    @elseif($registration->approved_by_psg_council && $registration->endorsed_by_dean)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            Ready for Director Noting
+                                        </span>
+                                    @elseif(!$registration->endorsed_by_dean)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                            ⏳ Awaiting Dean
+                                        </span>
+                                    @elseif(!$registration->approved_by_psg_council)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                            ⏳ Awaiting PSG Council
+                                        </span>
                                     @else
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                             Pending Review
@@ -138,8 +150,6 @@
                                                     onclick="openRejectModal('{{ $registration->club_name }}', '{{ route('director.approvals.reject', $registration) }}')">
                                                 Reject
                                             </button>
-                                        @else
-                                            <span class="text-gray-400 text-sm italic">⏳ Awaiting PSG Council approval</span>
                                         @endif
                                     @elseif($registration->noted_by_director)
                                         <span class="text-green-600 text-sm">✓ Already Noted</span>

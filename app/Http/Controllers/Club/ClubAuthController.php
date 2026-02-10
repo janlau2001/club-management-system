@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Laravel\Socialite\Facades\Socialite;
 
 class ClubAuthController extends Controller
 {
@@ -104,20 +105,146 @@ class ClubAuthController extends Controller
 
     public function showOfficerRegistration()
     {
-        // Check if we're in edit mode (coming back from club registration)
-        $editMode = request('edit_mode') == '1';
+        // Step 0: Email registration (if not verified yet)
         $officerId = request('officer_id');
         
-        return view('club.officer-registration', compact('editMode', 'officerId'));
+        if ($officerId) {
+            $officer = Officer::find($officerId);
+            if ($officer && $officer->hasVerifiedEmail() && $officer->registration_status === 'email_verified') {
+                // Determine if user needs to set password (Google OAuth) or already has one (manual email)
+                // If created_at and email_verified_at are very close (within 5 seconds), it's likely Google OAuth
+                $needsPassword = $officer->created_at && $officer->email_verified_at && 
+                                 abs($officer->created_at->diffInSeconds($officer->email_verified_at)) < 5;
+                
+                // Show Step 1: Personal info form
+                return view('club.officer-personal-info', compact('officer', 'needsPassword'));
+            }
+        }
+        
+        // Show Step 0: Email registration
+        return view('club.officer-email-registration');
+    }
+
+    public function storeEmailRegistration(Request $request)
+    {
+        $request->validate([
+            'email' => [
+                'required',
+                'email',
+                'unique:officers,email',
+                function ($attribute, $value, $fail) {
+                    // Validate Gmail domain
+                    if (!str_ends_with(strtolower($value), '@gmail.com')) {
+                        $fail('Please use a Gmail address (@gmail.com).');
+                    }
+                },
+            ],
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        // Create officer with email only, pending verification
+        $officer = Officer::create([
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'registration_status' => 'pending_email_verification',
+        ]);
+
+        // Send verification email
+        $officer->sendEmailVerificationNotification();
+
+        return redirect()->route('club.verification.notice')
+            ->with('success', 'Verification email sent! Please check your inbox.')
+            ->with('officer_id', $officer->id);
+    }
+
+    /**
+     * Redirect to Google OAuth
+     */
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')
+            ->scopes(['openid', 'profile', 'email'])
+            ->redirect();
+    }
+
+    /**
+     * Handle Google OAuth callback
+     */
+    public function handleGoogleCallback()
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
+            
+            // Validate email domain
+            if (!str_ends_with(strtolower($googleUser->getEmail()), '@gmail.com')) {
+                return redirect()->route('club.register')
+                    ->with('error', 'Please use a Gmail address (@gmail.com).');
+            }
+
+            // Check if officer already exists
+            $officer = Officer::where('email', $googleUser->getEmail())->first();
+
+            if (!$officer) {
+                // Create new officer with verified email
+                $officer = Officer::create([
+                    'email' => $googleUser->getEmail(),
+                    'name' => $googleUser->getName(),
+                    'password' => Hash::make(Str::random(32)), // Random password since using OAuth
+                    'email_verified_at' => now(),
+                    'registration_status' => 'email_verified',
+                ]);
+            } else {
+                // Update verification status if not verified
+                if (!$officer->hasVerifiedEmail()) {
+                    $officer->update([
+                        'email_verified_at' => now(),
+                        'registration_status' => 'email_verified',
+                    ]);
+                }
+            }
+
+            // If registration is complete, log them in
+            if ($officer->registration_status === 'submitted' || $officer->registration_status === 'approved') {
+                // Check if they have a ClubUser record
+                $clubUser = ClubUser::where('email', $officer->email)->first();
+                
+                if ($clubUser) {
+                    session([
+                        'club_user' => $clubUser,
+                        'club' => $clubUser->club,
+                        'user_type' => 'club_user',
+                        'authenticated' => true,
+                        'session_token' => Str::random(60),
+                        'last_activity' => time()
+                    ]);
+
+                    return redirect()->route($clubUser->hasManagementAccess() ? 'club.officer.dashboard' : 'club.member.dashboard')
+                        ->with('success', 'Welcome back, ' . $clubUser->name . '!');
+                }
+            }
+
+            // Otherwise, continue to registration
+            return redirect()->route('club.register', ['officer_id' => $officer->id])
+                ->with('success', 'Google account verified! Please complete your registration and set your password.');
+
+        } catch (\Exception $e) {
+            \Log::error('Google OAuth error: ' . $e->getMessage());
+            return redirect()->route('club.register')
+                ->with('error', 'Failed to authenticate with Google. Please try again or use email registration.');
+        }
     }
 
     public function storeOfficerRegistration(Request $request)
     {
-        \Log::info('Officer registration attempt', ['student_id' => $request->student_id]);
+        \Log::info('Officer personal info registration', ['officer_id' => $request->officer_id]);
 
-        // Check if we're updating an existing officer (edit mode)
-        $editMode = $request->edit_mode == '1';
-        $officerId = $request->officer_id;
+        // Get the verified officer
+        $officer = Officer::findOrFail($request->officer_id);
+        
+        if (!$officer->hasVerifiedEmail()) {
+            return redirect()->route('club.register')
+                ->with('error', 'Please verify your email first.');
+        }
 
         // Prepare validation rules
         $rules = [
@@ -127,74 +254,31 @@ class ClubAuthController extends Controller
             'year_level' => 'required|string',
             'course' => 'required|string|max:255',
             'department' => 'required|string',
-            'password' => 'required|string|min:8',
+            'phone' => [
+                'required',
+                'string',
+                new PhilippinePhoneNumber(),
+                new UniquePhoneNumber($officer->id, 'officers')
+            ],
+            'student_id' => [
+                'required',
+                'string',
+                new UniqueStudentId($officer->id, 'officers')
+            ],
         ];
 
-        // Handle phone validation based on edit mode
-        if ($editMode && $officerId) {
-            $rules['phone'] = [
-                'required',
-                'string',
-                new PhilippinePhoneNumber(),
-                new UniquePhoneNumber($officerId, 'officers')
-            ];
-        } else {
-            $rules['phone'] = [
-                'required',
-                'string',
-                new PhilippinePhoneNumber(),
-                new UniquePhoneNumber()
-            ];
+        // Only require password if user needs to set one (Google OAuth users)
+        $needsPassword = $officer->created_at && $officer->email_verified_at && 
+                         abs($officer->created_at->diffInSeconds($officer->email_verified_at)) < 5;
+        
+        if ($needsPassword) {
+            $rules['password'] = 'required|string|min:8|confirmed';
         }
 
-        // Handle student_id validation based on edit mode
-        if ($editMode && $officerId) {
-            $rules['student_id'] = [
-                'required',
-                'string',
-                new UniqueStudentId($officerId, 'officers')
-            ];
-        } else {
-            $rules['student_id'] = [
-                'required',
-                'string',
-                new UniqueStudentId()
-            ];
-        }
-
-        $validator = Validator::make($request->only(['first_name', 'last_name', 'suffix', 'email', 'phone', 'student_id', 'year_level', 'course', 'department', 'password', 'password_confirmation']), $rules);
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
-        }
-
-        if ($editMode && $officerId) {
-            // Update existing officer
-            $officer = Officer::findOrFail($officerId);
-            
-            // Build full name with suffix
-            $fullName = $request->first_name . ' ' . $request->last_name;
-            if ($request->suffix) {
-                $fullName .= ' ' . $request->suffix;
-            }
-
-            $officer->update([
-                'first_name' => $request->first_name,
-                'last_name' => $request->last_name,
-                'suffix' => $request->suffix,
-                'name' => $fullName,
-                'phone' => $request->phone,
-                'student_id' => $request->student_id,
-                'year_level' => $request->year_level,
-                'course' => $request->course,
-                'department' => $request->department,
-            ]);
-
-            // Store the plain password temporarily for later display
-            session(['temp_password_' . $officer->id => $request->password]);
-
-            return redirect()->route('club.club-registration.show', $officer->id)
-                ->with('success', 'Officer information updated! Please continue with club registration.');
         }
 
         // Build full name with suffix
@@ -203,54 +287,33 @@ class ClubAuthController extends Controller
             $fullName .= ' ' . $request->suffix;
         }
 
-        // Generate unique email
-        $baseEmail = strtolower(str_replace(' ', '', $request->first_name) . '.' . str_replace(' ', '', $request->last_name));
-        $email = $baseEmail . '.' . substr($request->student_id, -4) . '@club.system';
-        
-        // Ensure email uniqueness
-        $counter = 1;
-        while (Officer::where('email', $email)->exists()) {
-            $email = $baseEmail . '.' . substr($request->student_id, -4) . '.' . $counter . '@club.system';
-            $counter++;
-        }
-
-        // Check if officer already has a pending registration
-        $existingOfficer = Officer::where('student_id', $request->student_id)
-            ->where('registration_status', 'pending_club_registration')
-            ->first();
-
-        if ($existingOfficer) {
-            return redirect()->route('club.club-registration.show', $existingOfficer->id)
-                ->with('info', 'You already have a pending registration. Please complete the club registration form.');
-        }
-
-        // Create officer record
-        $officer = Officer::create([
+        // Prepare update data
+        $updateData = [
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'suffix' => $request->suffix,
             'name' => $fullName,
-            'username' => strtolower(str_replace(' ', '', $request->first_name) . '.' . str_replace(' ', '', $request->last_name) . '.' . substr($request->student_id, -4)),
-            'email' => $email,
             'phone' => $request->phone,
             'student_id' => $request->student_id,
             'year_level' => $request->year_level,
             'course' => $request->course,
             'department' => $request->department,
-            'position' => 'Officer',
-            'password' => Hash::make($request->password),
-            'club_status' => 'pending_registration',
-            'current_club' => null,
+            'position' => 'President', // Automatically set as President
             'registration_status' => 'pending_club_registration',
-        ]);
+        ];
 
-        // Store the plain password temporarily for later display
-        session(['temp_password_' . $officer->id => $request->password]);
+        // Only update password if user needed to set one
+        if ($needsPassword && $request->filled('password')) {
+            $updateData['password'] = Hash::make($request->password);
+        }
 
-        \Log::info('Officer created successfully', ['officer_id' => $officer->id, 'email' => $officer->email]);
+        // Update officer with personal information
+        $officer->update($updateData);
+
+        \Log::info('Officer personal info saved', ['officer_id' => $officer->id]);
 
         return redirect()->route('club.club-registration.show', $officer->id)
-            ->with('success', 'Officer registration completed! Please proceed to club registration.');
+            ->with('success', 'Personal information saved! Please proceed to club registration.');
     }
 
     public function showClubRegistration(Officer $officer)
@@ -272,7 +335,16 @@ class ClubAuthController extends Controller
         $validator = Validator::make($request->only(['club_name', 'nature', 'rationale', 'recommended_adviser', 'constitution_file', 'officers_list_file', 'activities_plan_file', 'budget_proposal_file']), [
             'club_name' => 'required|string|max:255',
             'nature' => 'required|in:Academic,Interest',
-            'rationale' => 'required|string',
+            'rationale' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) {
+                    $wordCount = str_word_count(trim($value));
+                    if ($wordCount < 10) {
+                        $fail('The rationale must contain at least 10 words.');
+                    }
+                },
+            ],
             'recommended_adviser' => 'required|string|max:255',
             'constitution_file' => 'required|file|mimes:pdf,doc,docx|max:10240',
             'officers_list_file' => 'required|file|mimes:pdf,doc,docx|max:10240',
@@ -312,21 +384,25 @@ class ClubAuthController extends Controller
             'current_club' => $request->club_name,
         ]);
 
-        // Store credentials in session for the completion page
-        session([
-            'registration_credentials' => [
-                'email' => $officer->email,
-                'password' => session('temp_password_' . $officer->id, 'Not Available'),
-                'officer_id' => $officer->id,
-                'club_name' => $request->club_name
-            ]
-        ]);
+        // Redirect to summary page with officer and club name
+        return redirect()->route('club.registration.summary', $officer->id)
+            ->with([
+                'club_name' => $request->club_name,
+                'success' => 'Club registration submitted successfully!'
+            ]);
+    }
 
-        // Clear temporary password from session
-        session()->forget('temp_password_' . $officer->id);
+    public function showRegistrationSummary(Officer $officer)
+    {
+        // Check if officer has submitted registration
+        if ($officer->registration_status !== 'submitted') {
+            return redirect()->route('club.login')
+                ->with('error', 'Invalid access to registration summary.');
+        }
 
-        return redirect()->route('club.registration.complete')
-            ->with('success', 'Club registration submitted successfully! Your application is now under review by the administration.');
+        $clubName = session('club_name') ?? $officer->current_club;
+
+        return view('club.registration-summary', compact('officer', 'clubName'));
     }
 
     public function showRegistrationTracker()
@@ -364,18 +440,18 @@ class ClubAuthController extends Controller
 
     public function showRegistrationComplete()
     {
-        // Check if credentials are in session
-        if (!session()->has('registration_credentials')) {
+        // Check if info is in session
+        if (!session()->has('registration_info')) {
             return redirect()->route('club.login')
                 ->with('error', 'Registration session expired. Please log in to continue.');
         }
 
-        $credentials = session('registration_credentials');
+        $info = session('registration_info');
         
-        // Clear credentials from session after displaying
-        session()->forget('registration_credentials');
+        // Clear info from session after displaying
+        session()->forget('registration_info');
         
-        return view('club.registration-complete', compact('credentials'));
+        return view('club.registration-complete', compact('info'));
     }
 
     public function cancelRegistration(Officer $officer)
@@ -398,6 +474,25 @@ class ClubAuthController extends Controller
         // If officer is not in the right status, just redirect to login
         return redirect()->route('club.login')
             ->with('info', 'Registration session ended.');
+    }
+
+    public function cleanupIncompleteRegistration(Officer $officer)
+    {
+        // This endpoint can be called by JavaScript when user leaves or closes the page
+        // Only cleanup if registration is not completed
+        if ($officer->registration_status !== 'completed' && $officer->registration_status !== 'submitted') {
+            // Delete associated club registration request if exists
+            if ($officer->clubRegistrationRequest) {
+                $officer->clubRegistrationRequest->delete();
+            }
+            
+            // Delete the officer
+            $officer->delete();
+            
+            return response()->json(['success' => true, 'message' => 'Incomplete registration cleaned up.']);
+        }
+        
+        return response()->json(['success' => false, 'message' => 'Registration is already completed or submitted.']);
     }
 
     public function showRegistrationReedit(ClubRegistrationRequest $registration)
@@ -427,7 +522,16 @@ class ClubAuthController extends Controller
             'club_name' => 'required|string|max:255',
             'department' => 'required|string|max:255',
             'nature' => 'required|in:Academic,Interest',
-            'rationale' => 'required|string|min:100',
+            'rationale' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) {
+                    $wordCount = str_word_count(trim($value));
+                    if ($wordCount < 10) {
+                        $fail('The rationale must contain at least 10 words.');
+                    }
+                },
+            ],
             'recommended_adviser' => 'required|string|max:255',
             'constitution_file' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
             'officers_list_file' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
@@ -529,15 +633,39 @@ class ClubAuthController extends Controller
 
     public function submitApplication(Request $request, Club $club)
     {
-        // Validate the form data
-        $validator = Validator::make($request->all(), [
+        // Determine if applicant is adviser
+        $isAdviser = $request->position === 'adviser';
+
+        // Build validation rules based on position
+        $rules = [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'suffix' => 'nullable|string|max:10',
-            'age' => 'required|integer|min:1|max:150',
             'gender' => 'required|in:Male,Female,Other',
             'phone_number' => ['required', 'string', new PhilippinePhoneNumber],
-            'student_id' => [
+            'position' => 'required|in:member,officer,adviser',
+            'email' => 'required|email|max:255|unique:club_applications,email',
+            'password' => 'required|string|min:8|confirmed',
+        ];
+
+        $messages = [
+            'phone_number.required' => 'Phone number is required.',
+            'position.required' => 'Please select a position you are applying for.',
+            'position.in' => 'Invalid position selected.',
+            'email.unique' => 'This email has already been used for another application.',
+            'password.confirmed' => 'Password confirmation does not match.',
+        ];
+
+        if ($isAdviser) {
+            // Adviser-specific validation
+            $rules['professor_id'] = 'required|string|max:50';
+            $rules['department_office'] = 'required|string|max:255';
+            $messages['professor_id.required'] = 'Professor ID is required.';
+            $messages['department_office.required'] = 'Department Office is required.';
+        } else {
+            // Student/Officer-specific validation
+            $rules['age'] = 'required|integer|min:1|max:150';
+            $rules['student_id'] = [
                 'required',
                 'string',
                 'max:50',
@@ -553,22 +681,16 @@ class ClubAuthController extends Controller
                         $fail('An application with this student ID and name already exists for this club.');
                     }
                 }
-            ],
-            'department' => 'required|string|max:255',
-            'year_level' => 'required|string|max:50',
-            'position' => 'required|in:member,officer,adviser',
-            'email' => 'required|email|max:255|unique:club_applications,email',
-            'password' => 'required|string|min:8|confirmed',
-        ], [
-            'phone_number.required' => 'Phone number is required.',
-            'student_id.required' => 'Student ID is required.',
-            'department.required' => 'Course/Program is required.',
-            'year_level.required' => 'Year level is required.',
-            'position.required' => 'Please select a position you are applying for.',
-            'position.in' => 'Invalid position selected.',
-            'email.unique' => 'This email has already been used for another application.',
-            'password.confirmed' => 'Password confirmation does not match.',
-        ]);
+            ];
+            $rules['department'] = 'required|string|max:255';
+            $rules['year_level'] = 'required|string|max:50';
+            $messages['student_id.required'] = 'Student ID is required.';
+            $messages['department.required'] = 'Course/Program is required.';
+            $messages['year_level.required'] = 'Year level is required.';
+        }
+
+        // Validate the form data
+        $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
             return back()
@@ -576,23 +698,32 @@ class ClubAuthController extends Controller
                 ->withInput();
         }
 
-        // Create the application
-        $application = \App\Models\ClubApplication::create([
+        // Create the application with appropriate fields
+        $applicationData = [
             'club_id' => $club->id,
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'suffix' => $request->suffix,
-            'age' => $request->age,
             'gender' => $request->gender,
             'phone_number' => $request->phone_number,
-            'student_id' => $request->student_id,
-            'department' => $request->department,
-            'year_level' => $request->year_level,
             'position' => $request->position,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'status' => 'pending',
-        ]);
+        ];
+
+        // Add position-specific fields
+        if ($isAdviser) {
+            $applicationData['professor_id'] = $request->professor_id;
+            $applicationData['department_office'] = $request->department_office;
+        } else {
+            $applicationData['age'] = $request->age;
+            $applicationData['student_id'] = $request->student_id;
+            $applicationData['department'] = $request->department;
+            $applicationData['year_level'] = $request->year_level;
+        }
+
+        $application = \App\Models\ClubApplication::create($applicationData);
 
         return redirect()->route('club.login')
             ->with('success', "Your application to join {$club->name} has been submitted successfully! The club officers will review your application.");

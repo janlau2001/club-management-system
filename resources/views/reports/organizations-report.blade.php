@@ -253,13 +253,14 @@
             <thead>
                 <tr>
                     <th style="width: 5%;">#</th>
-                    <th style="width: 25%;">Organization Name</th>
-                    <th style="width: 12%;">Type</th>
-                    <th style="width: 10%;">Status</th>
+                    <th style="width: 23%;">Organization Name</th>
+                    <th style="width: 10%;">Type</th>
+                    <th style="width: 8%;">Status</th>
                     <th style="width: 12%;">Date Registered</th>
-                    <th style="width: 8%;">Members</th>
-                    <th style="width: 8%;">Officers</th>
-                    <th style="width: 20%;">Adviser</th>
+                    <th style="width: 7%;">Members</th>
+                    <th style="width: 7%;">Officers</th>
+                    <th style="width: 7%;">Advisers</th>
+                    <th style="width: 21%;">Adviser</th>
                 </tr>
             </thead>
             <tbody>
@@ -274,8 +275,9 @@
                             </span>
                         </td>
                         <td>{{ $club->date_registered ? $club->date_registered->format('M j, Y') : 'N/A' }}</td>
-                        <td style="text-align: center;">{{ $club->member_count }}</td>
+                        <td style="text-align: center;">{{ $club->members->count() }}</td>
                         <td style="text-align: center;">{{ $club->officers->count() }}</td>
+                        <td style="text-align: center;">{{ $club->advisers->count() }}</td>
                         <td>{{ $club->adviser_name ?: 'Not Assigned' }}</td>
                     </tr>
                 @endforeach

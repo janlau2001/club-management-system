@@ -111,7 +111,11 @@
                                         {{ $member->email }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ $member->student_id ?? 'N/A' }}
+                                        @if($member->role === 'adviser')
+                                            {{ $member->professor_id ?? 'N/A' }}
+                                        @else
+                                            {{ $member->student_id ?? 'N/A' }}
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ $member->department }}
@@ -168,10 +172,18 @@
                                         {{ $member->email }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ $member->student_id }}
+                                        @if($member->role === 'adviser')
+                                            {{ $member->professor_id ?? 'N/A' }}
+                                        @else
+                                            {{ $member->student_id }}
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ $member->department }}
+                                        @if($member->role === 'adviser')
+                                            {{ $member->department_office ?? 'N/A' }}
+                                        @else
+                                            {{ $member->department }}
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ $member->created_at ? $member->created_at->format('M j, Y') : 'N/A' }}

@@ -115,9 +115,13 @@
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                             Rejected
                                         </span>
+                                    @elseif($registration->endorsed_by_dean)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            Ready for PSG Council Approval
+                                        </span>
                                     @else
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                            Pending Approval
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                            ⏳ Awaiting Dean
                                         </span>
                                     @endif
                                 </td>
@@ -138,8 +142,6 @@
                                                     onclick="openRejectModal('{{ $registration->club_name }}', '{{ route('psg-council.approvals.reject', $registration) }}')">
                                                 Reject
                                             </button>
-                                        @else
-                                            <span class="text-gray-400 text-sm italic">⏳ Awaiting Dean endorsement</span>
                                         @endif
                                     @elseif($registration->approved_by_psg_council)
                                         <span class="text-green-600 text-sm">✓ Already Approved</span>

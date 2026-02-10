@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Support\Facades\URL;
 
-class Officer extends Authenticatable
+class Officer extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
 
@@ -15,7 +18,6 @@ class Officer extends Authenticatable
         'first_name',
         'last_name',
         'suffix',
-        'username',
         'department',
         'club_status',
         'current_club',
@@ -27,6 +29,8 @@ class Officer extends Authenticatable
         'email',
         'password',
         'registration_status',
+        'email_verified_at',
+        'remember_token',
     ];
 
     public function clubRegistrationRequest()
@@ -42,6 +46,8 @@ class Officer extends Authenticatable
     {
         return [
             'password' => 'hashed',
+            'email_verified_at' => 'datetime',
+            'has_middle_initial' => 'boolean',
         ];
     }
 
@@ -78,5 +84,25 @@ class Officer extends Authenticatable
         // Remove all non-digit characters and store as-is
         $phone = preg_replace('/\D/', '', $value);
         $this->attributes['phone'] = $phone;
+    }
+
+    /**
+     * Override the email verification notification to use club routes
+     */
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new class extends VerifyEmail {
+            protected function verificationUrl($notifiable)
+            {
+                return URL::temporarySignedRoute(
+                    'club.verification.verify',
+                    now()->addMinutes(60),
+                    [
+                        'id' => $notifiable->getKey(),
+                        'hash' => sha1($notifiable->getEmailForVerification()),
+                    ]
+                );
+            }
+        });
     }
 }

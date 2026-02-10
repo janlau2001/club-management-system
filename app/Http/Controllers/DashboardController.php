@@ -650,6 +650,9 @@ class DashboardController extends Controller
         $totalOfficers = $clubs->sum(function($club) {
             return $club->clubUsers->where('role', 'officer')->count();
         });
+        $totalAdvisers = $clubs->sum(function($club) {
+            return $club->clubUsers->where('role', 'adviser')->count();
+        });
         $activeClubs = $clubs->where('status', 'active')->count();
         $totalClubs = $clubs->count();
 
@@ -665,6 +668,7 @@ class DashboardController extends Controller
             'statuses',
             'totalMembers',
             'totalOfficers',
+            'totalAdvisers',
             'activeClubs',
             'totalClubs'
         ));
@@ -898,7 +902,7 @@ class DashboardController extends Controller
         }
 
         // Generate report for all organizations
-        $clubs = Club::with(['officers', 'members'])->orderBy('name')->get();
+        $clubs = Club::with(['officers', 'members', 'advisers'])->orderBy('name')->get();
 
         $data = [
             'clubs' => $clubs,
@@ -948,22 +952,26 @@ class DashboardController extends Controller
                 return back()->with('error', 'Please select an organization to generate a report.');
             }
             
-            $clubs = Club::with(['officers', 'members'])
+            $clubs = Club::with(['officers', 'members', 'advisers'])
                 ->where('id', $clubId)
                 ->get();
         } else {
-            $clubs = Club::with(['officers', 'members'])->orderBy('name')->get();
+            $clubs = Club::with(['officers', 'members', 'advisers'])->orderBy('name')->get();
         }
 
         $totalMembers = $clubs->sum('member_count');
         $totalOfficers = $clubs->sum(function($club) {
             return $club->officers->count();
         });
+        $totalAdvisers = $clubs->sum(function($club) {
+            return $club->advisers->count();
+        });
 
         $data = [
             'clubs' => $clubs,
             'totalMembers' => $totalMembers,
             'totalOfficers' => $totalOfficers,
+            'totalAdvisers' => $totalAdvisers,
             'generatedDate' => now()->format('F j, Y'),
             'generatedTime' => now()->format('g:i A'),
             'adminName' => session('user')->name ?? 'Administrator',
@@ -1064,7 +1072,7 @@ class DashboardController extends Controller
 
     public function generateSingleClubReport($clubId)
     {
-        $club = Club::with(['officers', 'members'])->findOrFail($clubId);
+        $club = Club::with(['officers', 'members', 'advisers'])->findOrFail($clubId);
 
         $data = [
             'club' => $club,

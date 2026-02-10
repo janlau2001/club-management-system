@@ -21,243 +21,6 @@
                     <p class="text-white opacity-75 text-sm">Welcome, {{ $clubUser->name }} ({{ $clubUser->getDisplayRole() }})</p>
                 </div>
                 <div class="flex items-center space-x-4">
-                    @if($clubUser->role !== 'president')
-                    <!-- Mailbox -->
-                    <div class="relative" x-data="{ 
-                        open: false, 
-                        notifications: [],
-                        unreadCount: 0,
-                        loading: false,
-                        hasError: false,
-                        
-                        async fetchNotifications() {
-                            // Don't fetch if a dropdown is open to prevent UI interference
-                            if (this.open) return;
-                            
-                            this.loading = true;
-                            this.hasError = false;
-                            try {
-                                const controller = new AbortController();
-                                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-                                
-                                const response = await fetch('{{ route('club.notifications.index') }}', {
-                                    signal: controller.signal,
-                                    headers: {
-                                        'Accept': 'application/json',
-                                        'Content-Type': 'application/json',
-                                    }
-                                });
-                                
-                                clearTimeout(timeoutId);
-                                
-                                if (!response.ok) {
-                                    throw new Error(`HTTP ${response.status}`);
-                                }
-                                
-                                const data = await response.json();
-                                this.notifications = data.notifications || [];
-                                this.unreadCount = data.unread_count || 0;
-                            } catch (error) {
-                                if (error.name !== 'AbortError') {
-                                    console.warn('Notifications fetch failed:', error.message);
-                                    this.hasError = true;
-                                }
-                                // Keep existing data on error, don't reset
-                            }
-                            this.loading = false;
-                        },
-                        
-                        async markAsRead(notificationId, event) {
-                            // Prevent event bubbling
-                            if (event) {
-                                event.stopPropagation();
-                            }
-                            
-                            try {
-                                const response = await fetch(`/club/notifications/${notificationId}/read`, {
-                                    method: 'POST',
-                                    headers: {
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                        'Content-Type': 'application/json'
-                                    }
-                                });
-                                
-                                if (response.ok) {
-                                    // Update local state immediately for better UX
-                                    const notification = this.notifications.find(n => n.id === notificationId);
-                                    if (notification && !notification.is_read) {
-                                        notification.is_read = true;
-                                        this.unreadCount = Math.max(0, this.unreadCount - 1);
-                                    }
-                                    
-                                    // Optionally refresh in background
-                                    setTimeout(() => this.fetchNotifications(), 1000);
-                                }
-                            } catch (error) {
-                                console.error('Error marking as read:', error);
-                            }
-                        },
-                        
-                        async markAllAsRead() {
-                            try {
-                                const response = await fetch('/club/notifications/mark-all-read', {
-                                    method: 'POST',
-                                    headers: {
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                        'Content-Type': 'application/json'
-                                    }
-                                });
-                                
-                                if (response.ok) {
-                                    // Update local state immediately
-                                    this.notifications.forEach(n => n.is_read = true);
-                                    this.unreadCount = 0;
-                                    
-                                    // Refresh in background
-                                    setTimeout(() => this.fetchNotifications(), 1000);
-                                }
-                            } catch (error) {
-                                console.error('Error marking all as read:', error);
-                            }
-                        },
-                        
-                        togglePanel() {
-                            this.open = !this.open;
-                            if (this.open && this.notifications.length === 0 && !this.hasError) {
-                                // Only fetch when opening panel if we don't have data
-                                this.fetchNotifications();
-                            }
-                        },
-                        
-                        closePanel() {
-                            this.open = false;
-                        },
-                        
-                        init() {
-                            // Delay initial fetch to avoid interfering with page load
-                            setTimeout(() => {
-                                this.fetchNotifications();
-                            }, 2000);
-                            
-                            // Set up periodic refresh (less frequent)
-                            setInterval(() => {
-                                // Only auto-refresh when panel is closed and page is visible
-                                if (!this.open && !document.hidden) {
-                                    this.fetchNotifications();
-                                }
-                            }, 60000); // Reduced to 60 seconds
-                            
-                            // Handle page visibility changes
-                            document.addEventListener('visibilitychange', () => {
-                                if (!document.hidden && !this.open) {
-                                    // Refresh when page becomes visible again
-                                    setTimeout(() => this.fetchNotifications(), 1000);
-                                }
-                            });
-                        }
-                    }">
-                        <button @click="togglePanel()" class="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-white/30 shadow-lg relative">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                            </svg>
-                            <span>Mailbox</span>
-                            <span x-show="unreadCount > 0" x-text="unreadCount" class="absolute -top-2 -right-2 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center"></span>
-                        </button>
-                        
-                        <div x-show="open" @click.outside="closePanel()" x-transition class="absolute right-0 top-full mt-2 w-96 bg-white rounded-lg shadow-xl border z-50">
-                            <!-- Mailbox Header -->
-                            <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-t-lg">
-                                <div class="flex justify-between items-center">
-                                    <div class="flex items-center space-x-2">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                                        </svg>
-                                        <h3 class="text-lg font-semibold">Head Office Mail</h3>
-                                    </div>
-                                    <div class="flex items-center space-x-2">
-                                        <span class="text-sm" x-text="unreadCount > 0 ? unreadCount + ' new messages' : 'No new messages'"></span>
-                                        <button @click="closePanel()" class="text-white/80 hover:text-white">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Mailbox Content -->
-                            <div class="p-4">
-                                <div x-show="loading" class="py-6 flex justify-center">
-                                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                                </div>
-                                
-                                <div x-show="!loading && notifications.length === 0 && !hasError" class="py-8 flex flex-col items-center justify-center text-center">
-                                    <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
-                                    </svg>
-                                    <h4 class="text-lg font-medium text-gray-900 mb-1">No Mail</h4>
-                                    <p class="text-sm text-gray-500">Your mailbox is empty. You'll receive official messages from the Head Office here.</p>
-                                </div>
-                                
-                                <div x-show="!loading && hasError" class="py-8 flex flex-col items-center justify-center text-center">
-                                    <svg class="w-12 h-12 text-yellow-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L5.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                    </svg>
-                                    <h4 class="text-lg font-medium text-gray-900 mb-1">Connection Issue</h4>
-                                    <p class="text-sm text-gray-500">Unable to load messages. Check your internet connection and try again.</p>
-                                    <button @click="fetchNotifications()" class="mt-3 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
-                                        Retry
-                                    </button>
-                                </div>
-                                
-                                <div x-show="!loading && notifications.length > 0" class="max-h-80 overflow-y-auto space-y-3">
-                                    <template x-for="notification in notifications" :key="notification.id">
-                                        <div class="border rounded-lg overflow-hidden transition-all duration-200"
-                                             :class="notification.is_read ? 'bg-gray-50 border-gray-200' : 'bg-blue-50 border-blue-300 shadow-sm'">
-                                            <!-- Mail Header -->
-                                            <div class="p-3 border-b" :class="notification.is_read ? 'border-gray-200' : 'border-blue-200'">
-                                                <div class="flex items-start justify-between">
-                                                    <div class="flex items-center space-x-2">
-                                                        <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full flex items-center justify-center">
-                                                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                                                            </svg>
-                                                        </div>
-                                                        <div>
-                                                            <p class="text-sm font-semibold text-gray-900">Head Office</p>
-                                                            <p class="text-xs text-gray-500" x-text="new Date(notification.created_at).toLocaleDateString() + ' ' + new Date(notification.created_at).toLocaleTimeString()"></p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="flex items-center space-x-2">
-                                                        <div x-show="!notification.is_read" class="w-3 h-3 bg-blue-600 rounded-full"></div>
-                                                        <button x-show="!notification.is_read" 
-                                                                @click="markAsRead(notification.id, $event)"
-                                                                class="text-xs text-blue-600 hover:text-blue-800 underline">
-                                                            Mark Read
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Mail Content -->
-                                            <div class="p-3">
-                                                <h4 class="text-sm font-semibold text-gray-900 mb-2" x-text="notification.title"></h4>
-                                                <p class="text-sm text-gray-700" x-text="notification.message"></p>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </div>
-                                
-                                <div x-show="!loading && notifications.length > 0 && unreadCount > 0" class="mt-4 pt-4 border-t">
-                                    <button @click="markAllAsRead()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors">
-                                        Mark All Messages as Read
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-
                     <!-- Profile Dropdown -->
                     <div class="relative" x-data="{ open: false }">
                         <button @click="open = !open" class="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-white/30 shadow-lg">
@@ -288,7 +51,7 @@
                             <!-- Profile Info -->
                             <div class="px-4 py-3 border-b border-gray-100">
                                 <p class="text-sm font-medium text-gray-900">{{ $clubUser->name }}</p>
-                                <p class="text-sm text-gray-500">{{ $clubUser->email }}</p>
+                                <p class="text-sm text-gray-500 truncate">{{ $clubUser->email }}</p>
                                 <p class="text-xs text-gray-400">{{ $clubUser->year_level }} • {{ $clubUser->department }}</p>
                             </div>
 
@@ -363,19 +126,12 @@
                         <h3 class="text-lg font-semibold text-gray-900">Violation Appeals</h3>
                         <p class="text-gray-600 text-sm">Review and appeal club violations</p>
                     </div>
-                    <button 
-                        onclick="showViolationsList()" 
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    <a 
+                        href="{{ route('club.officer.violations') }}"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
                     >
                         📋 View & Appeal Violations
-                    </button>
-                </div>
-                
-                <!-- Violations List -->
-                <div id="violationsList" class="hidden">
-                    <div id="violationsContent">
-                        <p class="text-gray-500">Loading violations...</p>
-                    </div>
+                    </a>
                 </div>
             </div>
         @endif
@@ -542,17 +298,8 @@
                                 @else
                                     <!-- Management Actions (All Officers and Advisers) -->
                                     @if($clubUser->role === 'officer' || $clubUser->role === 'adviser')
-                                        <a href="{{ route('club.officer.add-member') }}"
-                                           class="block w-full bg-green-50 hover:bg-green-100 text-green-700 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-center">
-                                            <div class="flex items-center justify-center space-x-2">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                                </svg>
-                                                <span>Add New Member/Officer</span>
-                                            </div>
-                                        </a>
-                                        <a href="{{ route('club.officer.manage-members') }}"
-                                           class="block w-full bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-center">
+                                        <a href="{{ $club->status === 'suspended' ? '#' : route('club.officer.manage-members') }}"
+                                           class="block w-full bg-blue-50 {{ $club->status === 'suspended' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-100' }} text-blue-700 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-center mb-3 {{ $club->status === 'suspended' ? 'pointer-events-none' : '' }}">
                                             <div class="flex items-center justify-center space-x-2">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
@@ -575,8 +322,8 @@
 
                                     <!-- Club Renewal (All Officers and Advisers) -->
                                     @if($clubUser->role === 'officer' || $clubUser->role === 'adviser')
-                                        <a href="{{ route('club.officer.renewal') }}"
-                                           class="block w-full bg-orange-50 hover:bg-orange-100 text-orange-700 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-center">
+                                        <a href="{{ $club->status === 'suspended' ? '#' : route('club.officer.renewal') }}"
+                                           class="block w-full bg-orange-50 {{ $club->status === 'suspended' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-orange-100' }} text-orange-700 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-center {{ $club->status === 'suspended' ? 'pointer-events-none' : '' }}">
                                             <div class="flex items-center justify-center space-x-2">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
@@ -588,53 +335,76 @@
 
                                     <!-- Officer and Adviser Special Actions -->
                                     @if($clubUser->role === 'officer' || $clubUser->role === 'adviser')
-                                        <div class="border-t border-gray-200 pt-3 mt-3">
+                                        <div class="border-t border-gray-200 pt-3 mt-3 relative">
                                             <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">
                                                 Officer Actions
                                             </p>
 
-                                            <a href="{{ route('club.officer.renewal.status') }}"
-                                               class="block w-full bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-center mb-3">
-                                                <div class="flex items-center justify-center space-x-2">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                    </svg>
-                                                    <span>Renewal Approvals</span>
-                                                </div>
-                                            </a>
-
-                                            <a href="{{ route('club.officer.applicants') }}"
-                                               class="block w-full bg-teal-50 hover:bg-teal-100 text-teal-700 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-center mb-3">
-                                                <div class="flex items-center justify-center space-x-2">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-                                                    </svg>
-                                                    <span>Review Club Applicants</span>
-                                                </div>
-                                            </a>
-
-                                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                                                <div class="flex items-center">
-                                                    <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                    </svg>
-                                                    <div>
-                                                        <p class="text-xs font-medium text-blue-800">Officer Authority</p>
-                                                        <p class="text-xs text-blue-700">You have full management access</p>
+                                            <!-- Actions Container (blurred when suspended) -->
+                                            <div class="{{ $club->status === 'suspended' ? 'filter blur-sm pointer-events-none' : '' }}">
+                                                <a href="{{ route('club.officer.renewal.status') }}"
+                                                   class="block w-full bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-center mb-3">
+                                                    <div class="flex items-center justify-center space-x-2">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                        </svg>
+                                                        <span>Renewal Approvals</span>
                                                     </div>
-                                                </div>
-                                            </div>
+                                                </a>
 
-                                            @if($clubUser->role === 'adviser')
-                                                <div class="bg-green-50 border border-green-200 rounded-lg p-3 mt-3">
+                                                <a href="{{ route('club.officer.applicants') }}"
+                                                   class="block w-full bg-teal-50 hover:bg-teal-100 text-teal-700 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-center mb-3 relative">
+                                                    <div class="flex items-center justify-center space-x-2">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                                                        </svg>
+                                                        <span>Review Club Applicants</span>
+                                                    </div>
+                                                    @if($newApplicationsCount > 0)
+                                                        <span class="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full min-w-[20px]">
+                                                            {{ $newApplicationsCount }}
+                                                        </span>
+                                                    @endif
+                                                </a>
+
+                                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
                                                     <div class="flex items-center">
-                                                        <svg class="w-4 h-4 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                         </svg>
                                                         <div>
-                                                            <p class="text-xs font-medium text-green-800">Adviser Authority</p>
-                                                            <p class="text-xs text-green-700">You can certify renewal applications</p>
+                                                            <p class="text-xs font-medium text-blue-800">Officer Authority</p>
+                                                            <p class="text-xs text-blue-700">You have full management access</p>
                                                         </div>
+                                                    </div>
+                                                </div>
+
+                                                @if($clubUser->role === 'adviser')
+                                                    <div class="bg-green-50 border border-green-200 rounded-lg p-3 mt-3">
+                                                        <div class="flex items-center">
+                                                            <svg class="w-4 h-4 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                            </svg>
+                                                            <div>
+                                                                <p class="text-xs font-medium text-green-800">Adviser Authority</p>
+                                                                <p class="text-xs text-green-700">You can certify renewal applications</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <!-- Suspension Lock Overlay -->
+                                            @if($club->status === 'suspended')
+                                                <div class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 rounded-lg">
+                                                    <div class="text-center px-4 py-6">
+                                                        <div class="inline-flex items-center justify-center w-12 h-12 bg-red-100 rounded-full mb-3">
+                                                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                                            </svg>
+                                                        </div>
+                                                        <h3 class="text-sm font-semibold text-gray-900 mb-1">Actions Locked</h3>
+                                                        <p class="text-xs text-gray-600">Officer actions are disabled during suspension</p>
                                                     </div>
                                                 </div>
                                             @endif

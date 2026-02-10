@@ -287,7 +287,7 @@
                             <!-- Profile Info -->
                             <div class="px-4 py-3 border-b border-gray-100">
                                 <p class="text-sm font-medium text-gray-900">{{ $clubUser->name }}</p>
-                                <p class="text-sm text-gray-500">{{ $clubUser->email }}</p>
+                                <p class="text-sm text-gray-500 truncate">{{ $clubUser->email }}</p>
                                 <p class="text-xs text-gray-400">{{ $clubUser->year_level }} • {{ $clubUser->department }}</p>
                             </div>
 

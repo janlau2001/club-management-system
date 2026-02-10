@@ -59,7 +59,7 @@
                         <div class="w-8 h-8 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center text-sm font-medium">
                             3
                         </div>
-                        <span class="ml-2 text-sm font-medium text-gray-500">Admin Approval</span>
+                        <span class="ml-2 text-sm font-medium text-gray-500">Summary</span>
                     </div>
                 </div>
             </div>
@@ -73,12 +73,12 @@
                         <h2 class="text-xl font-semibold text-gray-900">Application for Recognition of New Club/Organization</h2>
                         <p class="text-gray-600 mt-1">Please provide complete information about your club/organization.</p>
                     </div>
-                    <button type="button" onclick="goBackToOfficerRegistration()" 
+                    <button type="button" onclick="goBackToPersonalInfo()" 
                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center space-x-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                         </svg>
-                        <span>Back to Officer Registration</span>
+                        <span>Back to Profile Information</span>
                     </button>
                 </div>
             </div>
@@ -157,33 +157,80 @@
                     <h3 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">Required Documents</h3>
                     <p class="text-sm text-gray-600">Please upload the following documents (PDF, DOC, or DOCX format, max 10MB each):</p>
                     
+                    <!-- Important Note -->
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-semibold text-blue-800">Important Note:</p>
+                                <p class="text-sm text-blue-700 mt-1">For clearer image quality, please scan your documents first before converting them to PDF. You may use scanning apps like <strong>CamScanner</strong>, <strong>Adobe Scan</strong>, or similar apps to ensure your documents are clear and readable.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label for="constitution_file" class="block text-sm font-medium text-gray-700 mb-2">Constitution and By-Laws *</label>
                             <input type="file" id="constitution_file" name="constitution_file" required
                                    accept=".pdf,.doc,.docx"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
+                                   class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white hover:bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-200 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-l-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-300 file:text-gray-800 hover:file:bg-gray-400 file:cursor-pointer">
+                            <a href="{{ asset('templates/constitution-template.pdf') }}" 
+                               download="Constitution_Template.pdf"
+                               class="mt-2 inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Download Template
+                            </a>
                         </div>
 
                         <div>
                             <label for="officers_list_file" class="block text-sm font-medium text-gray-700 mb-2">List of Officers *</label>
                             <input type="file" id="officers_list_file" name="officers_list_file" required
                                    accept=".pdf,.doc,.docx"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
+                                   class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white hover:bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-200 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-l-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-300 file:text-gray-800 hover:file:bg-gray-400 file:cursor-pointer">
+                            <a href="{{ asset('templates/officers-list-template.pdf') }}" 
+                               download="Officers_List_Template.pdf"
+                               class="mt-2 inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Download Template
+                            </a>
                         </div>
 
                         <div>
                             <label for="activities_plan_file" class="block text-sm font-medium text-gray-700 mb-2">Activities/Action Plan *</label>
                             <input type="file" id="activities_plan_file" name="activities_plan_file" required
                                    accept=".pdf,.doc,.docx"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
+                                   class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white hover:bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-200 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-l-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-300 file:text-gray-800 hover:file:bg-gray-400 file:cursor-pointer">
+                            <a href="{{ asset('templates/activities-plan-template.pdf') }}" 
+                               download="Activities_Plan_Template.pdf"
+                               class="mt-2 inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Download Template
+                            </a>
                         </div>
 
                         <div>
                             <label for="budget_proposal_file" class="block text-sm font-medium text-gray-700 mb-2">Budget Proposal *</label>
                             <input type="file" id="budget_proposal_file" name="budget_proposal_file" required
                                    accept=".pdf,.doc,.docx"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
+                                   class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white hover:bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-200 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-l-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-300 file:text-gray-800 hover:file:bg-gray-400 file:cursor-pointer">
+                            <a href="{{ asset('templates/budget-proposal-template.pdf') }}" 
+                               download="Budget_Proposal_Template.pdf"
+                               class="mt-2 inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Download Template
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -193,13 +240,10 @@
 
                 <!-- Submit Button -->
                 <div class="flex justify-between space-x-4 pt-6 border-t border-gray-200">
-                    <form method="POST" action="{{ route('club.club-registration.cancel', $officer) }}">
-                        @csrf
-                        <button type="submit" 
-                                class="px-6 py-2 bg-red-100 hover:bg-red-200 text-red-700 hover:text-red-800 border border-red-300 hover:border-red-400 rounded-lg transition-all duration-200">
-                            Cancel
-                        </button>
-                    </form>
+                    <button type="button" onclick="cancelRegistration()"
+                       class="px-6 py-2 bg-red-100 hover:bg-red-200 text-red-700 hover:text-red-800 border border-red-300 hover:border-red-400 rounded-lg transition-all duration-200">
+                        Cancel
+                    </button>
                     <button type="submit" 
                             class="px-6 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 font-medium">
                         Submit Club Registration
@@ -209,35 +253,36 @@
         </div>
     </main>
 
-    <!-- Hidden form for going back with officer data preserved -->
-    <form id="backToOfficerForm" method="GET" action="{{ route('club.register') }}" style="display: none;">
-        <input type="hidden" name="first_name" value="{{ $officer->first_name }}">
-        <input type="hidden" name="last_name" value="{{ $officer->last_name }}">
-        <input type="hidden" name="suffix" value="{{ $officer->suffix ?? '' }}">
-        <input type="hidden" name="phone" value="{{ $officer->phone }}">
-        <input type="hidden" name="student_id" value="{{ $officer->student_id }}">
-        <input type="hidden" name="year_level" value="{{ $officer->year_level }}">
-        <input type="hidden" name="course" value="{{ $officer->course }}">
-        <input type="hidden" name="department" value="{{ $officer->department }}">
-        <input type="hidden" name="position" value="{{ $officer->position }}">
-        <input type="hidden" name="edit_mode" value="1">
+    <!-- Hidden form for going back to personal info with officer data preserved -->
+    <form id="backToPersonalInfoForm" method="GET" action="{{ route('club.register') }}" style="display: none;">
         <input type="hidden" name="officer_id" value="{{ $officer->id }}">
     </form>
 
     <script>
-        function goBackToOfficerRegistration() {
-            // Store current club form data in localStorage
-            const clubFormData = {
-                club_name: document.getElementById('club_name')?.value || '',
-                nature: document.getElementById('nature')?.value || '',
-                rationale: document.getElementById('rationale')?.value || '',
-                recommended_adviser: document.getElementById('recommended_adviser')?.value || '',
-            };
-            
-            localStorage.setItem('clubFormData', JSON.stringify(clubFormData));
-            
-            // Submit the hidden form to go back with officer data
-            document.getElementById('backToOfficerForm').submit();
+        function goBackToPersonalInfo() {
+            // Go back to the personal info page with the officer_id parameter
+            const url = new URL("{{ route('club.register') }}", window.location.origin);
+            url.searchParams.set('officer_id', '{{ $officer->id }}');
+            window.location.href = url.toString();
+        }
+
+        function cancelRegistration() {
+            // Cleanup the incomplete registration
+            const url = '{{ route("club.registration.cleanup", $officer->id) }}';
+            fetch(url, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            }).then(() => {
+                // Redirect to login after cleanup
+                window.location.href = '{{ route("club.login") }}';
+            }).catch(() => {
+                // Even if cleanup fails, still redirect
+                window.location.href = '{{ route("club.login") }}';
+            });
         }
 
         // Restore club form data when coming back from officer registration
@@ -491,6 +536,50 @@
                 form.onsubmit = showCancelConfirmModal;
             });
         });
-    </script>
-</body>
-</html>
+
+        // Auto Cleanup - Track if form was submitted successfully
+        let registrationSubmitted = false;
+        
+        // Mark as submitted when registration form is submitted
+        const registrationForm = document.querySelector('form[action*="club-registration.store"]');
+        if (registrationForm) {
+            registrationForm.addEventListener('submit', function() {
+                registrationSubmitted = true;
+            });
+        }
+
+        // Cleanup on page unload (close/navigate away)
+        window.addEventListener('beforeunload', function(e) {
+            if (!registrationSubmitted) {
+                // Use sendBeacon for reliable cleanup during unload
+                const url = '{{ route("club.registration.cleanup", $officer->id) }}';
+                const data = new FormData();
+                data.append('_method', 'DELETE');
+                data.append('_token', '{{ csrf_token() }}');
+                navigator.sendBeacon(url, data);
+            }
+        });
+
+        // Also cleanup when page visibility changes (tab switch, minimize)
+        let inactivityTimer = null;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && !registrationSubmitted) {
+                // Page is hidden, set a timeout to cleanup if user doesn't return
+                inactivityTimer = setTimeout(function() {
+                    if (document.hidden && !registrationSubmitted) {
+                        const url = '{{ route("club.registration.cleanup", $officer->id) }}';
+                        fetch(url, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            }
+                        }).catch(() => {}); // Ignore errors
+                    }
+                }, 300000); // 5 minutes of inactivity
+            } else if (!document.hidden && inactivityTimer) {
+                // User came back, cancel the cleanup
+                clearTimeout(inactivityTimer);
+            }
+        });

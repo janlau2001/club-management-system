@@ -7,7 +7,7 @@
             <h1 class="text-3xl font-bold text-gray-900">Renewal Details</h1>
             <p class="text-gray-600 mt-2">{{ $renewal->club->name }} • {{ $renewal->academic_year }}</p>
         </div>
-        <a href="{{ route('dashboard.renewals') }}" 
+        <a href="{{ route('head-office.renewals') }}" 
            class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium flex items-center space-x-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -491,7 +491,7 @@
                         @endif
                     @endif
                     
-                    <a href="{{ route('dashboard.organization.show', $renewal->club) }}" 
+                    <a href="{{ route('head-office.organization.show', $renewal->club) }}" 
                        class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-block text-center">
                         View Organization
                     </a>
@@ -697,7 +697,7 @@ function submitRejectionReason() {
     closeRejectionModal();
     
     // Get admin info and show password modal
-    fetch('/dashboard/admin-info', {
+    fetch('/head-office/admin-info', {
         method: 'GET',
         headers: {
             'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -773,7 +773,7 @@ document.addEventListener('keydown', function(event) {
 
 function approveRenewal(renewalId) {
     // Get admin info first
-    fetch('/dashboard/admin-info', {
+    fetch('/head-office/admin-info', {
         method: 'GET',
         headers: {
             'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -803,7 +803,7 @@ function approveRenewal(renewalId) {
 function performApproval(renewalId, password) {
 function performApproval(renewalId, password) {
     // Verify password first
-    fetch('/dashboard/verify-password', {
+    fetch('/head-office/verify-password', {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -817,7 +817,7 @@ function performApproval(renewalId, password) {
     .then(verifyData => {
         if (verifyData.success) {
             // Password verified, proceed with approval
-            fetch(`/dashboard/renewals/${renewalId}/approve`, {
+            fetch(`/head-office/renewals/${renewalId}/approve`, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -859,7 +859,7 @@ let currentRejectionReason = null;
 
 function performRejection(renewalId, password) {
     // Verify password first
-    fetch('/dashboard/verify-password', {
+    fetch('/head-office/verify-password', {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -873,7 +873,7 @@ function performRejection(renewalId, password) {
     .then(verifyData => {
         if (verifyData.success) {
             // Password verified, proceed with rejection
-            fetch(`/dashboard/renewals/${renewalId}/reject`, {
+            fetch(`/head-office/renewals/${renewalId}/reject`, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -917,7 +917,7 @@ function updateApprovalStatus(status) {
                 <div class="w-full bg-green-100 text-green-800 px-4 py-2 rounded-lg text-sm font-medium text-center">
                     ✅ Renewal Approved
                 </div>
-                <a href="{{ route('dashboard.organization.show', $renewal->club) }}" 
+                <a href="{{ route('head-office.organization.show', $renewal->club) }}" 
                    class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-block text-center">
                     View Organization
                 </a>
@@ -927,7 +927,7 @@ function updateApprovalStatus(status) {
                 <div class="w-full bg-red-100 text-red-800 px-4 py-2 rounded-lg text-sm font-medium text-center">
                     ❌ Renewal Rejected
                 </div>
-                <a href="{{ route('dashboard.organization.show', $renewal->club) }}" 
+                <a href="{{ route('head-office.organization.show', $renewal->club) }}" 
                    class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-block text-center">
                     View Organization
                 </a>

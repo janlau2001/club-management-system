@@ -28,9 +28,6 @@
 
     <!-- Main Content -->
     <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-    <!-- Main Content -->
-    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Club Info Card -->
         <div class="bg-white rounded-xl shadow-md p-6 mb-6">
             <div class="text-center">
@@ -97,9 +94,7 @@
             <form action="{{ route('club.club-application.submit', $club) }}" method="POST" class="p-6 space-y-6" autocomplete="off">
                 @csrf
 
-                <!-- Personal Information -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Personal Information -->
+                <!-- First Name and Last Name -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
@@ -130,7 +125,10 @@
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
+                </div>
 
+                <!-- Suffix and Age -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label for="suffix" class="block text-sm font-medium text-gray-700 mb-2">Suffix (Optional)</label>
                         <select id="suffix" 
@@ -146,7 +144,7 @@
                         </select>
                     </div>
 
-                    <div>
+                    <div id="ageField">
                         <label for="age" class="block text-sm font-medium text-gray-700 mb-2">Age *</label>
                         <input type="number" 
                                id="age" 
@@ -154,14 +152,16 @@
                                value="{{ old('age') }}"
                                min="1"
                                max="150"
-                               required
                                autocomplete="off"
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors @error('age') border-red-500 @enderror">
                         @error('age')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
+                </div>
 
+                <!-- Gender and Phone Number -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label for="gender" class="block text-sm font-medium text-gray-700 mb-2">Gender *</label>
                         <select id="gender" 
@@ -194,23 +194,54 @@
                         @enderror
                         <p class="text-xs text-gray-500 mt-1">Philippine mobile number (e.g., 09171234567)</p>
                     </div>
+                </div>
 
+                <!-- Position Applying For (full width) -->
+                <div>
+                    <label for="position" class="block text-sm font-medium text-gray-700 mb-2">Position Applying For *</label>
+                    <select id="position" 
+                            name="position" 
+                            required
+                            autocomplete="off"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors @error('position') border-red-500 @enderror">
+                        <option value="">Select a position</option>
+                        <option value="member" {{ old('position') == 'member' ? 'selected' : '' }}>Member</option>
+                        <option value="officer" {{ old('position') == 'officer' ? 'selected' : '' }}>Officer</option>
+                        <option value="adviser" {{ old('position') == 'adviser' ? 'selected' : '' }}>Adviser</option>
+                    </select>
+                    @error('position')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                    <p class="text-xs text-gray-500 mt-1">Select the role you wish to apply for</p>
+                </div>
+
+                <!-- Student ID / Professor ID and Email Address -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label for="student_id" class="block text-sm font-medium text-gray-700 mb-2">Student ID *</label>
+                        <label for="id_field" id="idLabel" class="block text-sm font-medium text-gray-700 mb-2">Student ID *</label>
                         <input type="text" 
                                id="student_id" 
                                name="student_id" 
                                value="{{ old('student_id') }}" 
-                               required
                                autocomplete="off"
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors @error('student_id') border-red-500 @enderror">
+                        <input type="text" 
+                               id="professor_id" 
+                               name="professor_id" 
+                               value="{{ old('professor_id') }}" 
+                               autocomplete="off"
+                               style="display: none;"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors @error('professor_id') border-red-500 @enderror">
                         @error('student_id')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                        @error('professor_id')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">School Email *</label>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Gmail Address *</label>
                         <input type="email" 
                                id="email" 
                                name="email" 
@@ -223,14 +254,16 @@
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
+                </div>
 
-                    <div>
+                <!-- Course/Program and Year Level / Department Office -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div id="courseField">
                         <label for="department" class="block text-sm font-medium text-gray-700 mb-2">Course/Program *</label>
                         <input type="text" 
                                id="department" 
                                name="department" 
                                value="{{ old('department') }}" 
-                               required
                                placeholder="e.g., BS Computer Science"
                                autocomplete="off"
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors @error('department') border-red-500 @enderror">
@@ -239,11 +272,30 @@
                         @enderror
                     </div>
 
-                    <div>
+                    <div id="departmentOfficeField" style="display: none;">
+                        <label for="department_office" class="block text-sm font-medium text-gray-700 mb-2">Department Office *</label>
+                        <select id="department_office" 
+                                name="department_office"
+                                autocomplete="off"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors @error('department_office') border-red-500 @enderror">
+                            <option value="">Select Department</option>
+                            <option value="SASTE" {{ old('department_office') == 'SASTE' ? 'selected' : '' }}>SASTE</option>
+                            <option value="SNAHS" {{ old('department_office') == 'SNAHS' ? 'selected' : '' }}>SNAHS</option>
+                            <option value="SITE" {{ old('department_office') == 'SITE' ? 'selected' : '' }}>SITE</option>
+                            <option value="SBAHM" {{ old('department_office') == 'SBAHM' ? 'selected' : '' }}>SBAHM</option>
+                            <option value="BEU" {{ old('department_office') == 'BEU' ? 'selected' : '' }}>BEU</option>
+                            <option value="SOM" {{ old('department_office') == 'SOM' ? 'selected' : '' }}>SOM</option>
+                            <option value="GRADUATE SCHOOL" {{ old('department_office') == 'GRADUATE SCHOOL' ? 'selected' : '' }}>GRADUATE SCHOOL</option>
+                        </select>
+                        @error('department_office')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div id="yearLevelField">
                         <label for="year_level" class="block text-sm font-medium text-gray-700 mb-2">Year Level *</label>
                         <select id="year_level" 
                                 name="year_level"
-                                required
                                 autocomplete="off"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors @error('year_level') border-red-500 @enderror">
                             <option value="">Select Year Level</option>
@@ -251,30 +303,10 @@
                             <option value="2nd Year" {{ old('year_level') == '2nd Year' ? 'selected' : '' }}>2nd Year</option>
                             <option value="3rd Year" {{ old('year_level') == '3rd Year' ? 'selected' : '' }}>3rd Year</option>
                             <option value="4th Year" {{ old('year_level') == '4th Year' ? 'selected' : '' }}>4th Year</option>
-                            <option value="5th Year" {{ old('year_level') == '5th Year' ? 'selected' : '' }}>5th Year</option>
-                            <option value="Graduate" {{ old('year_level') == 'Graduate' ? 'selected' : '' }}>Graduate</option>
                         </select>
                         @error('year_level')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
-                    </div>
-
-                    <div>
-                        <label for="position" class="block text-sm font-medium text-gray-700 mb-2">Position Applying For *</label>
-                        <select id="position" 
-                                name="position" 
-                                required
-                                autocomplete="off"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors @error('position') border-red-500 @enderror">
-                            <option value="">Select a position</option>
-                            <option value="member" {{ old('position') == 'member' ? 'selected' : '' }}>Member</option>
-                            <option value="officer" {{ old('position') == 'officer' ? 'selected' : '' }}>Officer</option>
-                            <option value="adviser" {{ old('position') == 'adviser' ? 'selected' : '' }}>Adviser</option>
-                        </select>
-                        @error('position')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                        <p class="text-xs text-gray-500 mt-1">Select the role you wish to apply for</p>
                     </div>
                 </div>
 
@@ -322,11 +354,74 @@
             </form>
         </div>
     </main>
-            </form>
-        </div>
-    </main>
 
     <script>
+        // Position change handler
+        document.getElementById('position').addEventListener('change', function() {
+            const position = this.value;
+            const ageField = document.getElementById('ageField');
+            const ageInput = document.getElementById('age');
+            const studentIdInput = document.getElementById('student_id');
+            const professorIdInput = document.getElementById('professor_id');
+            const idLabel = document.getElementById('idLabel');
+            const courseField = document.getElementById('courseField');
+            const departmentInput = document.getElementById('department');
+            const departmentOfficeField = document.getElementById('departmentOfficeField');
+            const departmentOfficeInput = document.getElementById('department_office');
+            const yearLevelField = document.getElementById('yearLevelField');
+            const yearLevelInput = document.getElementById('year_level');
+
+            if (position === 'adviser') {
+                // Hide age field
+                ageField.style.display = 'none';
+                ageInput.required = false;
+                ageInput.value = '';
+
+                // Switch to Professor ID
+                idLabel.textContent = 'Professor ID *';
+                studentIdInput.style.display = 'none';
+                studentIdInput.required = false;
+                studentIdInput.value = '';
+                professorIdInput.style.display = 'block';
+                professorIdInput.required = true;
+
+                // Hide course, show department office
+                courseField.style.display = 'none';
+                departmentInput.required = false;
+                departmentInput.value = '';
+                departmentOfficeField.style.display = 'block';
+                departmentOfficeInput.required = true;
+
+                // Hide year level
+                yearLevelField.style.display = 'none';
+                yearLevelInput.required = false;
+                yearLevelInput.value = '';
+            } else {
+                // Show age field
+                ageField.style.display = 'block';
+                ageInput.required = true;
+
+                // Switch to Student ID
+                idLabel.textContent = 'Student ID *';
+                studentIdInput.style.display = 'block';
+                studentIdInput.required = true;
+                professorIdInput.style.display = 'none';
+                professorIdInput.required = false;
+                professorIdInput.value = '';
+
+                // Show course, hide department office
+                courseField.style.display = 'block';
+                departmentInput.required = true;
+                departmentOfficeField.style.display = 'none';
+                departmentOfficeInput.required = false;
+                departmentOfficeInput.value = '';
+
+                // Show year level
+                yearLevelField.style.display = 'block';
+                yearLevelInput.required = true;
+            }
+        });
+
         // Password confirmation validation
         document.getElementById('password').addEventListener('input', function() {
             const password = this.value;
@@ -350,7 +445,5 @@
             }
         });
     </script>
-</body>
-</html>
 </body>
 </html>

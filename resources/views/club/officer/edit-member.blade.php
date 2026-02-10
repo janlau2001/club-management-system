@@ -71,7 +71,18 @@
                                 <span class="font-medium text-gray-700">Email:</span> {{ $clubUser->email }}
                             </div>
                             <div>
-                                <span class="font-medium text-gray-700">Student ID:</span> {{ $clubUser->student_id }}
+                                <span class="font-medium text-gray-700">
+                                    @if($clubUser->role === 'adviser')
+                                        Professor ID:
+                                    @else
+                                        Student ID:
+                                    @endif
+                                </span> 
+                                @if($clubUser->role === 'adviser')
+                                    {{ $clubUser->professor_id ?? 'N/A' }}
+                                @else
+                                    {{ $clubUser->student_id }}
+                                @endif
                             </div>
                             <div>
                                 <span class="font-medium text-gray-700">Role:</span> 
@@ -111,13 +122,26 @@
                                 @enderror
                             </div>
 
-                            <div>
+                            <div x-show="role !== 'adviser'" x-transition>
                                 <label for="student_id" class="block text-sm font-medium text-gray-700 mb-2">Student ID <span class="text-red-500">*</span></label>
-                                <input type="text" name="student_id" id="student_id" required
+                                <input type="text" name="student_id" id="student_id"
                                        value="{{ old('student_id', $clubUser->student_id) }}"
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors @error('student_id') border-red-500 @enderror"
-                                       placeholder="Enter student ID">
+                                       placeholder="Enter student ID"
+                                       :required="role !== 'adviser'">
                                 @error('student_id')
+                                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div x-show="role === 'adviser'" x-transition>
+                                <label for="professor_id" class="block text-sm font-medium text-gray-700 mb-2">Professor ID <span class="text-red-500">*</span></label>
+                                <input type="text" name="professor_id" id="professor_id"
+                                       value="{{ old('professor_id', $clubUser->professor_id) }}"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors @error('professor_id') border-red-500 @enderror"
+                                       placeholder="Enter professor ID"
+                                       :required="role === 'adviser'">
+                                @error('professor_id')
                                     <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
@@ -238,10 +262,11 @@
                     <div class="mb-8">
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Academic Information</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
+                            <div x-show="role !== 'adviser'" x-transition>
                                 <label for="department" class="block text-sm font-medium text-gray-700 mb-2">Department <span class="text-red-500">*</span></label>
-                                <select name="department" id="department" required 
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
+                                <select name="department" id="department"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                                        :required="role !== 'adviser'">
                                     <option value="">Select Department</option>
                                     <option value="SASTE" {{ old('department', $clubUser->department) === 'SASTE' ? 'selected' : '' }}>SASTE</option>
                                     <option value="SBAHM" {{ old('department', $clubUser->department) === 'SBAHM' ? 'selected' : '' }}>SBAHM</option>
@@ -256,10 +281,30 @@
                                 @enderror
                             </div>
 
-                            <div>
+                            <div x-show="role === 'adviser'" x-transition>
+                                <label for="department_office" class="block text-sm font-medium text-gray-700 mb-2">Department Office <span class="text-red-500">*</span></label>
+                                <select name="department_office" id="department_office"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+                                        :required="role === 'adviser'">
+                                    <option value="">Select Department Office</option>
+                                    <option value="SASTE" {{ old('department_office', $clubUser->department_office) === 'SASTE' ? 'selected' : '' }}>SASTE</option>
+                                    <option value="SNAHS" {{ old('department_office', $clubUser->department_office) === 'SNAHS' ? 'selected' : '' }}>SNAHS</option>
+                                    <option value="SITE" {{ old('department_office', $clubUser->department_office) === 'SITE' ? 'selected' : '' }}>SITE</option>
+                                    <option value="SBAHM" {{ old('department_office', $clubUser->department_office) === 'SBAHM' ? 'selected' : '' }}>SBAHM</option>
+                                    <option value="BEU" {{ old('department_office', $clubUser->department_office) === 'BEU' ? 'selected' : '' }}>BEU</option>
+                                    <option value="SOM" {{ old('department_office', $clubUser->department_office) === 'SOM' ? 'selected' : '' }}>SOM</option>
+                                    <option value="GRADUATE SCHOOL" {{ old('department_office', $clubUser->department_office) === 'GRADUATE SCHOOL' ? 'selected' : '' }}>GRADUATE SCHOOL</option>
+                                </select>
+                                @error('department_office')
+                                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div x-show="role !== 'adviser'" x-transition>
                                 <label for="year_level" class="block text-sm font-medium text-gray-700 mb-2">Year Level <span class="text-red-500">*</span></label>
-                                <select name="year_level" id="year_level" required 
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
+                                <select name="year_level" id="year_level"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                                        :required="role !== 'adviser'">
                                     <option value="">Select Year Level</option>
                                     <option value="1st Year" {{ old('year_level', $clubUser->year_level) === '1st Year' ? 'selected' : '' }}>1st Year</option>
                                     <option value="2nd Year" {{ old('year_level', $clubUser->year_level) === '2nd Year' ? 'selected' : '' }}>2nd Year</option>

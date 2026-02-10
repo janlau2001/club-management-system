@@ -361,7 +361,13 @@
                         <tr>
                             <td style="text-align: center;">{{ $index + 1 }}</td>
                             <td><strong>{{ $member->name }}</strong></td>
-                            <td>{{ $member->student_id }}</td>
+                            <td>
+                                @if($member->role === 'adviser')
+                                    {{ $member->professor_id ?? 'N/A' }}
+                                @else
+                                    {{ $member->student_id }}
+                                @endif
+                            </td>
                             <td>{{ $member->email }}</td>
                             <td>{{ $member->department }}</td>
                             <td>{{ ucfirst($member->role) }}</td>

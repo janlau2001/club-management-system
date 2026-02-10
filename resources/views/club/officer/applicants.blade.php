@@ -66,7 +66,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm font-medium text-gray-600">Pending</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $applications->where('status', 'pending')->count() }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $pendingCount }}</p>
                 </div>
             </div>
         </div>
@@ -80,7 +80,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm font-medium text-gray-600">Approved</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $applications->where('status', 'approved')->count() }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $approvedCount }}</p>
                 </div>
             </div>
         </div>
@@ -94,7 +94,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm font-medium text-gray-600">Rejected</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $applications->where('status', 'rejected')->count() }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $rejectedCount }}</p>
                 </div>
             </div>
         </div>
@@ -104,7 +104,40 @@
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="bg-gradient-to-r from-teal-50 to-cyan-50 px-6 py-4 border-b border-gray-200">
             <h2 class="text-xl font-bold text-gray-900">Applications</h2>
-            <p class="text-gray-600 mt-1">{{ $applications->count() }} total application(s)</p>
+            <p class="text-gray-600 mt-1">Manage club membership applications</p>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="border-b border-gray-200">
+            <nav class="flex -mb-px">
+                <a href="{{ route('club.officer.applicants', ['status' => 'pending']) }}"
+                   class="flex-1 py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors {{ $status === 'pending' ? 'border-yellow-500 text-yellow-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                    <div class="flex items-center justify-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Pending ({{ $pendingCount }})</span>
+                    </div>
+                </a>
+                <a href="{{ route('club.officer.applicants', ['status' => 'approved']) }}"
+                   class="flex-1 py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors {{ $status === 'approved' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                    <div class="flex items-center justify-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Approved ({{ $approvedCount }})</span>
+                    </div>
+                </a>
+                <a href="{{ route('club.officer.applicants', ['status' => 'rejected']) }}"
+                   class="flex-1 py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors {{ $status === 'rejected' ? 'border-red-500 text-red-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                    <div class="flex items-center justify-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        <span>Rejected ({{ $rejectedCount }})</span>
+                    </div>
+                </a>
+            </nav>
         </div>
 
         @if($applications->isEmpty())
@@ -113,7 +146,15 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                 </svg>
                 <h3 class="mt-2 text-sm font-medium text-gray-900">No Applications</h3>
-                <p class="mt-1 text-sm text-gray-500">No one has applied to join your club yet.</p>
+                <p class="mt-1 text-sm text-gray-500">
+                    @if($status === 'pending')
+                        No pending applications at the moment.
+                    @elseif($status === 'approved')
+                        No approved applications yet.
+                    @else
+                        No rejected applications.
+                    @endif
+                </p>
             </div>
         @else
             <div class="overflow-x-auto">
@@ -150,7 +191,15 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ $application->student_id }}</div>
+                                    <div class="text-sm text-gray-900">
+                                        @if($application->position === 'adviser')
+                                            {{ $application->professor_id ?? 'N/A' }}
+                                            <span class="text-xs text-gray-500 block">Professor ID</span>
+                                        @else
+                                            {{ $application->student_id }}
+                                            <span class="text-xs text-gray-500 block">Student ID</span>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 

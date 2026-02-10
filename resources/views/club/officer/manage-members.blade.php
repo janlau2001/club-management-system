@@ -46,12 +46,6 @@
                            class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-white/30">
                             ← Back to Dashboard
                         </a>
-                        @if($clubUser->role !== 'member')
-                            <a href="{{ route('club.officer.add-member') }}"
-                               class="bg-white text-green-700 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                                Add New Member
-                            </a>
-                        @endif
                     </div>
                 </div>
             </div>
@@ -207,15 +201,33 @@
                                             <div class="ml-3">
                                                 <a href="{{ route('club.officer.member.view', $member) }}" class="text-sm font-medium text-gray-900 hover:text-green-600 transition-colors">{{ $member->name }}</a>
                                                 <div class="text-sm text-gray-500">{{ $member->email }}</div>
-                                                <div class="text-xs text-gray-400">ID: {{ $member->student_id }}</div>
+                                                <div class="text-xs text-gray-400">
+                                                    @if($member->role === 'adviser')
+                                                        ID: {{ $member->professor_id ?? $member->student_id }}
+                                                    @else
+                                                        ID: {{ $member->student_id }}
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-3 py-4 whitespace-nowrap">
                                         {!! $member->getRoleBadgeHtml() !!}
                                     </td>
-                                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">{{ $member->department }}</td>
-                                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">{{ $member->year_level }}</td>
+                                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        @if($member->role === 'adviser')
+                                            {{ $member->department_office ?? $member->department }}
+                                        @else
+                                            {{ $member->department }}
+                                        @endif
+                                    </td>
+                                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        @if($member->role === 'adviser')
+                                            <span class="text-gray-400">-</span>
+                                        @else
+                                            {{ $member->year_level }}
+                                        @endif
+                                    </td>
                                     <td class="px-3 py-4 whitespace-nowrap">
                                         @if($member->isOnline())
                                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -436,9 +448,14 @@
 
             if (roleSelect) {
                 roleSelect.addEventListener('change', function() {
-                    if (this.value === 'officer' || this.value === 'adviser') {
+                    if (this.value === 'officer') {
                         positionField.style.display = 'block';
                         positionInput.required = true;
+                        positionInput.value = '';
+                    } else if (this.value === 'adviser') {
+                        positionField.style.display = 'none';
+                        positionInput.required = false;
+                        positionInput.value = 'Club Adviser';
                     } else {
                         positionField.style.display = 'none';
                         positionInput.required = false;

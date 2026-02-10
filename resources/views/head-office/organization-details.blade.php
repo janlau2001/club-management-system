@@ -27,7 +27,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Member Count</label>
-                    <p class="mt-1 text-sm text-gray-900">{{ $club->clubUsers->count() }} ({{ $club->clubUsers->where('role', 'officer')->count() }} officers, {{ $club->clubUsers->where('role', 'member')->count() }} members)</p>
+                    <p class="mt-1 text-sm text-gray-900">{{ $club->clubUsers->count() }} ({{ $club->clubUsers->where('role', 'officer')->count() }} officers, {{ $club->clubUsers->where('role', 'adviser')->count() }} advisers, {{ $club->clubUsers->where('role', 'member')->count() }} members)</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Date Registered</label>
@@ -81,6 +81,43 @@
             </div>
         @endif
 
+        <!-- Advisers Section -->
+        @php
+            $advisers = $club->clubUsers->where('role', 'adviser');
+        @endphp
+        @if($advisers->count() > 0)
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-semibold mb-4">Club Advisers ({{ $advisers->count() }})</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @foreach($advisers as $adviser)
+                        <div class="border border-green-200 rounded-lg p-4 bg-green-50">
+                            <h3 class="font-medium text-gray-900">{{ $adviser->name }}</h3>
+                            <p class="text-sm text-gray-600">{{ $adviser->position ?? 'Club Adviser' }}</p>
+                            <p class="text-sm text-gray-500">{{ $adviser->email }}</p>
+                            @if($adviser->professor_id)
+                                <p class="text-sm text-gray-500">Professor ID: {{ $adviser->professor_id }}</p>
+                            @endif
+                            @if($adviser->department_office)
+                                <p class="text-sm text-gray-500">{{ $adviser->department_office }}</p>
+                            @endif
+                            <p class="text-sm text-gray-400">Joined: {{ $adviser->joined_date ? $adviser->joined_date->format('M j, Y') : 'N/A' }}</p>
+                            @if($adviser->isOnline())
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 mt-2">
+                                    <span class="w-2 h-2 bg-green-400 rounded-full mr-1"></span>
+                                    Online
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 mt-2">
+                                    <span class="w-2 h-2 bg-gray-400 rounded-full mr-1"></span>
+                                    Offline
+                                </span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
         <!-- Members Section -->
         @php
             $members = $club->clubUsers->where('role', 'member');
@@ -111,7 +148,11 @@
                                         {{ $member->email }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ $member->student_id ?? 'N/A' }}
+                                        @if($member->role === 'adviser')
+                                            {{ $member->professor_id ?? 'N/A' }}
+                                        @else
+                                            {{ $member->student_id ?? 'N/A' }}
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ $member->department }}

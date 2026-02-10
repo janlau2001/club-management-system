@@ -33,7 +33,7 @@
                 </svg>
                 <div>
                     <h3 class="text-lg font-semibold text-green-800">Registration Submitted Successfully!</h3>
-                    <p class="text-green-700 mt-1">Your club "{{ $credentials['club_name'] }}" registration has been submitted for admin approval.</p>
+                    <p class="text-green-700 mt-1">Your club "{{ $info['club_name'] }}" registration has been submitted for admin approval.</p>
                 </div>
             </div>
         </div>
@@ -75,28 +75,36 @@
             </div>
         </div>
 
-        <!-- Login Credentials -->
+        <!-- Login Information -->
         <div class="bg-white rounded-xl shadow-lg overflow-hidden">
             <div class="bg-gradient-to-r from-blue-50 to-green-50 px-6 py-4 border-b border-gray-200">
                 <div class="flex items-center">
                     <svg class="w-6 h-6 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
-                    <h2 class="text-xl font-semibold text-gray-900">Your Login Credentials</h2>
+                    <h2 class="text-xl font-semibold text-gray-900">Your Registration Information</h2>
                 </div>
-                <p class="text-gray-600 mt-1">Save these credentials safely - they will be used to track your application status</p>
+                <p class="text-gray-600 mt-1">Use this information to track your application status</p>
             </div>
 
             <div class="p-6 space-y-6">
+                <!-- Name -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Registrant Name (President)</label>
+                    <div class="px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-900">
+                        {{ $info['officer_name'] }}
+                    </div>
+                </div>
+
                 <!-- Email Address -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Gmail Address</label>
                     <div class="flex items-center space-x-2">
                         <input type="text" 
-                               value="{{ $credentials['email'] }}" 
+                               value="{{ $info['email'] }}" 
                                readonly
-                               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 font-mono text-sm">
-                        <button onclick="copyToClipboard('{{ $credentials['email'] }}')" 
+                               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 text-sm">
+                        <button onclick="copyToClipboard('{{ $info['email'] }}')" 
                                 class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
                             Copy
                         </button>

@@ -178,33 +178,77 @@
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Sequential Approval Status</h3>
                 <div class="space-y-4">
                     <!-- Current Status Badge -->
-                    <div class="flex items-center p-4 bg-blue-50 rounded-lg">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-8a1 1 0 11-2 0 1 1 0 012 0z" clip-rule="evenodd"></path>
-                                </svg>
+                    @if($registration->approved_by_vp)
+                        <div class="flex items-center p-4 bg-green-50 rounded-lg">
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-green-900">Status: FULLY APPROVED & REGISTERED</p>
+                                <p class="text-sm text-green-700">Club is now officially registered and active</p>
                             </div>
                         </div>
-                        <div class="ml-3">
-                            @if($registration->approved_by_vp)
-                                <p class="text-sm font-medium text-green-900">Current Status: Fully Approved</p>
-                                <p class="text-sm text-green-700">All approvals completed</p>
-                            @elseif($registration->noted_by_director)
-                                <p class="text-sm font-medium text-blue-900">Current Status: Waiting for VP Approval</p>
-                                <p class="text-sm text-blue-700">Pending approval from Vice President for Academics</p>
-                            @elseif($registration->approved_by_psg_council)
-                                <p class="text-sm font-medium text-blue-900">Current Status: Waiting for Director Noting</p>
-                                <p class="text-sm text-blue-700">Pending approval from Director</p>
-                            @elseif($registration->endorsed_by_dean)
-                                <p class="text-sm font-medium text-blue-900">Current Status: Waiting for PSG Council Approval</p>
-                                <p class="text-sm text-blue-700">Pending approval from PSG Council Adviser</p>
-                            @else
-                                <p class="text-sm font-medium text-blue-900">Current Status: Waiting for Dean Endorsement</p>
-                                <p class="text-sm text-blue-700">Pending approval from Dean</p>
-                            @endif
+                    @elseif(!$registration->endorsed_by_dean)
+                        <div class="flex items-center p-4 bg-gray-50 rounded-lg">
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-gray-900">Status: AWAITING DEAN ENDORSEMENT</p>
+                                <p class="text-sm text-gray-700">Step 1 of 4 - Dean must endorse this application first</p>
+                            </div>
                         </div>
-                    </div>
+                    @elseif(!$registration->approved_by_psg_council)
+                        <div class="flex items-center p-4 bg-gray-50 rounded-lg">
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-gray-900">Status: AWAITING PSG COUNCIL APPROVAL</p>
+                                <p class="text-sm text-gray-700">Step 2 of 4 - PSG Council Adviser must approve this application</p>
+                            </div>
+                        </div>
+                    @elseif(!$registration->noted_by_director)
+                        <div class="flex items-center p-4 bg-gray-50 rounded-lg">
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-gray-900">Status: AWAITING DIRECTOR NOTING</p>
+                                <p class="text-sm text-gray-700">Step 3 of 4 - Director of Student Affairs must note this application</p>
+                            </div>
+                        </div>
+                    @else
+                        <div class="flex items-center p-4 bg-gray-50 rounded-lg">
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-gray-900">Status: READY FOR FINAL VP APPROVAL</p>
+                                <p class="text-sm text-gray-700">Final step - awaiting VP approval to officially register the club</p>
+                            </div>
+                        </div>
+                    @endif
                     
                     <!-- Step 1: Dean Endorsement -->
                     <div class="flex items-center">
@@ -222,15 +266,15 @@
                             </div>
                         @else
                             <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
                                     </svg>
                                 </div>
                             </div>
                             <div class="ml-3">
-                                <p class="text-sm font-medium text-gray-900">Step 1: ENDORSED BY Dean</p>
-                                <p class="text-sm text-gray-500">Pending</p>
+                                <p class="text-sm font-medium text-blue-900">Step 1: PENDING Dean Endorsement</p>
+                                <p class="text-sm text-blue-700">Awaiting Dean to endorse this application</p>
                             </div>
                         @endif
                     </div>
@@ -251,15 +295,15 @@
                             </div>
                         @elseif($registration->endorsed_by_dean)
                             <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
                                     </svg>
                                 </div>
                             </div>
                             <div class="ml-3">
-                                <p class="text-sm font-medium text-yellow-900">Step 2: APPROVED BY PSG Council Adviser</p>
-                                <p class="text-sm text-yellow-700">Pending</p>
+                                <p class="text-sm font-medium text-blue-900">Step 2: PENDING PSG Council Approval</p>
+                                <p class="text-sm text-blue-700">Awaiting PSG Council Adviser to approve</p>
                             </div>
                         @else
                             <div class="flex-shrink-0">
@@ -292,15 +336,15 @@
                             </div>
                         @elseif($registration->approved_by_psg_council)
                             <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
                                     </svg>
                                 </div>
                             </div>
                             <div class="ml-3">
-                                <p class="text-sm font-medium text-yellow-900">Step 3: NOTED BY Director</p>
-                                <p class="text-sm text-yellow-700">Current Step - Pending</p>
+                                <p class="text-sm font-medium text-blue-900">Step 3: PENDING Director Noting</p>
+                                <p class="text-sm text-blue-700">Awaiting Director to note this application</p>
                             </div>
                         @else
                             <div class="flex-shrink-0">
@@ -311,8 +355,8 @@
                                 </div>
                             </div>
                             <div class="ml-3">
-                                <p class="text-sm font-medium text-gray-900">Step 3: NOTED BY Director</p>
-                                <p class="text-sm text-gray-500">Pending</p>
+                                <p class="text-sm font-medium text-gray-600">Step 3: PENDING Director Noting</p>
+                                <p class="text-sm text-gray-500">Awaiting previous approvals first</p>
                             </div>
                         @endif
                     </div>
@@ -331,6 +375,18 @@
                                 <p class="text-sm font-medium text-green-900">Step 4: APPROVED BY Vice President for Academics</p>
                                 <p class="text-sm text-green-700">Approved on {{ $registration->approved_by_vp_at ? $registration->approved_by_vp_at->format('M d, Y g:i A') : 'N/A' }} by {{ $registration->approved_by_vp_user ?? 'VP Academics' }}</p>
                             </div>
+                        @elseif($registration->endorsed_by_dean && $registration->approved_by_psg_council && $registration->noted_by_director)
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-blue-900">Step 4: FINAL APPROVAL BY Vice President for Academics</p>
+                                <p class="text-sm text-blue-700">Awaiting VP approval to officially register the club</p>
+                            </div>
                         @else
                             <div class="flex-shrink-0">
                                 <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
@@ -340,8 +396,8 @@
                                 </div>
                             </div>
                             <div class="ml-3">
-                                <p class="text-sm font-medium text-gray-900">Step 4: APPROVED BY Vice President for Academics</p>
-                                <p class="text-sm text-gray-500">Pending</p>
+                                <p class="text-sm font-medium text-gray-600">Step 4: FINAL APPROVAL BY Vice President for Academics</p>
+                                <p class="text-sm text-gray-500">Awaiting previous approvals first</p>
                             </div>
                         @endif
                     </div>
@@ -354,13 +410,19 @@
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Actions</h3>
                     <div class="space-y-3">
                         <button type="button"
-                                class="w-full bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg font-medium"
+                                class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-3.5 rounded-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200"
                                 onclick="openNoteModal('{{ $registration->club_name }}', '{{ route('director.approvals.approve', $registration) }}')">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
                             Note Registration
                         </button>
                         <button type="button"
-                                class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium"
+                                class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3.5 rounded-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200"
                                 onclick="openRejectModal('{{ $registration->club_name }}', '{{ route('director.approvals.reject', $registration) }}')">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
                             Reject Registration
                         </button>
                     </div>
@@ -381,17 +443,18 @@
                 </div>
             @endif
 
-            @if(!$registration->approved_by_psg_council)
-                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+            @if(!$registration->approved_by_psg_council && $registration->status !== 'rejected')
+                <div class="bg-gray-50 border border-gray-200 rounded-xl p-6">
                     <div class="flex items-center space-x-3 mb-3">
                         <div class="flex-shrink-0">
-                            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                             </svg>
                         </div>
-                        <h3 class="text-lg font-semibold text-yellow-900">Waiting for PSG Council Approval</h3>
+                        <h3 class="text-lg font-semibold text-gray-700">Not Your Turn Yet</h3>
                     </div>
-                    <p class="text-yellow-800">This application needs to be approved by the PSG Council before the Director can review it.</p>
+                    <p class="text-gray-600 mb-2">The application must be endorsed by the Dean and approved by the PSG Council first before you can take action.</p>
+                    <p class="text-sm text-gray-500">Sequential approval order: Dean → PSG Council → Director → Vice President</p>
                 </div>
             @endif
 

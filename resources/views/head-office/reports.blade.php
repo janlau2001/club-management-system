@@ -4,8 +4,8 @@
     <!-- Header -->
     <div class="flex items-center justify-between mb-8">
         <div>
-            <h1 class="text-3xl font-bold text-gray-900">Reports</h1>
-            <p class="text-gray-600 mt-2">Generate and view comprehensive system reports</p>
+            <h1 class="text-2xl font-semibold text-gray-900">Reports</h1>
+            <p class="text-sm text-gray-500 mt-1">Generate and view comprehensive system reports</p>
         </div>
     </div>
 
@@ -111,7 +111,7 @@
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('dashboard.reports.organizations') }}" @submit="handleFormSubmit($event)">
+                <form method="POST" action="{{ route('head-office.reports.organizations') }}" @submit="handleFormSubmit($event)">
                     @csrf
                     <!-- Modal Body -->
                     <div class="p-6 space-y-5">
@@ -245,7 +245,7 @@
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('dashboard.reports.members') }}" @submit="handleFormSubmit($event)">
+                <form method="POST" action="{{ route('head-office.reports.members') }}" @submit="handleFormSubmit($event)">
                     @csrf
                     <!-- Modal Body -->
                     <div class="p-6 space-y-5">
@@ -382,7 +382,7 @@
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('dashboard.reports.activities') }}" @submit="handleFormSubmit($event)">
+                <form method="POST" action="{{ route('head-office.reports.activities') }}" @submit="handleFormSubmit($event)">
                     @csrf
                     <!-- Modal Body -->
                     <div class="p-6 space-y-5">

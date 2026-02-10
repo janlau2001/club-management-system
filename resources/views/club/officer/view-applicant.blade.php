@@ -87,20 +87,29 @@
                     </p>
                 </div>
 
+                @if($application->position !== 'adviser')
                 <div>
                     <label class="text-sm font-medium text-gray-500">Age</label>
                     <p class="mt-1 text-base text-gray-900">{{ $application->age }} years old</p>
                 </div>
+                @endif
 
                 <div>
                     <label class="text-sm font-medium text-gray-500">Gender</label>
                     <p class="mt-1 text-base text-gray-900">{{ $application->gender }}</p>
                 </div>
 
+                @if($application->position === 'adviser')
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Professor ID</label>
+                    <p class="mt-1 text-base text-gray-900">{{ $application->professor_id }}</p>
+                </div>
+                @else
                 <div>
                     <label class="text-sm font-medium text-gray-500">Student ID</label>
                     <p class="mt-1 text-base text-gray-900">{{ $application->student_id }}</p>
                 </div>
+                @endif
 
                 <div>
                     <label class="text-sm font-medium text-gray-500">Email Address</label>
@@ -111,6 +120,23 @@
                     <label class="text-sm font-medium text-gray-500">Phone Number</label>
                     <p class="mt-1 text-base text-gray-900">{{ $application->phone_number }}</p>
                 </div>
+
+                @if($application->position === 'adviser')
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Department Office</label>
+                    <p class="mt-1 text-base text-gray-900">{{ $application->department_office }}</p>
+                </div>
+                @else
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Course/Program</label>
+                    <p class="mt-1 text-base text-gray-900">{{ $application->department }}</p>
+                </div>
+
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Year Level</label>
+                    <p class="mt-1 text-base text-gray-900">{{ $application->year_level }}</p>
+                </div>
+                @endif
 
                 <div>
                     <label class="text-sm font-medium text-gray-500">Position Applying For</label>

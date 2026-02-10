@@ -48,12 +48,12 @@
                             
                             <!-- Simple Appeal Section -->
                             <div class="mt-4">
-                                <button 
-                                    onclick="showViolationsList()" 
-                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                                <a 
+                                    href="{{ route('club.officer.violations') }}"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium inline-block transition-colors"
                                 >
                                     📋 View & Appeal Violations
-                                </button>
+                                </a>
                             </div>
                             
                             <!-- Simple Violations List -->

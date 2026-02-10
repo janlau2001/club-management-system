@@ -8,7 +8,7 @@
                 <h1 class="text-3xl font-bold text-gray-900">Recent Activities</h1>
                 <p class="text-gray-600 mt-2">All activities from the last 24 hours</p>
             </div>
-            <a href="{{ route('dashboard.index') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            <a href="{{ route('head-office.dashboard') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                 ← Back to Dashboard
             </a>
         </div>

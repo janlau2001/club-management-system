@@ -17,10 +17,32 @@ use Illuminate\Support\Facades\Storage;
 
 class ClubDashboardController extends Controller
 {
+    /**
+     * Get fresh club data from database
+     * This ensures we always have the latest club status (suspended/active)
+     */
+    private function getFreshClub()
+    {
+        $sessionClub = session('club');
+        if (!$sessionClub) {
+            return null;
+        }
+        
+        // Refresh club from database to get latest status
+        $freshClub = \App\Models\Club::find($sessionClub->id);
+        
+        // Update session with fresh data
+        if ($freshClub) {
+            session(['club' => $freshClub]);
+        }
+        
+        return $freshClub;
+    }
+
     public function memberDashboard()
     {
         $clubUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
         
         if (!$clubUser || !$club) {
             return redirect()->route('club.login')->with('error', 'Please login first.');
@@ -80,7 +102,7 @@ class ClubDashboardController extends Controller
     public function memberProfile()
     {
         $clubUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
 
         if (!$clubUser || !$club) {
             return redirect()->route('club.login')->with('error', 'Please login first.');
@@ -186,7 +208,7 @@ class ClubDashboardController extends Controller
     public function memberViewMembers()
     {
         $clubUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
 
         if (!$clubUser || !$club) {
             return redirect()->route('club.login')->with('error', 'Please login first.');
@@ -209,7 +231,7 @@ class ClubDashboardController extends Controller
     public function officerDashboard()
     {
         $clubUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
         
         if (!$clubUser || !$club || !$clubUser->hasManagementAccess()) {
             return redirect()->route('club.login')->with('error', 'Officer or Adviser access required.');
@@ -254,6 +276,12 @@ class ClubDashboardController extends Controller
         $onlineMembersCount = $onlineMembers->count();
         $onlineOfficersCount = $onlineOfficers->count();
         
+        // Count new unviewed pending applications
+        $newApplicationsCount = \App\Models\ClubApplication::where('club_id', $club->id)
+            ->where('status', 'pending')
+            ->whereNull('viewed_at')
+            ->count();
+        
         return view('club.officer.dashboard', compact(
             'clubUser',
             'club',
@@ -264,14 +292,15 @@ class ClubDashboardController extends Controller
             'totalMembers',
             'totalOfficers',
             'onlineMembersCount',
-            'onlineOfficersCount'
+            'onlineOfficersCount',
+            'newApplicationsCount'
         ));
     }
 
     public function officerProfile()
     {
         $clubUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
 
         if (!$clubUser || !$club || !$clubUser->hasManagementAccess()) {
             return redirect()->route('club.login')->with('error', 'Officer or Adviser access required.');
@@ -374,114 +403,10 @@ class ClubDashboardController extends Controller
         return back()->with('success', 'Email address updated successfully!');
     }
 
-    public function showAddMemberForm()
-    {
-        $clubUser = session('club_user');
-        $club = session('club');
-
-        if (!$clubUser || !$club || !$clubUser->hasRestrictedManagementAccess()) {
-            return redirect()->route('club.officer.dashboard')->with('error', 'Access denied. Only Presidents, Vice Presidents, and Advisers can add members.');
-        }
-
-        return view('club.officer.add-member', compact('clubUser', 'club'));
-    }
-    
-    public function addMember(Request $request)
-    {
-        $clubUser = session('club_user');
-        $club = session('club');
-        
-        if (!$clubUser || !$club || !$clubUser->hasRestrictedManagementAccess()) {
-            return redirect()->route('club.officer.dashboard')->with('error', 'Access denied. Only Presidents, Vice Presidents, and Advisers can add members.');
-        }
-        
-        // Log the incoming request data for debugging
-        \Log::info('Add Member Request Data', [
-            'role' => $request->role,
-            'position' => $request->position,
-            'name' => $request->name,
-            'email' => $request->email,
-            'club_id' => $club->id,
-            'submitted_by' => $clubUser->email,
-            'all_request_data' => $request->all()
-        ]);
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:club_users,email,NULL,id,club_id,' . $club->id,
-            'password' => 'required|min:6',
-            'student_id' => [
-                'required',
-                'string',
-                'max:255',
-                new UniqueStudentId()
-            ],
-            'role' => 'required|in:member,officer,adviser',
-            'position' => 'required_if:role,officer|required_if:role,adviser|nullable|string|max:255',
-            'year_level' => 'required|string|max:255',
-            'course' => 'required|string|max:255',
-            'phone' => [
-                'required',
-                'string',
-                new PhilippinePhoneNumber(),
-                new UniquePhoneNumber()
-            ],
-            'current_password' => 'required',
-        ], [
-            'position.required_if' => 'The position field is required when role is officer or adviser.',
-            'role.in' => 'The selected role is invalid. Please choose member, officer, or adviser.',
-            'current_password.required' => 'Please enter your current password to verify your identity.',
-        ]);
-
-        \Log::info('Validation passed for add member request', [
-            'role' => $request->role,
-            'position' => $request->position,
-            'name' => $request->name
-        ]);
-
-        // Verify current user's password
-        if (!Hash::check($request->current_password, $clubUser->password)) {
-            return back()->withErrors(['current_password' => 'Current password is incorrect. Please verify your identity to add new members.'])
-                        ->withInput($request->except(['current_password']));
-        }
-        
-        // Create the new club user
-        $newUser = ClubUser::create([
-            'club_id' => $club->id,
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'student_id' => $request->student_id,
-            'role' => $request->role,
-            'position' => $request->position,
-            'department' => $club->department, // Use club's department instead of user input
-            'year_level' => $request->year_level,
-            'course' => $request->course,
-            'phone' => $request->phone,
-            'joined_date' => now(),
-        ]);
-
-        // Update the club's member count for admin views
-        $this->updateClubMemberCount($club);
-
-        // Log the action for security purposes
-        Log::info('New club member/officer added', [
-            'added_by' => $clubUser->name . ' (' . $clubUser->email . ')',
-            'added_user' => $newUser->name . ' (' . $newUser->email . ')',
-            'role' => $newUser->role,
-            'position' => $newUser->position,
-            'club' => $club->name,
-            'timestamp' => now()
-        ]);
-
-        return redirect()->route('club.officer.manage-members')
-            ->with('success', 'New ' . $newUser->getDisplayRole() . ' "' . $request->name . '" added successfully! They can now log in with their email and password.');
-    }
-
     public function manageMembers(Request $request)
     {
         $clubUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
 
         if (!$clubUser || !$club || !$clubUser->hasRestrictedManagementAccess()) {
             return redirect()->route('club.officer.dashboard')->with('error', 'Access denied. Only Presidents, Vice Presidents, and Advisers can view manage members page.');
@@ -519,7 +444,7 @@ class ClubDashboardController extends Controller
     public function officerViewMembers()
     {
         $clubUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
 
         if (!$clubUser || !$club || !$clubUser->hasManagementAccess()) {
             return redirect()->route('club.officer.dashboard')->with('error', 'Officer access required.');
@@ -542,7 +467,7 @@ class ClubDashboardController extends Controller
     public function viewMember(ClubUser $clubUser)
     {
         $currentUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
 
         if (!$currentUser || !$club || !$currentUser->hasManagementAccess()) {
             return redirect()->route('club.login')->with('error', 'Officer or Adviser access required.');
@@ -564,7 +489,7 @@ class ClubDashboardController extends Controller
     public function editMember(ClubUser $clubUser)
     {
         $currentUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
 
         if (!$currentUser || !$club || !$currentUser->hasRestrictedManagementAccess()) {
             return redirect()->route('club.officer.dashboard')->with('error', 'Access denied. Only Presidents, Vice Presidents, and Advisers can edit members.');
@@ -585,7 +510,7 @@ class ClubDashboardController extends Controller
     public function updateMember(Request $request, ClubUser $clubUser)
     {
         $currentUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
 
         if (!$currentUser || !$club || !$currentUser->hasRestrictedManagementAccess()) {
             return redirect()->route('club.officer.dashboard')->with('error', 'Access denied. Only Presidents, Vice Presidents, and Advisers can update members.');
@@ -696,7 +621,7 @@ class ClubDashboardController extends Controller
     public function removeMember(Request $request, ClubUser $clubUser)
     {
         $currentUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
 
         if (!$currentUser || !$club || !$currentUser->hasRestrictedManagementAccess()) {
             return redirect()->route('club.officer.dashboard')->with('error', 'Access denied. Only Presidents, Vice Presidents, and Advisers can remove members.');
@@ -734,7 +659,7 @@ class ClubDashboardController extends Controller
     public function changeMemberRole(Request $request, ClubUser $clubUser)
     {
         $currentUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
 
         // Only Presidents and Advisers can change roles
         if (!$currentUser || !$club || !($currentUser->position === 'President' || $currentUser->role === 'adviser')) {
@@ -843,9 +768,10 @@ class ClubDashboardController extends Controller
         // Force refresh relationships
         $club->load(['clubUsers', 'officers', 'members']);
         
-        // Update session data if needed
-        if (session('club') && session('club')->id === $club->id) {
-            session(['club' => $club->fresh()]);
+        // Update session data - always refresh to get latest status
+        $freshClub = \App\Models\Club::find($club->id);
+        if ($freshClub) {
+            session(['club' => $freshClub]);
         }
     }
 
@@ -855,7 +781,7 @@ class ClubDashboardController extends Controller
     public function showRenewal()
     {
         $clubUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
 
         if (!$clubUser || !$club) {
             return redirect()->route('club.login')->with('error', 'Please login first.');
@@ -888,7 +814,7 @@ class ClubDashboardController extends Controller
     public function submitRenewal(Request $request)
     {
         $clubUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
 
         if (!$clubUser || !$club) {
             return redirect()->route('club.login')->with('error', 'Please login first.');
@@ -966,7 +892,7 @@ class ClubDashboardController extends Controller
     public function renewalStatus()
     {
         $clubUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
 
         if (!$clubUser || !$club) {
             return redirect()->route('club.login')->with('error', 'Please login first.');
@@ -996,7 +922,7 @@ class ClubDashboardController extends Controller
     public function deletePendingRenewal(Request $request, $renewalId)
     {
         $clubUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
 
         if (!$clubUser || !$club) {
             return redirect()->route('club.login')->with('error', 'Please login first.');
@@ -1069,7 +995,7 @@ class ClubDashboardController extends Controller
     public function viewRenewalDetails($renewalId)
     {
         $clubUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
 
         if (!$clubUser || !$club) {
             return redirect()->route('club.login')->with('error', 'Please login first.');
@@ -1103,7 +1029,7 @@ class ClubDashboardController extends Controller
     public function prepareRenewal(Request $request, $renewalId)
     {
         $clubUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
 
         if (!$clubUser || !$club) {
             return redirect()->route('club.login')->with('error', 'Please login first.');
@@ -1167,7 +1093,7 @@ class ClubDashboardController extends Controller
     public function certifyRenewal(Request $request, $renewalId)
     {
         $clubUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
 
         if (!$clubUser || !$club) {
             return redirect()->route('club.login')->with('error', 'Please login first.');
@@ -1259,40 +1185,134 @@ class ClubDashboardController extends Controller
     }
 
     /**
-     * Submit violation appeal
+     * View violations page (dedicated page, not modal)
      */
-    public function submitViolationAppeal(Request $request)
+    public function viewViolationsPage()
     {
         $clubUser = session('club_user');
-        if (!$clubUser) {
-            return response()->json(['error' => 'Not authenticated'], 401);
+        $club = $this->getFreshClub();
+
+        if (!$clubUser || !$club) {
+            return redirect()->route('club.login')->with('error', 'Please login first.');
         }
 
-        $request->validate([
-            'violation_id' => 'required|exists:violations,id',
-            'reason' => 'required|string|max:1000',
-        ]);
+        // Check if user has management access (Officers and Advisers)
+        if (!$clubUser->hasManagementAccess()) {
+            return redirect()->route('club.member.dashboard')
+                ->with('error', 'Only officers and advisers can view and appeal violations.');
+        }
 
-        $violation = Violation::where('id', $request->violation_id)
-            ->where('club_id', $clubUser->club_id)
+        // Update user's online status
+        $clubUser->updateOnlineStatus();
+
+        // Get all violations for this club with appeals
+        $violations = Violation::where('club_id', $club->id)
+            ->with(['appeals' => function($query) {
+                $query->latest();
+            }])
+            ->orderBy('violation_date', 'desc')
+            ->get();
+
+        // Get violation statistics
+        $confirmedCount = $violations->where('status', 'confirmed')->count();
+        $appealedCount = $violations->where('status', 'appealed')->count();
+        $resolvedCount = $violations->where('status', 'dismissed')->count();
+
+        return view('club.officer.violations', compact('clubUser', 'club', 'violations', 'confirmedCount', 'appealedCount', 'resolvedCount'));
+    }
+
+    /**
+     * Show appeal form
+     */
+    public function showAppealForm($violationId)
+    {
+        $clubUser = session('club_user');
+        $club = $this->getFreshClub();
+
+        if (!$clubUser || !$club) {
+            return redirect()->route('club.login')->with('error', 'Please login first.');
+        }
+
+        // Check if user has permission
+        if (!$clubUser->hasManagementAccess()) {
+            return redirect()->route('club.officer.violations')
+                ->with('error', 'Only officers and advisers can submit appeals.');
+        }
+
+        // Get the violation
+        $violation = Violation::where('id', $violationId)
+            ->where('club_id', $club->id)
             ->first();
 
         if (!$violation) {
-            return response()->json(['error' => 'Violation not found'], 404);
+            return redirect()->route('club.officer.violations')
+                ->with('error', 'Violation not found.');
         }
 
         // Check if violation can be appealed
         $latestAppeal = ViolationAppeal::where('violation_id', $violation->id)->latest()->first();
         if ($violation->status !== 'confirmed' || ($latestAppeal && $latestAppeal->status === 'pending')) {
-            return response()->json(['error' => 'This violation cannot be appealed at this time'], 400);
+            return redirect()->route('club.officer.violations')
+                ->with('error', 'This violation cannot be appealed at this time.');
         }
 
-        // Create simple appeal without documents
+        // Get count of confirmed violations (for status indicator)
+        $confirmedViolationsCount = Violation::where('club_id', $club->id)
+            ->where('status', 'confirmed')
+            ->count();
+
+        return view('club.officer.appeal-form', compact('clubUser', 'club', 'violation', 'confirmedViolationsCount'));
+    }
+
+    /**
+     * Submit violation appeal
+     */
+    public function submitViolationAppeal(Request $request)
+    {
+        $clubUser = session('club_user');
+        $club = $this->getFreshClub();
+
+        if (!$clubUser || !$club) {
+            return redirect()->route('club.login')->with('error', 'Please login first.');
+        }
+
+        $request->validate([
+            'violation_id' => 'required|exists:violations,id',
+            'appeal_reason' => 'required|string|max:2000',
+            'attachment' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120', // 5MB max
+        ]);
+
+        $violation = Violation::where('id', $request->violation_id)
+            ->where('club_id', $club->id)
+            ->first();
+
+        if (!$violation) {
+            return redirect()->route('club.officer.violations')
+                ->with('error', 'Violation not found.');
+        }
+
+        // Check if violation can be appealed
+        $latestAppeal = ViolationAppeal::where('violation_id', $violation->id)->latest()->first();
+        if ($violation->status !== 'confirmed' || ($latestAppeal && $latestAppeal->status === 'pending')) {
+            return redirect()->route('club.officer.violations')
+                ->with('error', 'This violation cannot be appealed at this time.');
+        }
+
+        // Handle file upload
+        $attachmentPath = null;
+        if ($request->hasFile('attachment')) {
+            $file = $request->file('attachment');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $attachmentPath = $file->storeAs('appeal_attachments', $fileName, 'public');
+        }
+
+        // Create appeal with all details
         ViolationAppeal::create([
             'violation_id' => $violation->id,
-            'club_id' => $clubUser->club_id,
+            'club_id' => $club->id,
             'submitted_by' => $clubUser->name,
-            'appeal_reason' => $request->reason,
+            'appeal_reason' => $request->appeal_reason,
+            'supporting_documents' => $attachmentPath ? [$attachmentPath] : null,
             'status' => 'pending',
             'submitted_at' => now(),
         ]);
@@ -1300,16 +1320,14 @@ class ClubDashboardController extends Controller
         // Update violation status to appealed
         $violation->update(['status' => 'appealed']);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Appeal submitted successfully'
-        ]);
+        return redirect()->route('club.officer.violations')
+            ->with('success', 'Appeal submitted successfully. You will be notified once it is reviewed.');
     }
 
-    public function showApplicants()
+    public function showApplicants(Request $request)
     {
         $clubUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
 
         if (!$clubUser || !$club) {
             return redirect()->route('club.login')->with('error', 'Please login first.');
@@ -1324,19 +1342,40 @@ class ClubDashboardController extends Controller
         // Update user's online status
         $clubUser->updateOnlineStatus();
 
-        // Get all applications for this club
-        $applications = \App\Models\ClubApplication::where('club_id', $club->id)
-            ->orderBy('status', 'asc') // pending first
-            ->orderBy('created_at', 'desc')
-            ->get();
+        // Mark all pending applications as viewed
+        \App\Models\ClubApplication::where('club_id', $club->id)
+            ->where('status', 'pending')
+            ->whereNull('viewed_at')
+            ->update(['viewed_at' => now()]);
 
-        return view('club.officer.applicants', compact('clubUser', 'club', 'applications'));
+        // Get status filter from request, default to 'pending'
+        $status = $request->get('status', 'pending');
+
+        // Build query based on status
+        $query = \App\Models\ClubApplication::where('club_id', $club->id);
+
+        if ($status === 'pending') {
+            $query->where('status', 'pending');
+        } elseif ($status === 'approved') {
+            $query->where('status', 'approved');
+        } elseif ($status === 'rejected') {
+            $query->where('status', 'rejected');
+        }
+
+        $applications = $query->orderBy('created_at', 'desc')->get();
+
+        // Get counts for tabs
+        $pendingCount = \App\Models\ClubApplication::where('club_id', $club->id)->where('status', 'pending')->count();
+        $approvedCount = \App\Models\ClubApplication::where('club_id', $club->id)->where('status', 'approved')->count();
+        $rejectedCount = \App\Models\ClubApplication::where('club_id', $club->id)->where('status', 'rejected')->count();
+
+        return view('club.officer.applicants', compact('clubUser', 'club', 'applications', 'status', 'pendingCount', 'approvedCount', 'rejectedCount'));
     }
 
     public function viewApplication($applicationId)
     {
         $clubUser = session('club_user');
-        $club = session('club');
+        $club = $this->getFreshClub();
 
         if (!$clubUser || !$club) {
             return redirect()->route('club.login')->with('error', 'Please login first.');
@@ -1367,7 +1406,7 @@ class ClubDashboardController extends Controller
     {
         try {
             $clubUser = session('club_user');
-            $club = session('club');
+            $club = $this->getFreshClub();
 
             if (!$clubUser || !$club) {
                 return response()->json(['success' => false, 'message' => 'Unauthorized. Please log in again.'], 401);
@@ -1400,20 +1439,29 @@ class ClubDashboardController extends Controller
             }
 
             // Create a club user from the application
-            $newUser = ClubUser::create([
+            $clubUserData = [
                 'club_id' => $application->club_id,
                 'name' => trim($application->first_name . ' ' . $application->last_name . ($application->suffix ? ' ' . $application->suffix : '')),
                 'email' => $application->email,
                 'password' => $application->password, // Already hashed
                 'role' => $application->position,
-                'position' => null, // Will be set later if officer
+                'position' => $application->position === 'adviser' ? 'Club Adviser' : null,
                 'phone' => $application->phone_number,
-                'student_id' => $application->student_id,
-                'department' => $application->department,
-                'year_level' => $application->year_level,
                 'joined_date' => now()->format('Y-m-d'),
                 'status' => 'active',
-            ]);
+            ];
+
+            // Add position-specific fields
+            if ($application->position === 'adviser') {
+                $clubUserData['professor_id'] = $application->professor_id;
+                $clubUserData['department_office'] = $application->department_office;
+            } else {
+                $clubUserData['student_id'] = $application->student_id;
+                $clubUserData['department'] = $application->department;
+                $clubUserData['year_level'] = $application->year_level;
+            }
+
+            $newUser = ClubUser::create($clubUserData);
 
             // Update application status
             $application->update([
@@ -1438,7 +1486,7 @@ class ClubDashboardController extends Controller
     {
         try {
             $clubUser = session('club_user');
-            $club = session('club');
+            $club = $this->getFreshClub();
 
             if (!$clubUser || !$club) {
                 return response()->json(['success' => false, 'message' => 'Unauthorized. Please log in again.'], 401);

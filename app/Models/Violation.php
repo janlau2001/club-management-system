@@ -16,7 +16,6 @@ class Violation extends Model
         'title',
         'description',
         'evidence',
-        'points',
         'status',
         'reported_by',
         'violation_date',
@@ -45,7 +44,7 @@ class Violation extends Model
             'minor' => 'bg-yellow-100 text-yellow-800',
             'moderate' => 'bg-orange-100 text-orange-800',
             'major' => 'bg-red-100 text-red-800',
-            'critical' => 'bg-red-200 text-red-900'
+            default => 'bg-gray-100 text-gray-800'
         };
     }
 

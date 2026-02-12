@@ -2,483 +2,422 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $club->name }} - Club Report</title>
+    <title>{{ $club->name }} &mdash; Club Report</title>
     <style>
+        @page {
+            margin: 18mm 14mm 22mm 14mm;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 15px;
-            font-size: 10px;
-            line-height: 1.3;
+            padding: 0;
+            font-size: 9pt;
+            line-height: 1.5;
+            color: #1a1a1a;
         }
 
-        .header {
+        /* ── Header ─── */
+        .doc-header {
             text-align: center;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #333;
             padding-bottom: 10px;
+            border-bottom: 2.5px solid #111;
+            margin-bottom: 18px;
         }
-
-        .header h1 {
-            margin: 0;
-            font-size: 14px;
+        .doc-header .institution {
+            font-size: 11pt;
             font-weight: bold;
-            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            color: #111;
+            margin: 0;
+        }
+        .doc-header .office {
+            font-size: 8.5pt;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #555;
+            margin: 3px 0 0 0;
+        }
+        .doc-header .address {
+            font-size: 7.5pt;
+            color: #888;
+            margin: 3px 0 0 0;
         }
 
-        .header h2 {
-            margin: 3px 0;
-            font-size: 12px;
-            color: #666;
-        }
-
-        .header .address {
-            margin: 5px 0;
-            font-size: 9px;
-            color: #777;
-        }
-        
-        .club-title-section {
+        /* ── Report Title ─── */
+        .report-title {
             text-align: center;
-            margin-bottom: 12px;
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
+            margin-bottom: 16px;
         }
-
-        .club-main-title {
-            font-size: 14px;
+        .report-title h1 {
+            font-size: 14pt;
             font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #111;
+            margin: 0 0 3px 0;
+        }
+        .report-title .subtitle {
+            font-size: 8pt;
+            color: #888;
             margin: 0;
         }
 
-        .club-subtitle {
-            font-size: 9px;
-            margin-top: 2px;
-            opacity: 0.9;
-        }
-
-        .report-info {
-            margin-bottom: 10px;
-            background-color: #f8f9fa;
-            padding: 8px;
-            border-radius: 3px;
-            font-size: 8px;
-        }
-
-        .report-info table {
+        /* ── Meta ─── */
+        .meta-table {
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 18px;
+            font-size: 8pt;
+            border: 1px solid #e0e0e0;
+        }
+        .meta-table td {
+            padding: 5px 10px;
+            border: 1px solid #e0e0e0;
+        }
+        .meta-label {
+            background-color: #f5f5f5;
+            color: #666;
+            font-size: 7pt;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            width: 100px;
+        }
+        .meta-value {
+            color: #111;
+            font-weight: 600;
         }
 
-        .report-info td {
-            padding: 2px;
-            border: none;
+        /* ── Club Overview ─── */
+        .overview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 8pt;
         }
-        
-        .club-overview {
-            background-color: #e9ecef;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 12px;
+        .overview-table td {
+            padding: 8px 10px;
+            border: 1px solid #e0e0e0;
+            vertical-align: top;
         }
-
-        .overview-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-        }
-
-        .overview-item {
-            background-color: white;
-            padding: 6px;
-            border-radius: 3px;
-            border-left: 2px solid #007bff;
-        }
-
         .overview-label {
-            font-size: 7px;
-            color: #666;
+            font-size: 6.5pt;
+            color: #999;
             text-transform: uppercase;
-            font-weight: bold;
+            letter-spacing: 0.8px;
+            font-weight: 600;
+            display: block;
             margin-bottom: 2px;
         }
-
         .overview-value {
-            font-size: 10px;
+            font-size: 9pt;
             font-weight: bold;
-            color: #333;
+            color: #111;
         }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 10px;
+
+        /* ── Status ─── */
+        .status {
+            font-size: 7pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            padding: 3px 8px;
+        }
+        .status-active { color: #166534; background-color: #dcfce7; }
+        .status-suspended { color: #991b1b; background-color: #fee2e2; }
+        .status-pending { color: #92400e; background-color: #fef3c7; }
+
+        /* ── Section Label ─── */
+        .section-label {
+            font-size: 9pt;
             font-weight: bold;
             text-transform: uppercase;
-        }
-        
-        .status-active { background-color: #d4edda; color: #155724; }
-        .status-suspended { background-color: #f8d7da; color: #721c24; }
-        .status-pending { background-color: #fff3cd; color: #856404; }
-        
-        .section {
-            margin-bottom: 15px;
-            page-break-inside: avoid;
-        }
-
-        .section-title {
-            font-size: 11px;
-            font-weight: bold;
-            color: #333;
+            letter-spacing: 1.5px;
+            color: #111;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ccc;
             margin-bottom: 8px;
-            border-bottom: 1px solid #007bff;
-            padding-bottom: 3px;
+            margin-top: 18px;
         }
 
-        .officers-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-
-        .officer-card {
-            background-color: #f8f9fa;
-            padding: 6px;
-            border-radius: 3px;
-            border-left: 2px solid #6f42c1;
-        }
-
-        .officer-name {
-            font-weight: bold;
-            font-size: 8px;
+        /* ── Description Block ─── */
+        .desc-block {
+            padding: 10px 12px;
+            background-color: #fafafa;
+            border-left: 3px solid #111;
+            font-size: 8.5pt;
+            line-height: 1.6;
             color: #333;
-            margin-bottom: 2px;
+            margin-bottom: 16px;
         }
 
-        .officer-position {
-            color: #6f42c1;
-            font-size: 7px;
+        /* ── Adviser Block ─── */
+        .adviser-block {
+            padding: 10px 12px;
+            background-color: #fafafa;
+            border-left: 3px solid #1a4d3e;
+            margin-bottom: 16px;
+        }
+        .adviser-name {
             font-weight: bold;
-            margin-bottom: 2px;
+            font-size: 9pt;
+            color: #111;
+        }
+        .adviser-email {
+            font-size: 8pt;
+            color: #888;
+            margin-top: 2px;
         }
 
-        .officer-email {
-            color: #666;
-            font-size: 7px;
-        }
-        
-        .members-table {
+        /* ── Data Table ─── */
+        .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 8px;
+            font-size: 8pt;
+            margin-bottom: 10px;
         }
-
-        .members-table th,
-        .members-table td {
-            border: 1px solid #ddd;
-            padding: 4px;
+        .data-table thead th {
+            background-color: #333;
+            color: #fff;
+            padding: 6px 5px;
             text-align: left;
-            font-size: 7px;
+            font-weight: 600;
+            font-size: 6.5pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-
-        .members-table th {
-            background-color: #007bff;
-            color: white;
-            font-weight: bold;
+        .data-table tbody td {
+            padding: 5px 5px;
+            border-bottom: 1px solid #eaeaea;
+            vertical-align: top;
         }
-
-        .members-table tr:nth-child(even) {
+        .data-table tbody tr:nth-child(even) {
             background-color: #f9f9f9;
         }
+        .officers-table thead th { background-color: #1e3a5f; }
+        .advisers-table thead th { background-color: #1a4d3e; }
+
+        .text-center { text-align: center; }
+        .font-bold { font-weight: 600; }
 
         .no-data {
             text-align: center;
-            color: #666;
+            color: #999;
             font-style: italic;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
+            padding: 16px;
+            background-color: #fafafa;
             border: 1px dashed #ddd;
-            font-size: 8px;
-        }
-
-        .description-section {
-            background-color: #f8f9fa;
-            padding: 8px;
-            border-radius: 5px;
+            font-size: 8pt;
             margin-bottom: 10px;
-            border-left: 3px solid #28a745;
         }
 
-        .description-text {
-            font-size: 8px;
-            line-height: 1.4;
-            color: #333;
-        }
-
-        .adviser-info {
-            background-color: #fff3cd;
-            padding: 8px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            border-left: 3px solid #ffc107;
-        }
-
-        .adviser-title {
-            font-weight: bold;
-            color: #856404;
-            margin-bottom: 3px;
-            font-size: 9px;
-        }
-
-        .adviser-details {
-            font-size: 8px;
-            color: #856404;
-        }
-        
-        .footer {
+        /* ── Footer ─── */
+        .doc-footer {
             position: fixed;
-            bottom: 10px;
-            left: 15px;
-            right: 15px;
+            bottom: 0;
+            left: 0;
+            right: 0;
             text-align: center;
-            font-size: 7px;
-            color: #666;
+            font-size: 7pt;
+            color: #aaa;
             border-top: 1px solid #ddd;
             padding-top: 5px;
         }
-
-        .two-column {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        @media print {
-            body {
-                margin: 0;
-                padding: 15px;
-            }
+        .doc-footer .conf {
+            font-size: 6pt;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #ccc;
+            margin-top: 2px;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="header">
-        <h1>OFFICE OF STUDENT AFFAIRS</h1>
-        <h2>{{ $adminRole }}</h2>
-        <div class="address">
-            St. Paul University Philippines<br>
-            Tuguegarao City, 3500
-        </div>
+    {{-- ── HEADER ── --}}
+    <div class="doc-header">
+        <p class="institution">St. Paul University Philippines</p>
+        <p class="office">Office of Student Affairs</p>
+        <p class="address">Tuguegarao City, Cagayan 3500</p>
     </div>
 
-    <!-- Club Title Section -->
-    <div class="club-title-section">
-        <div class="club-main-title">{{ $club->name }}</div>
-        <div class="club-subtitle">Official Club Report</div>
+    {{-- ── TITLE ── --}}
+    <div class="report-title">
+        <h1>{{ $club->name }}</h1>
+        <p class="subtitle">Individual Organization Report</p>
     </div>
 
-    <!-- Report Information -->
-    <div class="report-info">
-        <table>
-            <tr>
-                <td><strong>Report Type:</strong></td>
-                <td>Individual Club Report</td>
-                <td><strong>Generated Date:</strong></td>
-                <td>{{ $generatedDate }}</td>
-            </tr>
-            <tr>
-                <td><strong>Generated By:</strong></td>
-                <td>{{ $adminName }}</td>
-                <td><strong>Generated Time:</strong></td>
-                <td>{{ $generatedTime }}</td>
-            </tr>
-            <tr>
-                <td><strong>Club Name:</strong></td>
-                <td>{{ $club->name }}</td>
-                <td><strong>Report Status:</strong></td>
-                <td>Official</td>
-            </tr>
-        </table>
-    </div>
+    {{-- ── META ── --}}
+    <table class="meta-table">
+        <tr>
+            <td class="meta-label">Prepared by</td>
+            <td class="meta-value">{{ $adminName }}</td>
+            <td class="meta-label">Date</td>
+            <td class="meta-value">{{ $generatedDate }}</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Designation</td>
+            <td class="meta-value">{{ $adminRole }}</td>
+            <td class="meta-label">Time</td>
+            <td class="meta-value">{{ $generatedTime }}</td>
+        </tr>
+    </table>
 
-    <!-- Club Details Section -->
-    <div class="club-overview">
-        <div class="overview-grid">
-            <div class="overview-item">
-                <div class="overview-label">Department</div>
-                <div class="overview-value">{{ $club->department }}</div>
-            </div>
-            <div class="overview-item">
-                <div class="overview-label">Club Type</div>
-                <div class="overview-value">{{ $club->club_type }}</div>
-            </div>
-            <div class="overview-item">
-                <div class="overview-label">Status</div>
-                <div class="overview-value">
-                    <span class="status-badge status-{{ $club->status }}">
-                        {{ ucfirst(str_replace('_', ' ', $club->status)) }}
-                    </span>
-                </div>
-            </div>
-            <div class="overview-item">
-                <div class="overview-label">Date Registered</div>
-                <div class="overview-value">{{ $club->date_registered ? $club->date_registered->format('M j, Y') : 'N/A' }}</div>
-            </div>
-            <div class="overview-item">
-                <div class="overview-label">Total Officers</div>
-                <div class="overview-value">{{ $club->officers->count() }}</div>
-            </div>
-            <div class="overview-item">
-                <div class="overview-label">Total Advisers</div>
-                <div class="overview-value">{{ $club->advisers->count() }}</div>
-            </div>
-            <div class="overview-item">
-                <div class="overview-label">Total Members</div>
-                <div class="overview-value">{{ $club->members->count() }}</div>
-            </div>
-            <div class="overview-item">
-                <div class="overview-label">Total All</div>
-                <div class="overview-value">{{ $club->officers->count() + $club->advisers->count() + $club->members->count() }}</div>
-            </div>
-        </div>
-    </div>
+    {{-- ── CLUB OVERVIEW ── --}}
+    <table class="overview-table">
+        <tr>
+            <td style="width: 33%;">
+                <span class="overview-label">Department</span>
+                <span class="overview-value">{{ $club->department }}</span>
+            </td>
+            <td style="width: 33%;">
+                <span class="overview-label">Club Type</span>
+                <span class="overview-value">{{ $club->club_type }}</span>
+            </td>
+            <td style="width: 34%;">
+                <span class="overview-label">Status</span>
+                <span class="status status-{{ $club->status }}">{{ ucfirst(str_replace('_', ' ', $club->status)) }}</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span class="overview-label">Date Registered</span>
+                <span class="overview-value">{{ $club->date_registered ? $club->date_registered->format('M j, Y') : '—' }}</span>
+            </td>
+            <td>
+                <span class="overview-label">Officers</span>
+                <span class="overview-value">{{ $club->officers->count() }}</span>
+            </td>
+            <td>
+                <span class="overview-label">Advisers</span>
+                <span class="overview-value">{{ $club->advisers->count() }}</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span class="overview-label">Members</span>
+                <span class="overview-value">{{ $club->members->count() }}</span>
+            </td>
+            <td>
+                <span class="overview-label">Total Personnel</span>
+                <span class="overview-value">{{ $club->officers->count() + $club->advisers->count() + $club->members->count() }}</span>
+            </td>
+            <td>
+                <span class="overview-label">Adviser</span>
+                <span class="overview-value">{{ $club->adviser_name ?: '—' }}</span>
+            </td>
+        </tr>
+    </table>
 
-    <!-- Adviser Information -->
-    @if($club->adviser_name)
-        <div class="section">
-            <div class="section-title">Club Adviser</div>
-            <div class="adviser-info">
-                <div class="adviser-title">{{ $club->adviser_name }}</div>
-                <div class="adviser-details">{{ $club->adviser_email ?: 'Email not provided' }}</div>
-            </div>
-        </div>
-    @endif
-
-    <!-- Club Description -->
+    {{-- ── DESCRIPTION ── --}}
     @if($club->description)
-        <div class="section">
-            <div class="section-title">Club Description</div>
-            <div class="description-section">
-                <div class="description-text">{{ $club->description }}</div>
-            </div>
+        <div class="section-label">Description</div>
+        <div class="desc-block">{{ $club->description }}</div>
+    @endif
+
+    {{-- ── ADVISER DETAILS ── --}}
+    @if($club->adviser_name)
+        <div class="section-label">Club Adviser</div>
+        <div class="adviser-block">
+            <div class="adviser-name">{{ $club->adviser_name }}</div>
+            <div class="adviser-email">{{ $club->adviser_email ?: 'Email not provided' }}</div>
         </div>
     @endif
 
-    <!-- Officers Section -->
-    <div class="section">
-        <div class="section-title">Club Officers ({{ $club->officers->count() }})</div>
-        @if($club->officers->count() > 0)
-            <table class="members-table">
-                <thead>
+    {{-- ── OFFICERS ── --}}
+    <div class="section-label">Officers ({{ $club->officers->count() }})</div>
+    @if($club->officers->count() > 0)
+        <table class="data-table officers-table">
+            <thead>
+                <tr>
+                    <th style="width: 5%;" class="text-center">#</th>
+                    <th style="width: 35%;">Name</th>
+                    <th style="width: 25%;">Position</th>
+                    <th style="width: 35%;">Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($club->officers as $i => $officer)
                     <tr>
-                        <th style="width: 5%;">#</th>
-                        <th style="width: 35%;">Name</th>
-                        <th style="width: 25%;">Position</th>
-                        <th style="width: 35%;">Email</th>
+                        <td class="text-center">{{ $i + 1 }}</td>
+                        <td class="font-bold">{{ $officer->name }}</td>
+                        <td>{{ $officer->position }}</td>
+                        <td>{{ $officer->email }}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach($club->officers as $index => $officer)
-                        <tr style="background-color: #f0f8ff;">
-                            <td style="text-align: center;">{{ $index + 1 }}</td>
-                            <td><strong>{{ $officer->name }}</strong></td>
-                            <td><span style="color: #6f42c1; font-weight: bold;">{{ $officer->position }}</span></td>
-                            <td>{{ $officer->email }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @else
-            <div class="no-data">No officers registered</div>
-        @endif
-    </div>
+                @endforeach
+            </tbody>
+        </table>
+    @else
+        <div class="no-data">No officers registered.</div>
+    @endif
 
-    <!-- Advisers Section -->
-    <div class="section">
-        <div class="section-title">Club Advisers ({{ $club->advisers->count() }})</div>
-        @if($club->advisers->count() > 0)
-            <table class="members-table">
-                <thead>
+    {{-- ── ADVISERS ── --}}
+    <div class="section-label">Advisers ({{ $club->advisers->count() }})</div>
+    @if($club->advisers->count() > 0)
+        <table class="data-table advisers-table">
+            <thead>
+                <tr>
+                    <th style="width: 5%;" class="text-center">#</th>
+                    <th style="width: 25%;">Name</th>
+                    <th style="width: 18%;">Position</th>
+                    <th style="width: 14%;">Professor ID</th>
+                    <th style="width: 16%;">Department</th>
+                    <th style="width: 22%;">Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($club->advisers as $i => $adviser)
                     <tr>
-                        <th style="width: 5%;">#</th>
-                        <th style="width: 30%;">Name</th>
-                        <th style="width: 20%;">Position</th>
-                        <th style="width: 15%;">Professor ID</th>
-                        <th style="width: 15%;">Department Office</th>
-                        <th style="width: 15%;">Email</th>
+                        <td class="text-center">{{ $i + 1 }}</td>
+                        <td class="font-bold">{{ $adviser->name }}</td>
+                        <td>{{ $adviser->position ?? 'Club Adviser' }}</td>
+                        <td>{{ $adviser->professor_id ?? '—' }}</td>
+                        <td>{{ $adviser->department_office ?? '—' }}</td>
+                        <td>{{ $adviser->email }}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach($club->advisers as $index => $adviser)
-                        <tr style="background-color: #f0fff4;">
-                            <td style="text-align: center;">{{ $index + 1 }}</td>
-                            <td><strong>{{ $adviser->name }}</strong></td>
-                            <td><span style="color: #059669; font-weight: bold;">{{ $adviser->position ?? 'Club Adviser' }}</span></td>
-                            <td>{{ $adviser->professor_id ?? 'N/A' }}</td>
-                            <td>{{ $adviser->department_office ?? 'N/A' }}</td>
-                            <td>{{ $adviser->email }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @else
-            <div class="no-data">No advisers registered</div>
-        @endif
-    </div>
+                @endforeach
+            </tbody>
+        </table>
+    @else
+        <div class="no-data">No advisers registered.</div>
+    @endif
 
-    <!-- Members Section -->
-    <div class="section">
-        <div class="section-title">Club Members ({{ $club->members->count() }})</div>
-        @if($club->members->count() > 0)
-            <table class="members-table">
-                <thead>
+    {{-- ── MEMBERS ── --}}
+    <div class="section-label">Members ({{ $club->members->count() }})</div>
+    @if($club->members->count() > 0)
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 5%;" class="text-center">#</th>
+                    <th style="width: 25%;">Name</th>
+                    <th style="width: 14%;">Student ID</th>
+                    <th style="width: 26%;">Email</th>
+                    <th style="width: 14%;">Year Level</th>
+                    <th style="width: 16%;">Date Joined</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($club->members as $i => $member)
                     <tr>
-                        <th style="width: 5%;">#</th>
-                        <th style="width: 25%;">Name</th>
-                        <th style="width: 15%;">Student ID</th>
-                        <th style="width: 25%;">Email</th>
-                        <th style="width: 15%;">Year Level</th>
-                        <th style="width: 15%;">Date Joined</th>
+                        <td class="text-center">{{ $i + 1 }}</td>
+                        <td class="font-bold">{{ $member->name }}</td>
+                        <td>{{ $member->role === 'adviser' ? ($member->professor_id ?? '—') : $member->student_id }}</td>
+                        <td>{{ $member->email }}</td>
+                        <td>{{ $member->year_level }}</td>
+                        <td>{{ $member->joined_date ? $member->joined_date->format('M j, Y') : '—' }}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach($club->members as $index => $member)
-                        <tr>
-                            <td style="text-align: center;">{{ $index + 1 }}</td>
-                            <td><strong>{{ $member->name }}</strong></td>
-                            <td>
-                                @if($member->role === 'adviser')
-                                    {{ $member->professor_id ?? 'N/A' }}
-                                @else
-                                    {{ $member->student_id }}
-                                @endif
-                            </td>
-                            <td>{{ $member->email }}</td>
-                            <td>{{ $member->year_level }}</td>
-                            <td>{{ $member->joined_date ? $member->joined_date->format('M j, Y') : 'N/A' }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @else
-            <div class="no-data">No members registered</div>
-        @endif
-    </div>
+                @endforeach
+            </tbody>
+        </table>
+    @else
+        <div class="no-data">No members registered.</div>
+    @endif
 
-    <!-- Footer -->
-    <div class="footer">
-        <div>
-            <strong>Club Management System</strong> - St. Paul University Philippines<br>
-            Generated by Office of Student Affairs • All Rights Reserved © {{ date('Y') }}<br>
-            For inquiries, contact: {{ $adminName }} ({{ $adminRole }})
-        </div>
+    {{-- ── FOOTER ── --}}
+    <div class="doc-footer">
+        Club Management System &mdash; St. Paul University Philippines &bull; Generated {{ $generatedDate }} at {{ $generatedTime }}<br>
+        <span class="conf">Official Document &bull; For Authorized Use Only</span>
     </div>
 </body>
 </html>

@@ -5,99 +5,69 @@
     <div class="mb-8">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-4xl font-bold bg-gradient-to-r from-[#29553c] to-[#031a0a] bg-clip-text text-transparent">
-                    Dean Dashboard
-                </h1>
-                <p class="text-gray-600 mt-2 text-lg">Welcome, Dean - Comprehensive Overview</p>
+                <h1 class="text-2xl font-semibold text-gray-900">Dean Dashboard</h1>
+                <p class="text-sm text-gray-500 mt-1">Welcome, Dean - Comprehensive oversight of all organizations</p>
             </div>
             <div class="flex items-center space-x-4">
-                <div class="bg-gradient-to-r from-[#29553c] to-[#031a0a] text-white px-6 py-3 rounded-xl shadow-lg">
-                    <div class="text-sm font-medium">Today</div>
-                    <div class="text-lg font-bold">{{ now()->format('M j, Y') }}</div>
+                <div class="bg-gray-900 text-white px-6 py-3">
+                    <div class="text-xs font-medium uppercase tracking-wide">Today</div>
+                    <div class="text-lg font-semibold">{{ now()->format('M j, Y') }}</div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
         <!-- Pending Approvals -->
-        <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl shadow-lg border border-orange-200 p-6 hover:shadow-xl transition-all duration-300">
-            <div class="flex items-center justify-between">
-                <div class="flex-1">
-                    <p class="text-sm font-semibold text-orange-600 uppercase tracking-wide">Pending Approvals</p>
-                    <p class="text-3xl font-bold text-orange-900 mt-2">{{ $pendingApprovals }}</p>
-                    <p class="text-xs text-orange-700 mt-1">Awaiting your endorsement</p>
-                </div>
-                <div class="bg-orange-200 p-4 rounded-xl">
-                    <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
+        <div class="bg-white border border-gray-200 p-5">
+            <div class="flex flex-col">
+                <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">PENDING APPROVALS</p>
+                <p class="text-3xl font-semibold text-gray-900">{{ $pendingApprovals }}</p>
+                <p class="text-xs text-gray-500 mt-1">Awaiting your endorsement</p>
             </div>
         </div>
 
         <!-- Endorsed by Me -->
-        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl shadow-lg border border-green-200 p-6 hover:shadow-xl transition-all duration-300">
-            <div class="flex items-center justify-between">
-                <div class="flex-1">
-                    <p class="text-sm font-semibold text-green-600 uppercase tracking-wide">Endorsed by Me</p>
-                    <p class="text-3xl font-bold text-green-900 mt-2">{{ $endorsedByMe }}</p>
-                    <p class="text-xs text-green-700 mt-1">Successfully endorsed</p>
-                </div>
-                <div class="bg-green-200 p-4 rounded-xl">
-                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                </div>
+        <div class="bg-white border border-gray-200 p-5">
+            <div class="flex flex-col">
+                <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">ENDORSED BY ME</p>
+                <p class="text-3xl font-semibold text-gray-900">{{ $endorsedByMe }}</p>
+                <p class="text-xs text-gray-500 mt-1">Successfully endorsed</p>
             </div>
         </div>
 
         <!-- Total Organizations -->
-        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl shadow-lg border border-blue-200 p-6 hover:shadow-xl transition-all duration-300">
-            <div class="flex items-center justify-between">
-                <div class="flex-1">
-                    <p class="text-sm font-semibold text-blue-600 uppercase tracking-wide">Total Organizations</p>
-                    <p class="text-3xl font-bold text-blue-900 mt-2">{{ $totalOrganizations }}</p>
-                    <p class="text-xs text-blue-700 mt-1">Registered clubs</p>
-                </div>
-                <div class="bg-blue-200 p-4 rounded-xl">
-                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                    </svg>
-                </div>
+        <div class="bg-white border border-gray-200 p-5">
+            <div class="flex flex-col">
+                <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">TOTAL ORGANIZATIONS</p>
+                <p class="text-3xl font-semibold text-gray-900">{{ $totalOrganizations }}</p>
+                <p class="text-xs text-gray-500 mt-1">Registered clubs</p>
             </div>
         </div>
 
         <!-- Active Organizations -->
-        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl shadow-lg border border-purple-200 p-6 hover:shadow-xl transition-all duration-300">
-            <div class="flex items-center justify-between">
-                <div class="flex-1">
-                    <p class="text-sm font-semibold text-purple-600 uppercase tracking-wide">Active Organizations</p>
-                    <p class="text-3xl font-bold text-purple-900 mt-2">{{ $activeOrganizations }}</p>
-                    <p class="text-xs text-purple-700 mt-1">Currently active</p>
-                </div>
-                <div class="bg-purple-200 p-4 rounded-xl">
-                    <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
-                </div>
+        <div class="bg-white border border-gray-200 p-5">
+            <div class="flex flex-col">
+                <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">ACTIVE ORGANIZATIONS</p>
+                <p class="text-3xl font-semibold text-gray-900">{{ $activeOrganizations }}</p>
+                <p class="text-xs text-gray-500 mt-1">Currently active</p>
             </div>
         </div>
     </div>
 
     <!-- Organizations Section -->
-    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-        <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-8 py-6 border-b border-gray-200">
+    <div class="bg-white border border-gray-200 overflow-hidden">
+        <div class="bg-gray-50 px-8 py-6 border-b border-gray-200">
             <div class="flex items-center justify-between">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-900">Organizations Overview</h2>
-                    <p class="text-gray-600 mt-1">Manage and monitor all registered organizations</p>
+                    <h2 class="text-base font-semibold text-gray-900">Student Organizations</h2>
+                    <p class="text-sm text-gray-500 mt-1">Complete management and oversight of all registered organizations</p>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <div class="bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200">
-                        <span class="text-sm font-medium text-gray-600">Total: </span>
-                        <span class="text-sm font-bold text-gray-900">{{ $clubs->count() }}</span>
+                    <div class="bg-white px-4 py-2 border border-gray-200">
+                        <span class="text-xs font-medium text-gray-600 uppercase tracking-wide">Total: </span>
+                        <span class="text-sm font-semibold text-gray-900">{{ $clubs->count() }}</span>
                     </div>
                 </div>
             </div>
@@ -111,15 +81,15 @@
                            name="search"
                            value="{{ request('search') }}"
                            placeholder="Search organizations..."
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                           class="w-full px-3 py-2 text-sm border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors">
                 </div>
-                <select name="type" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <select name="type" class="px-3 py-2 text-sm border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors">
                     <option value="">All Types</option>
                     @foreach($clubTypes as $type)
                         <option value="{{ $type }}" {{ request('type') === $type ? 'selected' : '' }}>{{ $type }}</option>
                     @endforeach
                 </select>
-                <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <select name="status" class="px-3 py-2 text-sm border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors">
                     <option value="">All Status</option>
                     @foreach($statuses as $status)
                         <option value="{{ $status }}" {{ request('status') === $status ? 'selected' : '' }}>
@@ -127,10 +97,16 @@
                         </option>
                     @endforeach
                 </select>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                <select name="department" class="px-3 py-2 text-sm border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors">
+                    <option value="">All Departments</option>
+                    @foreach($departments as $department)
+                        <option value="{{ $department }}" {{ request('department') === $department ? 'selected' : '' }}>{{ $department }}</option>
+                    @endforeach
+                </select>
+                <button type="submit" class="bg-gray-900 hover:bg-gray-800 text-white px-6 py-2 text-sm font-medium transition-colors">
                     Filter
                 </button>
-                <a href="{{ route('dean.dashboard') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                <a href="{{ route('dean.dashboard') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 text-sm font-medium transition-colors">
                     Clear
                 </a>
             </form>
@@ -138,9 +114,9 @@
 
         <!-- Organizations Grid -->
         <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 @forelse($clubs as $club)
-                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+                    <div class="bg-white border border-gray-200 hover:border-gray-400 transition-colors overflow-hidden">
                         <!-- Club Header -->
                         <div class="p-4
                             @if($club->department === 'SASTE') bg-gradient-to-r from-blue-800 to-blue-900
@@ -162,7 +138,7 @@
                                     @elseif(in_array($club->department, ['SOM', 'GRADUATE SCHOOL'])) text-slate-200
                                     @else text-slate-200
                                     @endif text-sm">{{ $club->department }}</span>
-                                <span class="px-2 py-1 text-xs font-medium rounded-full
+                                <span class="px-2 py-1 text-xs font-medium
                                     @if($club->status === 'active') bg-green-100 text-green-800
                                     @elseif($club->status === 'suspended') bg-red-100 text-red-800
                                     @elseif($club->status === 'pending_renewal') bg-yellow-100 text-yellow-800
@@ -221,7 +197,7 @@
                             <div class="mt-4 pt-4 border-t border-gray-100">
                                 <div class="flex space-x-2">
                                     <a href="{{ route('dean.organization.show', $club) }}"
-                                       class="flex-1 px-3 py-2 rounded-lg text-xs font-medium text-center transition-colors
+                                       class="flex-1 px-3 py-2 text-xs font-medium text-center transition-colors
                                         @if($club->department === 'SASTE') bg-blue-100 hover:bg-blue-200 text-blue-800
                                         @elseif($club->department === 'SBAHM') bg-green-100 hover:bg-green-200 text-green-800
                                         @elseif($club->department === 'SNAHS') bg-red-100 hover:bg-red-200 text-red-800

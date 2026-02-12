@@ -237,6 +237,15 @@ class ClubDashboardController extends Controller
             return redirect()->route('club.login')->with('error', 'Officer or Adviser access required.');
         }
         
+        // Enforce auto-suspension: if club has 2+ confirmed violations, suspend it
+        $confirmedViolations = \App\Models\Violation::where('club_id', $club->id)
+            ->where('status', 'confirmed')
+            ->count();
+        if ($confirmedViolations >= 2 && $club->status !== 'suspended') {
+            $club->update(['status' => 'suspended']);
+            $club = $club->fresh();
+        }
+
         // Check if club is suspended and user doesn't have privileged access
         if ($club->status === 'suspended' && !$clubUser->hasAccessDuringSuspension()) {
             return redirect()->route('club.login')->with('error', 'This club is currently suspended. Access is restricted to Presidents, Vice Presidents, and Advisers only.');
@@ -1170,7 +1179,6 @@ class ClubDashboardController extends Controller
                     'severity_color' => $violation->severity_color,
                     'status' => $violation->status,
                     'status_color' => $violation->status_color,
-                    'points' => $violation->points,
                     'violation_date' => $violation->violation_date->format('M d, Y'),
                     'can_appeal' => $violation->status === 'confirmed' && (!$latestAppeal || $latestAppeal->status === 'rejected'),
                     'appeal_status' => $latestAppeal ? $latestAppeal->status : null,
@@ -1279,7 +1287,8 @@ class ClubDashboardController extends Controller
         $request->validate([
             'violation_id' => 'required|exists:violations,id',
             'appeal_reason' => 'required|string|max:2000',
-            'attachment' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120', // 5MB max
+            'attachments' => 'nullable|array|max:5',
+            'attachments.*' => 'file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120', // 5MB max each
         ]);
 
         $violation = Violation::where('id', $request->violation_id)
@@ -1298,12 +1307,13 @@ class ClubDashboardController extends Controller
                 ->with('error', 'This violation cannot be appealed at this time.');
         }
 
-        // Handle file upload
-        $attachmentPath = null;
-        if ($request->hasFile('attachment')) {
-            $file = $request->file('attachment');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $attachmentPath = $file->storeAs('appeal_attachments', $fileName, 'public');
+        // Handle multiple file uploads
+        $attachmentPaths = [];
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $attachmentPaths[] = $file->storeAs('appeal_attachments', $fileName, 'public');
+            }
         }
 
         // Create appeal with all details
@@ -1312,7 +1322,7 @@ class ClubDashboardController extends Controller
             'club_id' => $club->id,
             'submitted_by' => $clubUser->name,
             'appeal_reason' => $request->appeal_reason,
-            'supporting_documents' => $attachmentPath ? [$attachmentPath] : null,
+            'supporting_documents' => count($attachmentPaths) > 0 ? $attachmentPaths : null,
             'status' => 'pending',
             'submitted_at' => now(),
         ]);

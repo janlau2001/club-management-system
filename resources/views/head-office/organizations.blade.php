@@ -175,26 +175,10 @@
                                         @endif">
                                         View Details
                                     </a>
-                                    @if($club->status === 'active')
-                                        <button type="button"
-                                                class="flex-1 bg-red-50 hover:bg-red-100 text-red-700 px-3 py-2 rounded-lg text-xs font-medium transition-colors"
-                                                onclick="openConfirmModal('suspend', '{{ $club->name }}', '{{ route('head-office.organization.suspend', $club) }}')">
-                                            Suspend
-                                        </button>
-                                    @else
-                                        <button type="button"
-                                                class="flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-colors
-                                                @if($club->department === 'SASTE') bg-blue-100 hover:bg-blue-200 text-blue-800
-                                                @elseif($club->department === 'SBAHM') bg-green-100 hover:bg-green-200 text-green-800
-                                                @elseif($club->department === 'SNAHS') bg-red-100 hover:bg-red-200 text-red-800
-                                                @elseif($club->department === 'SITE') bg-purple-100 hover:bg-purple-200 text-purple-800
-                                                @elseif($club->department === 'BEU') bg-yellow-100 hover:bg-yellow-200 text-yellow-800
-                                                @elseif(in_array($club->department, ['SOM', 'GRADUATE SCHOOL'])) bg-slate-100 hover:bg-slate-200 text-slate-800
-                                                @else bg-slate-100 hover:bg-slate-200 text-slate-800
-                                                @endif"
-                                                onclick="openConfirmModal('resume', '{{ $club->name }}', '{{ route('head-office.organization.activate', $club) }}')">
-                                            Activate
-                                        </button>
+                                    @if($club->status === 'suspended')
+                                        <span class="flex-1 bg-red-50 text-red-700 px-3 py-2 rounded-lg text-xs font-medium text-center">
+                                            Suspended
+                                        </span>
                                     @endif
                                 </div>
                             </div>

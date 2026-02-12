@@ -99,6 +99,9 @@ class HeadOfficeController extends Controller
             return redirect()->route('login')->with('error', 'Access denied.');
         }
 
+        // Track last visited for sidebar notifications
+        session(['sidebar_last_visited.organizations' => now()]);
+
         $query = Club::with(['clubUsers']);
 
         // Apply filters
@@ -143,6 +146,9 @@ class HeadOfficeController extends Controller
         if (session('admin_role') !== 'head_student_affairs') {
             return redirect()->route('login')->with('error', 'Access denied.');
         }
+
+        // Track last visited for sidebar notifications
+        session(['sidebar_last_visited.approvals' => now()]);
         
         // Get status filter from request, default to 'pending'
         $status = $request->get('status', 'pending');
@@ -499,6 +505,9 @@ class HeadOfficeController extends Controller
             return redirect()->route('login')->with('error', 'Access denied.');
         }
 
+        // Track last visited for sidebar notifications
+        session(['sidebar_last_visited.renewals' => now()]);
+
         // Get clubs and calculate their renewal status based on date_registered
         $clubsQuery = Club::with(['clubUsers'])
             ->when($request->search, function($query, $search) {
@@ -666,6 +675,9 @@ class HeadOfficeController extends Controller
             return redirect()->route('login')->with('error', 'Access denied.');
         }
 
+        // Track last visited for sidebar notifications
+        session(['sidebar_last_visited.violations' => now()]);
+
         $clubs = Club::with(['violations' => function($query) {
             $query->orderBy('violation_date', 'desc');
         }])->get();
@@ -690,6 +702,17 @@ class HeadOfficeController extends Controller
                 $recommendation = '3rd Offense: Club termination recommended.';
             }
 
+            // Enforce auto-suspension for clubs with 2+ confirmed offenses
+            if ($offenseCount >= 2 && $club->status !== 'suspended') {
+                $club->update(['status' => 'suspended']);
+                $club->status = 'suspended';
+                \Log::info("Club auto-suspended on page load (enforcement)", [
+                    'club_id' => $club->id,
+                    'club_name' => $club->name,
+                    'offense_count' => $offenseCount,
+                ]);
+            }
+
             $club->offense_count = $offenseCount;
             $club->risk_level = $riskLevel;
             $club->recommendation = $recommendation;
@@ -700,13 +723,130 @@ class HeadOfficeController extends Controller
         // Sort by offense count descending
         $clubsWithRisk = $clubsWithRisk->sortByDesc('offense_count');
 
-        // Get pending appeals
-        $pendingAppeals = \App\Models\ViolationAppeal::with(['club', 'violation'])
-            ->where('status', 'pending')
-            ->orderBy('submitted_at', 'desc')
-            ->get();
+        // Get all clubs for the record violation dropdown
+        $allClubs = Club::where('status', '!=', 'pending')
+            ->orderBy('name')
+            ->get(['id', 'name', 'department']);
 
-        return view('head-office.decision-support', compact('clubsWithRisk', 'pendingAppeals'));
+        return view('head-office.decision-support', compact('clubsWithRisk', 'allClubs'));
+    }
+
+    /**
+     * Record a new violation against a club
+     */
+    public function recordViolation(Request $request)
+    {
+        if (session('admin_role') !== 'head_student_affairs') {
+            return response()->json(['error' => 'Access denied.'], 403);
+        }
+
+        $request->validate([
+            'club_id' => 'required|exists:clubs,id',
+            'violation_type' => 'required|string|max:255',
+            'severity' => 'required|in:minor,moderate,major',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|max:2000',
+        ]);
+
+        $admin = session('user');
+        $adminName = $admin->name ?? 'Unknown Admin';
+
+        $violation = Violation::create([
+            'club_id' => $request->club_id,
+            'violation_type' => $request->violation_type,
+            'severity' => $request->severity,
+            'title' => $request->title,
+            'description' => $request->description,
+            'status' => 'confirmed',
+            'reported_by' => $adminName,
+            'violation_date' => now()->toDateString(),
+        ]);
+
+        $club = Club::findOrFail($request->club_id);
+
+        // Count confirmed violations (offense count)
+        $offenseCount = Violation::where('club_id', $club->id)
+            ->where('status', 'confirmed')
+            ->count();
+
+        $autoSuspended = false;
+
+        // Auto-suspend at 2 or more confirmed offenses
+        if ($offenseCount >= 2 && $club->status !== 'suspended') {
+            $club->update(['status' => 'suspended']);
+            $autoSuspended = true;
+
+            \Log::info("Club auto-suspended due to reaching {$offenseCount} offense(s)", [
+                'club_id' => $club->id,
+                'club_name' => $club->name,
+                'offense_count' => $offenseCount,
+                'violation_id' => $violation->id,
+                'admin_name' => $adminName,
+                'timestamp' => now(),
+            ]);
+        }
+
+        \Log::info("Violation recorded", [
+            'club_id' => $club->id,
+            'club_name' => $club->name,
+            'violation_id' => $violation->id,
+            'violation_title' => $request->title,
+            'severity' => $request->severity,
+            'offense_count' => $offenseCount,
+            'auto_suspended' => $autoSuspended,
+            'admin_name' => $adminName,
+            'timestamp' => now(),
+        ]);
+
+        $message = "Violation recorded successfully against {$club->name}.";
+        if ($autoSuspended) {
+            $message .= " The club has been automatically suspended (Offense #{$offenseCount}).";
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'offense_count' => $offenseCount,
+            'auto_suspended' => $autoSuspended,
+        ]);
+    }
+
+    public function appeals(Request $request)
+    {
+        if (session('admin_role') !== 'head_student_affairs') {
+            return redirect()->route('login')->with('error', 'Access denied.');
+        }
+
+        // Track last visited for sidebar notifications
+        session(['sidebar_last_visited.appeals' => now()]);
+
+        $status = $request->get('status', 'pending');
+
+        // Counts for tab badges
+        $pendingCount = \App\Models\ViolationAppeal::where('status', 'pending')->count();
+        $approvedCount = \App\Models\ViolationAppeal::where('status', 'approved')->count();
+        $rejectedCount = \App\Models\ViolationAppeal::where('status', 'rejected')->count();
+
+        // Fetch appeals based on selected tab
+        if ($status === 'approved') {
+            $appeals = \App\Models\ViolationAppeal::with(['club', 'violation'])
+                ->where('status', 'approved')
+                ->orderBy('updated_at', 'desc')
+                ->get();
+        } elseif ($status === 'rejected') {
+            $appeals = \App\Models\ViolationAppeal::with(['club', 'violation'])
+                ->where('status', 'rejected')
+                ->orderBy('updated_at', 'desc')
+                ->get();
+        } else {
+            $status = 'pending';
+            $appeals = \App\Models\ViolationAppeal::with(['club', 'violation'])
+                ->where('status', 'pending')
+                ->orderBy('submitted_at', 'desc')
+                ->get();
+        }
+
+        return view('head-office.appeals', compact('appeals', 'status', 'pendingCount', 'approvedCount', 'rejectedCount'));
     }
 
     public function clubViolationDetails($clubId)
@@ -733,7 +873,7 @@ class HeadOfficeController extends Controller
         $request->validate([
             'admin_password' => 'required',
             'violation_reason' => 'required|string|max:500',
-            'severity' => 'required|in:minor,moderate,major,critical'
+            'severity' => 'required|in:minor,moderate,major'
         ]);
 
         // Verify admin password
@@ -832,10 +972,15 @@ class HeadOfficeController extends Controller
 
         $appeal = \App\Models\ViolationAppeal::with(['club', 'violation'])->findOrFail($appealId);
 
-        $attachmentName = null;
-        if ($appeal->supporting_documents && is_array($appeal->supporting_documents) && count($appeal->supporting_documents) > 0) {
-            $attachmentPath = $appeal->supporting_documents[0];
-            $attachmentName = basename($attachmentPath);
+        // Build attachments list
+        $attachments = [];
+        if ($appeal->supporting_documents && is_array($appeal->supporting_documents)) {
+            foreach ($appeal->supporting_documents as $index => $path) {
+                $attachments[] = [
+                    'index' => $index,
+                    'name' => basename($path),
+                ];
+            }
         }
 
         // Count remaining confirmed violations for this club
@@ -856,14 +1001,13 @@ class HeadOfficeController extends Controller
             'violation_title' => $appeal->violation->title,
             'violation_description' => $appeal->violation->description,
             'violation_date' => $appeal->violation->violation_date->format('M d, Y'),
-            'violation_points' => $appeal->violation->points,
             'violation_severity' => ucfirst($appeal->violation->severity),
             'submitted_by' => $appeal->submitted_by,
-            'position' => 'Club Officer', // This could be enhanced if stored
+            'position' => 'Club Officer',
             'submitted_at' => $appeal->submitted_at->format('M d, Y g:i A'),
             'appeal_reason' => $appeal->appeal_reason,
-            'has_attachment' => $attachmentName !== null,
-            'attachment_name' => $attachmentName,
+            'has_attachment' => count($attachments) > 0,
+            'attachments' => $attachments,
             'confirmed_violations_count' => $confirmedViolations,
             'total_violations_count' => $totalViolations,
         ]);
@@ -872,7 +1016,7 @@ class HeadOfficeController extends Controller
     /**
      * Download appeal attachment
      */
-    public function downloadAppealAttachment($appealId)
+    public function downloadAppealAttachment($appealId, $fileIndex = 0)
     {
         if (session('admin_role') !== 'head_student_affairs') {
             return redirect()->route('login')->with('error', 'Access denied.');
@@ -884,7 +1028,12 @@ class HeadOfficeController extends Controller
             return redirect()->back()->with('error', 'No attachment found.');
         }
 
-        $filePath = $appeal->supporting_documents[0];
+        $fileIndex = (int) $fileIndex;
+        if ($fileIndex < 0 || $fileIndex >= count($appeal->supporting_documents)) {
+            return redirect()->back()->with('error', 'Invalid file index.');
+        }
+
+        $filePath = $appeal->supporting_documents[$fileIndex];
 
         if (!\Storage::disk('public')->exists($filePath)) {
             return redirect()->back()->with('error', 'File not found.');

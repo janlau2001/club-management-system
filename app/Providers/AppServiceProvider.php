@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Socialite\Contracts\Factory as SocialiteFactory;
 
@@ -22,5 +23,64 @@ class AppServiceProvider extends ServiceProvider
     {
         // Google is natively supported by Laravel Socialite
         // No custom provider configuration needed
+
+        // Share sidebar notification counts with the sidebar component
+        View::composer('components.dashboard.sidebar', function ($view) {
+            if (session('admin_role') !== 'head_student_affairs') {
+                return;
+            }
+
+            $lastVisited = session('sidebar_last_visited', []);
+
+            // Registration Monitoring: pending registrations created after last visit
+            $regLastVisited = $lastVisited['approvals'] ?? null;
+            $regQuery = \App\Models\ClubRegistrationRequest::where('status', 'pending');
+            if ($regLastVisited) {
+                $regQuery->where('created_at', '>', $regLastVisited);
+            }
+            $registrationCount = $regQuery->count();
+
+            // Renewals: pending_admin renewals created after last visit
+            $renewalLastVisited = $lastVisited['renewals'] ?? null;
+            $renewalQuery = \App\Models\ClubRenewal::where('status', 'pending_admin');
+            if ($renewalLastVisited) {
+                $renewalQuery->where('created_at', '>', $renewalLastVisited);
+            }
+            $renewalCount = $renewalQuery->count();
+
+            // Appeals: pending appeals created after last visit
+            $appealsLastVisited = $lastVisited['appeals'] ?? null;
+            $appealsQuery = \App\Models\ViolationAppeal::where('status', 'pending');
+            if ($appealsLastVisited) {
+                $appealsQuery->where('submitted_at', '>', $appealsLastVisited);
+            }
+            $appealsCount = $appealsQuery->count();
+
+            // Violations: confirmed violations (new ones since last visit)
+            $violationsLastVisited = $lastVisited['violations'] ?? null;
+            $violationsQuery = \App\Models\Violation::where('status', 'confirmed');
+            if ($violationsLastVisited) {
+                $violationsQuery->where('created_at', '>', $violationsLastVisited);
+            }
+            $violationsCount = $violationsQuery->count();
+
+            // Organizations: new clubs created after last visit
+            $orgsLastVisited = $lastVisited['organizations'] ?? null;
+            $orgsQuery = \App\Models\Club::query();
+            if ($orgsLastVisited) {
+                $orgsQuery->where('created_at', '>', $orgsLastVisited);
+            } else {
+                $orgsQuery->where('created_at', '>', now()); // no count if never visited
+            }
+            $organizationsCount = $orgsQuery->count();
+
+            $view->with('sidebarBadges', [
+                'organizations' => $organizationsCount,
+                'renewals' => $renewalCount,
+                'approvals' => $registrationCount,
+                'appeals' => $appealsCount,
+                'violations' => $violationsCount,
+            ]);
+        });
     }
 }

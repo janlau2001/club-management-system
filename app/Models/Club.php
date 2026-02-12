@@ -144,24 +144,23 @@ class Club extends Model
     }
 
     /**
-     * Get total violation points
+     * Get offense count (confirmed violations)
      */
-    public function getTotalViolationPointsAttribute()
+    public function getOffenseCountAttribute()
     {
-        return $this->violations()->where('status', 'confirmed')->sum('points');
+        return $this->violations()->where('status', 'confirmed')->count();
     }
 
     /**
-     * Get risk level based on violation points
+     * Get risk level based on offense count (3-strike system)
      */
     public function getRiskLevelAttribute()
     {
-        $points = $this->total_violation_points;
+        $offenses = $this->offense_count;
         
-        if ($points >= 100) return 'critical';
-        if ($points >= 50) return 'high';
-        if ($points >= 20) return 'medium';
-        if ($points > 0) return 'low';
+        if ($offenses >= 3) return 'critical';
+        if ($offenses === 2) return 'high';
+        if ($offenses === 1) return 'low';
         return 'none';
     }
 
@@ -173,7 +172,6 @@ class Club extends Model
         return match($this->risk_level) {
             'critical' => 'bg-red-500 text-white',
             'high' => 'bg-orange-500 text-white',
-            'medium' => 'bg-yellow-500 text-white',
             'low' => 'bg-blue-500 text-white',
             'none' => 'bg-green-500 text-white'
         };

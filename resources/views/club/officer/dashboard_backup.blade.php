@@ -965,7 +965,6 @@
                     <div class="flex justify-between items-center pt-2 border-t border-gray-100">
                         <div class="text-xs text-gray-500">
                             <p>Date: ${new Date(violation.violation_date).toLocaleDateString()}</p>
-                            <p>Points: ${violation.points}</p>
                         </div>
                         <div class="space-x-2">
                             ${violation.can_appeal ? `

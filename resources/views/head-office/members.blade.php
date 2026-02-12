@@ -499,7 +499,7 @@
                 const checkedBoxes = document.querySelectorAll('.club-checkbox:checked');
                 if (checkedBoxes.length === 0) {
                     e.preventDefault();
-                    alert('Please select at least one club to generate a report.');
+                    document.getElementById('validationModal').classList.remove('hidden');
                 }
             });
         });
@@ -511,4 +511,24 @@
             }
         });
     </script>
+
+    <!-- Validation Modal -->
+    <div id="validationModal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm overflow-y-auto h-full w-full z-[70]">
+        <div class="relative top-1/3 mx-auto p-6 border border-gray-200 w-[420px] bg-white">
+            <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 w-10 h-10 bg-amber-100 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-base font-semibold text-gray-900">Selection Required</h3>
+                    <p class="text-sm text-gray-600 mt-2">Please select at least one club to generate a report.</p>
+                </div>
+            </div>
+            <div class="flex items-center justify-end mt-6 pt-4 border-t border-gray-200">
+                <button onclick="document.getElementById('validationModal').classList.add('hidden')" class="px-5 py-2 bg-gray-900 text-white hover:bg-gray-800 transition-colors text-sm font-medium">OK</button>
+            </div>
+        </div>
+    </div>
 </x-dashboard-layout>

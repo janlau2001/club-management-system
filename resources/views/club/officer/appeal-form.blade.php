@@ -45,10 +45,6 @@
                                 <span class="text-gray-900">{{ $violation->violation_date->format('M d, Y') }}</span>
                             </div>
                             <div>
-                                <span class="text-sm font-medium text-gray-500">Points:</span>
-                                <span class="text-gray-900 font-medium">{{ $violation->points }}</span>
-                            </div>
-                            <div>
                                 <span class="text-sm font-medium text-gray-500">Severity:</span>
                                 @php
                                     $severityColors = [
@@ -163,30 +159,34 @@
 
                             <!-- File Upload -->
                             <div>
-                                <label for="attachment" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Supporting Document (Optional)
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Supporting Documents (Optional)
                                 </label>
-                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-500 transition-colors">
+                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-500 transition-colors" id="dropZone">
                                     <input 
                                         type="file" 
-                                        id="attachment" 
-                                        name="attachment" 
+                                        id="attachments" 
+                                        name="attachments[]" 
                                         accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                                         class="hidden"
-                                        onchange="updateFileName(this)"
+                                        multiple
+                                        onchange="updateFileList(this)"
                                     >
-                                    <label for="attachment" class="cursor-pointer">
+                                    <label for="attachments" class="cursor-pointer">
                                         <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                                             <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                         </svg>
                                         <p class="mt-2 text-sm text-gray-600">
                                             <span class="font-medium text-green-600 hover:text-green-500">Click to upload</span> or drag and drop
                                         </p>
-                                        <p class="text-xs text-gray-500 mt-1">PDF, DOC, DOCX, JPG, JPEG, PNG (Max. 5MB)</p>
+                                        <p class="text-xs text-gray-500 mt-1">PDF, DOC, DOCX, JPG, JPEG, PNG (Max. 5MB each, up to 5 files)</p>
                                     </label>
-                                    <p id="fileName" class="text-sm text-gray-700 mt-2 hidden"></p>
                                 </div>
-                                @error('attachment')
+                                <div id="fileList" class="mt-3 space-y-2 hidden"></div>
+                                @error('attachments')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                                @error('attachments.*')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
@@ -246,14 +246,38 @@
             charCount.textContent = `${this.value.length} / 2000`;
         });
 
-        // File name display
-        function updateFileName(input) {
-            const fileName = document.getElementById('fileName');
-            if (input.files && input.files[0]) {
-                fileName.textContent = `Selected: ${input.files[0].name}`;
-                fileName.classList.remove('hidden');
+        // File list display for multiple files
+        function updateFileList(input) {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            
+            if (input.files && input.files.length > 0) {
+                if (input.files.length > 5) {
+                    fileList.innerHTML = '<p class="text-red-500 text-xs">You can upload a maximum of 5 files.</p>';
+                    fileList.classList.remove('hidden');
+                    input.value = '';
+                    return;
+                }
+
+                fileList.classList.remove('hidden');
+                for (let i = 0; i < input.files.length; i++) {
+                    const file = input.files[i];
+                    const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-4 py-2';
+                    fileItem.innerHTML = `
+                        <div class="flex items-center gap-2 min-w-0">
+                            <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            </svg>
+                            <span class="text-sm text-gray-700 truncate">${file.name}</span>
+                            <span class="text-xs text-gray-400 flex-shrink-0">(${sizeMB} MB)</span>
+                        </div>
+                    `;
+                    fileList.appendChild(fileItem);
+                }
             } else {
-                fileName.classList.add('hidden');
+                fileList.classList.add('hidden');
             }
         }
 

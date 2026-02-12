@@ -263,13 +263,15 @@ Route::middleware(['check.auth:admin'])->prefix('head-office')->name('head-offic
     
     // Decision Support System routes
     Route::get('/decision-support', [HeadOfficeController::class, 'decisionSupport'])->name('decision-support');
+    Route::get('/decision-support/appeals', [HeadOfficeController::class, 'appeals'])->name('decision-support.appeals');
     Route::get('/decision-support/club/{club}', [HeadOfficeController::class, 'clubViolationDetails'])->name('decision-support.club-details');
+    Route::post('/decision-support/record-violation', [HeadOfficeController::class, 'recordViolation'])->name('decision-support.record-violation');
     Route::post('/decision-support/suspend/{club}', [HeadOfficeController::class, 'suspendClubWithAuthentication'])->name('decision-support.suspend');
     Route::post('/decision-support/reactivate/{club}', [HeadOfficeController::class, 'reactivateClubWithAuthentication'])->name('decision-support.reactivate');
     
     // Appeal Management Routes
     Route::get('/decision-support/appeal/{appeal}', [HeadOfficeController::class, 'getAppealDetails'])->name('decision-support.appeal-details');
-    Route::get('/decision-support/appeal/{appeal}/download', [HeadOfficeController::class, 'downloadAppealAttachment'])->name('decision-support.appeal-download');
+    Route::get('/decision-support/appeal/{appeal}/download/{fileIndex?}', [HeadOfficeController::class, 'downloadAppealAttachment'])->name('decision-support.appeal-download');
     Route::post('/decision-support/appeal/{appeal}/accept', [HeadOfficeController::class, 'acceptAppeal'])->name('decision-support.appeal-accept');
     Route::post('/decision-support/appeal/{appeal}/reject', [HeadOfficeController::class, 'rejectAppeal'])->name('decision-support.appeal-reject');
 });

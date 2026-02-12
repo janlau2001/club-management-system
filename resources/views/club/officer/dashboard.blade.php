@@ -118,19 +118,52 @@
             </div>
         @endif
 
+        <!-- Violation Notice for Non-Suspended Clubs -->
+        @if($club->status !== 'suspended' && $club->offense_count > 0)
+            <div class="mx-6 mt-4 bg-amber-50 border-2 border-amber-200 rounded-lg p-6">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 18.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <h3 class="text-lg font-semibold text-amber-800">Violation Report Received</h3>
+                        <p class="text-amber-700 mt-1">
+                            <strong>{{ $club->name }}</strong> has 
+                            <strong>{{ $club->offense_count }} confirmed violation{{ $club->offense_count > 1 ? 's' : '' }}</strong> 
+                            on record. Please review the details and submit an appeal if applicable.
+                        </p>
+                        <p class="text-amber-600 text-sm mt-2">
+                            Note: Clubs reaching 2 confirmed violations will be automatically suspended.
+                        </p>
+                        <div class="mt-4">
+                            <a href="{{ route('club.officer.violations') }}"
+                               class="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-md transition-colors">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                View & Appeal Violations
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Violation Appeals Section -->
         @if($club->status === 'suspended')
-            <!-- Violation Appeals Section (Outside Alert Box) -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-                <div class="flex items-center justify-between mb-4">
+            <div class="mx-6 mt-4 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="flex items-center justify-between">
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900">Violation Appeals</h3>
-                        <p class="text-gray-600 text-sm">Review and appeal club violations</p>
+                        <p class="text-gray-600 text-sm">Review and appeal club violations to lift suspension</p>
                     </div>
                     <a 
                         href="{{ route('club.officer.violations') }}"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                        class="bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 text-sm font-medium transition-colors"
                     >
-                        📋 View & Appeal Violations
+                        View & Appeal Violations
                     </a>
                 </div>
             </div>
@@ -754,7 +787,6 @@
                     <div class="flex justify-between items-center pt-2 border-t border-gray-100">
                         <div class="text-xs text-gray-500">
                             <p>Date: ${new Date(violation.violation_date).toLocaleDateString()}</p>
-                            <p>Points: ${violation.points}</p>
                         </div>
                         <div class="space-x-2">
                             ${violation.can_appeal ? `
@@ -843,7 +875,6 @@
                                             <p class="text-sm text-gray-600 mt-1">${violation.description}</p>
                                             <div class="mt-2 flex items-center space-x-4 text-xs text-gray-500">
                                                 <span>Date: ${violation.violation_date}</span>
-                                                <span>Points: ${violation.points}</span>
                                                 <span class="px-2 py-1 rounded ${violation.severity_color}">${violation.severity}</span>
                                                 <span class="px-2 py-1 rounded ${violation.status_color}">${violation.status}</span>
                                             </div>

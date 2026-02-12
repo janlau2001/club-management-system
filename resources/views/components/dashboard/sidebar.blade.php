@@ -6,6 +6,9 @@
     <nav class="mt-6 flex-1">
         <div class="px-3 space-y-2">
             @if(session('admin_role') === 'head_student_affairs')
+                @php
+                    $badges = $sidebarBadges ?? [];
+                @endphp
                 <!-- Head of Student Affairs Navigation -->
                 <a href="{{ route('head-office.dashboard') }}"
                    class="flex items-center px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('head-office.dashboard') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
@@ -16,27 +19,42 @@
                 </a>
 
                 <a href="{{ route('head-office.organizations') }}"
-                   class="flex items-center px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('head-office.organizations*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                    </svg>
-                    Organizations
+                   class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('head-office.organizations*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                        </svg>
+                        Organizations
+                    </div>
+                    @if(($badges['organizations'] ?? 0) > 0)
+                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $badges['organizations'] }}</span>
+                    @endif
                 </a>
 
                 <a href="{{ route('head-office.renewals') }}"
-                   class="flex items-center px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('head-office.renewals*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    Renewals
+                   class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('head-office.renewals*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        Renewals
+                    </div>
+                    @if(($badges['renewals'] ?? 0) > 0)
+                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $badges['renewals'] }}</span>
+                    @endif
                 </a>
 
                 <a href="{{ route('head-office.approvals') }}"
-                   class="flex items-center px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('head-office.approvals*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Registration Monitoring
+                   class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('head-office.approvals*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Registration Monitoring
+                    </div>
+                    @if(($badges['approvals'] ?? 0) > 0)
+                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $badges['approvals'] }}</span>
+                    @endif
                 </a>
 
                 <a href="{{ route('head-office.members') }}"
@@ -59,13 +77,55 @@
                 <div class="mt-6 pt-4 border-t border-[#FFE670]/20">
                     <p class="text-xs text-[#FFE670]/60 uppercase tracking-wider px-4 mb-2">Decision Support</p>
                     
-                    <a href="{{ route('head-office.decision-support') }}"
-                       class="flex items-center px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('head-office.decision-support*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                        </svg>
-                        Violation Analysis
-                    </a>
+                    @php
+                        $decisionSupportBadgeTotal = ($badges['violations'] ?? 0) + ($badges['appeals'] ?? 0);
+                    @endphp
+                    <div x-data="{ open: {{ request()->routeIs('head-office.decision-support*') ? 'true' : 'false' }} }">
+                        <button @click="open = !open" 
+                                class="w-full flex items-center justify-between px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('head-office.decision-support*') ? 'text-white font-semibold' : 'text-white hover:text-black' }}">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                Violation Analysis
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                @if($decisionSupportBadgeTotal > 0)
+                                    <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $decisionSupportBadgeTotal }}</span>
+                                @endif
+                                <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </div>
+                        </button>
+
+                        <div x-show="open" x-collapse class="mt-1 ml-4 space-y-1">
+                            <a href="{{ route('head-office.decision-support') }}"
+                               class="flex items-center justify-between px-4 py-2.5 rounded-lg hover:bg-[#FFE670] duration-300 text-sm {{ request()->routeIs('head-office.decision-support') && !request()->routeIs('head-office.decision-support.appeals') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white/80 hover:text-black' }}">
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                    </svg>
+                                    Violations
+                                </div>
+                                @if(($badges['violations'] ?? 0) > 0)
+                                    <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-red-500 rounded-full">{{ $badges['violations'] }}</span>
+                                @endif
+                            </a>
+                            <a href="{{ route('head-office.decision-support.appeals') }}"
+                               class="flex items-center justify-between px-4 py-2.5 rounded-lg hover:bg-[#FFE670] duration-300 text-sm {{ request()->routeIs('head-office.decision-support.appeals') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white/80 hover:text-black' }}">
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    Appeals
+                                </div>
+                                @if(($badges['appeals'] ?? 0) > 0)
+                                    <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-red-500 rounded-full">{{ $badges['appeals'] }}</span>
+                                @endif
+                            </a>
+                        </div>
+                    </div>
                 </div>
 
             @elseif(session('admin_role') === 'director_student_affairs')

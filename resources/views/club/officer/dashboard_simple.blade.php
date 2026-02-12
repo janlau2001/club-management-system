@@ -162,7 +162,6 @@
                                             <p class="text-sm text-gray-600 mt-1">${violation.description}</p>
                                             <div class="mt-2 flex items-center space-x-4 text-xs text-gray-500">
                                                 <span>Date: ${violation.violation_date}</span>
-                                                <span>Points: ${violation.points}</span>
                                                 <span class="px-2 py-1 rounded ${violation.severity_color}">${violation.severity}</span>
                                                 <span class="px-2 py-1 rounded ${violation.status_color}">${violation.status}</span>
                                             </div>

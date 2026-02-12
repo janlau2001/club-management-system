@@ -237,11 +237,88 @@
         </div>
     </div>
 
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm overflow-y-auto h-full w-full z-[60]">
+        <div class="relative top-1/3 mx-auto p-6 border border-gray-200 w-[480px] bg-white">
+            <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 w-10 h-10 bg-amber-100 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 id="confirmTitle" class="text-base font-semibold text-gray-900"></h3>
+                    <p id="confirmMessage" class="text-sm text-gray-600 mt-2"></p>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
+                <button onclick="closeConfirmModal()" class="px-5 py-2 border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">Cancel</button>
+                <button id="confirmActionBtn" class="px-5 py-2 bg-gray-900 text-white hover:bg-gray-800 transition-colors text-sm font-medium">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Modal -->
+    <div id="notificationModal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm overflow-y-auto h-full w-full z-[70]">
+        <div class="relative top-1/3 mx-auto p-6 border border-gray-200 w-[420px] bg-white">
+            <div class="flex items-start gap-4">
+                <div id="notifIconContainer" class="flex-shrink-0 w-10 h-10 flex items-center justify-center"></div>
+                <div class="flex-1">
+                    <h3 id="notifTitle" class="text-base font-semibold text-gray-900"></h3>
+                    <p id="notifMessage" class="text-sm text-gray-600 mt-2"></p>
+                </div>
+            </div>
+            <div class="flex items-center justify-end mt-6 pt-4 border-t border-gray-200">
+                <button onclick="closeNotificationModal()" class="px-5 py-2 bg-gray-900 text-white hover:bg-gray-800 transition-colors text-sm font-medium">OK</button>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript for reminder functionality -->
     <script>
+    // --- Modal Helpers ---
+    function showNotification(type, title, message, callback) {
+        const iconContainer = document.getElementById('notifIconContainer');
+        if (type === 'error') {
+            iconContainer.className = 'flex-shrink-0 w-10 h-10 bg-red-100 flex items-center justify-center';
+            iconContainer.innerHTML = '<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>';
+        } else if (type === 'warning') {
+            iconContainer.className = 'flex-shrink-0 w-10 h-10 bg-amber-100 flex items-center justify-center';
+            iconContainer.innerHTML = '<svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>';
+        } else {
+            iconContainer.className = 'flex-shrink-0 w-10 h-10 bg-green-100 flex items-center justify-center';
+            iconContainer.innerHTML = '<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+        }
+        document.getElementById('notifTitle').textContent = title;
+        document.getElementById('notifMessage').textContent = message;
+        document.getElementById('notificationModal').classList.remove('hidden');
+        window._notifCallback = callback || null;
+    }
+
+    function closeNotificationModal() {
+        document.getElementById('notificationModal').classList.add('hidden');
+        if (window._notifCallback) {
+            window._notifCallback();
+            window._notifCallback = null;
+        }
+    }
+
+    function showConfirm(title, message, onConfirm) {
+        document.getElementById('confirmTitle').textContent = title;
+        document.getElementById('confirmMessage').textContent = message;
+        document.getElementById('confirmModal').classList.remove('hidden');
+        document.getElementById('confirmActionBtn').onclick = function() {
+            closeConfirmModal();
+            onConfirm();
+        };
+    }
+
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').classList.add('hidden');
+    }
+
     function sendRenewalReminder(clubId) {
-        if (confirm('Send renewal reminder to all members of this club?')) {
-            // Show loading state
+        showConfirm('Send Reminder', 'Send renewal reminder to all members of this club?', function() {
             const button = event.target;
             const originalText = button.textContent;
             button.textContent = 'Sending...';
@@ -260,36 +337,34 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
-                    // Optionally disable the button for some time to prevent spam
+                    showNotification('success', 'Reminder Sent', data.message);
                     button.textContent = 'Sent ✓';
                     setTimeout(() => {
                         button.textContent = originalText;
                         button.disabled = false;
                     }, 5000);
                 } else {
-                    alert('Failed to send reminder. Please try again.');
+                    showNotification('error', 'Failed', 'Failed to send reminder. Please try again.');
                     button.textContent = originalText;
                     button.disabled = false;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('An error occurred while sending the reminder.');
+                showNotification('error', 'Error', 'An error occurred while sending the reminder.');
                 button.textContent = originalText;
                 button.disabled = false;
             });
-        }
+        });
     }
 
     function sendBulkReminders() {
-        if (confirm('Send renewal reminders to all overdue clubs? This will notify all members of overdue clubs.')) {
+        showConfirm('Send Bulk Reminders', 'Send renewal reminders to all overdue clubs? This will notify all members of overdue clubs.', function() {
             const button = event.target;
             const originalText = button.innerHTML;
             button.innerHTML = '<svg class="w-5 h-5 animate-spin mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Sending...';
             button.disabled = true;
 
-            // Get all overdue clubs from the table
             const overdueClubs = [];
             document.querySelectorAll('tr').forEach(row => {
                 const statusText = row.textContent;
@@ -302,13 +377,12 @@
             });
 
             if (overdueClubs.length === 0) {
-                alert('No overdue clubs found that need reminders.');
+                showNotification('warning', 'No Clubs Found', 'No overdue clubs found that need reminders.');
                 button.innerHTML = originalText;
                 button.disabled = false;
                 return;
             }
 
-            // Send reminders to all overdue clubs
             Promise.all(overdueClubs.map(clubId => 
                 fetch('{{ route('head-office.renewals.send-reminder') }}', {
                     method: 'POST',
@@ -330,17 +404,17 @@
                     return sum;
                 }, 0);
                 
-                alert(`Sent renewal reminders to ${overdueClubs.length} clubs (${totalMembers} total members).`);
+                showNotification('success', 'Reminders Sent', `Sent renewal reminders to ${overdueClubs.length} clubs (${totalMembers} total members).`);
                 button.innerHTML = originalText;
                 button.disabled = false;
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('An error occurred while sending bulk reminders.');
+                showNotification('error', 'Error', 'An error occurred while sending bulk reminders.');
                 button.innerHTML = originalText;
                 button.disabled = false;
             });
-        }
+        });
     }
     </script>
 </x-dashboard-layout>

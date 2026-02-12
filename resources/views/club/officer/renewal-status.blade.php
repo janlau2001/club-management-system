@@ -13,7 +13,7 @@
 <body class="bg-gray-50 font-sans">
     <div class="min-h-screen">
         <!-- Header -->
-        <header class="p-4 bg-gradient-to-r from-[#29553c] to-[#031a0a] shadow-lg">
+        <header class="p-4 bg-gradient-to-r from-[#29553c] to-[#031a0a]">
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-2xl font-bold text-white">Renewal Status & Approvals</h1>
@@ -21,7 +21,7 @@
                     <p class="text-white opacity-75 text-sm">{{ $clubUser->name }} ({{ $clubUser->position ?? 'Officer' }})</p>
                 </div>
                 <a href="{{ route('club.officer.dashboard') }}" 
-                   class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-colors">
+                   class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 transition-colors">
                     ← Back to Dashboard
                 </a>
             </div>
@@ -29,13 +29,13 @@
 
         <!-- Success/Error Messages -->
         @if(session('success'))
-            <div class="mx-6 mt-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+            <div class="mx-6 mt-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3">
                 {{ session('success') }}
             </div>
         @endif
 
         @if(session('error'))
-            <div class="mx-6 mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <div class="mx-6 mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3">
                 {{ session('error') }}
             </div>
         @endif
@@ -47,15 +47,15 @@
                     <div class="lg:col-span-2 space-y-8">
                         
                         <!-- Authority Information -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                            <div class="bg-gradient-to-r from-purple-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+                        <div class="bg-white border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                                 <h2 class="text-xl font-bold text-gray-900">Your Authority Level</h2>
                                 <p class="text-gray-600 mt-1">What you can do with renewal applications</p>
                             </div>
                     
                     <div class="p-6">
                         @if($clubUser->position === 'President' || $clubUser->position === 'Vice President')
-                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <div class="bg-yellow-50 border border-yellow-200 p-4">
                                 <div class="flex items-center">
                                     <svg class="w-6 h-6 text-yellow-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -72,7 +72,7 @@
                                 </div>
                             </div>
                         @elseif($clubUser->position === 'Adviser' || $clubUser->role === 'adviser')
-                            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="bg-green-50 border border-green-200 p-4">
                                 <div class="flex items-center">
                                     <svg class="w-6 h-6 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -94,8 +94,8 @@
                         </div>
 
                         <!-- Current Renewal Applications -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                            <div class="bg-gradient-to-r from-orange-50 to-yellow-50 px-6 py-4 border-b border-gray-200">
+                        <div class="bg-white border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                                 <h2 class="text-xl font-bold text-gray-900">Current Renewal Applications</h2>
                                 <p class="text-gray-600 mt-1">Active renewal applications for your club</p>
                             </div>
@@ -104,7 +104,7 @@
                         @if($renewals->count() > 0)
                             <div class="space-y-4">
                                 @foreach($renewals as $renewal)
-                                    <div class="border border-gray-200 rounded-lg p-4">
+                                    <div class="border border-gray-200 p-4">
                                         <div class="flex items-center justify-between mb-3">
                                             <div>
                                                 <h3 class="font-semibold text-gray-900">{{ $renewal->academic_year }} Renewal</h3>
@@ -112,7 +112,7 @@
                                                 <p class="text-xs text-gray-500 mt-1">{{ $renewal->next_action }}</p>
                                             </div>
                                             <div class="flex items-center space-x-3">
-                                                <span class="px-3 py-1 rounded-full text-xs font-medium
+                                                <span class="px-3 py-1 text-xs font-medium
                                                     @if($renewal->status === 'draft') bg-gray-100 text-gray-800
                                                     @elseif($renewal->status === 'pending_internal') bg-yellow-100 text-yellow-800
                                                     @elseif($renewal->status === 'pending_admin') bg-blue-100 text-blue-800
@@ -158,7 +158,7 @@
                                             <div class="space-y-3">
                                                 <!-- Step 1: President Preparation -->
                                                 <div class="flex items-center space-x-3">
-                                                    <div class="flex items-center justify-center w-6 h-6 rounded-full flex-shrink-0
+                                                    <div class="flex items-center justify-center w-6 h-6 flex-shrink-0
                                                         {{ $renewal->prepared_by_president ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600' }}">
                                                         @if($renewal->prepared_by_president)
                                                             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -189,7 +189,7 @@
 
                                                 <!-- Step 2: Adviser Certification -->
                                                 <div class="flex items-center space-x-3">
-                                                    <div class="flex items-center justify-center w-6 h-6 rounded-full flex-shrink-0
+                                                    <div class="flex items-center justify-center w-6 h-6 flex-shrink-0
                                                         {{ $renewal->certified_by_adviser ? 'bg-green-500 text-white' : ($renewal->prepared_by_president ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600') }}">
                                                         @if($renewal->certified_by_adviser)
                                                             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -230,7 +230,7 @@
 
                                                     <!-- Step 3: PSG Council Review -->
                                                     <div class="flex items-center space-x-3">
-                                                        <div class="flex items-center justify-center w-6 h-6 rounded-full flex-shrink-0
+                                                        <div class="flex items-center justify-center w-6 h-6 flex-shrink-0
                                                             {{ $renewal->reviewed_by_psg ? 'bg-green-500 text-white' : ($renewal->status === 'pending_admin' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600') }}">
                                                             @if($renewal->reviewed_by_psg)
                                                                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -265,7 +265,7 @@
 
                                                     <!-- Step 4: Dean Noting -->
                                                     <div class="flex items-center space-x-3">
-                                                        <div class="flex items-center justify-center w-6 h-6 rounded-full flex-shrink-0
+                                                        <div class="flex items-center justify-center w-6 h-6 flex-shrink-0
                                                             {{ $renewal->noted_by_dean ? 'bg-green-500 text-white' : ($renewal->reviewed_by_psg ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600') }}">
                                                             @if($renewal->noted_by_dean)
                                                                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -300,7 +300,7 @@
 
                                                     <!-- Step 5: Director Endorsement -->
                                                     <div class="flex items-center space-x-3">
-                                                        <div class="flex items-center justify-center w-6 h-6 rounded-full flex-shrink-0
+                                                        <div class="flex items-center justify-center w-6 h-6 flex-shrink-0
                                                             {{ $renewal->endorsed_by_osa ? 'bg-green-500 text-white' : ($renewal->noted_by_dean ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600') }}">
                                                             @if($renewal->endorsed_by_osa)
                                                                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -335,7 +335,7 @@
 
                                                     <!-- Step 6: VP Final Approval -->
                                                     <div class="flex items-center space-x-3">
-                                                        <div class="flex items-center justify-center w-6 h-6 rounded-full flex-shrink-0
+                                                        <div class="flex items-center justify-center w-6 h-6 flex-shrink-0
                                                             {{ $renewal->approved_by_vp ? 'bg-green-500 text-white' : ($renewal->endorsed_by_osa ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600') }}">
                                                             @if($renewal->approved_by_vp)
                                                                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -397,7 +397,7 @@
                                 <h3 class="text-lg font-medium text-gray-900 mb-2">No Renewal Applications</h3>
                                 <p class="text-gray-500 mb-4">There are currently no renewal applications for your club.</p>
                                 <a href="{{ route('club.officer.renewal') }}" 
-                                   class="inline-flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
+                                   class="inline-flex items-center px-4 py-2 bg-orange-600 text-white hover:bg-orange-700 transition-colors">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                     </svg>
@@ -413,8 +413,8 @@
                     <div class="lg:col-span-1 space-y-8">
                         
                         <!-- Renewal Process Guide -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+                        <div class="bg-white border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                                 <h2 class="text-xl font-bold text-gray-900">Renewal Process</h2>
                                 <p class="text-gray-600 mt-1">How the renewal approval process works</p>
                             </div>
@@ -422,7 +422,7 @@
                             <div class="p-6">
                                 <div class="space-y-4">
                                     <div class="flex items-start space-x-4">
-                                        <div class="flex-shrink-0 w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-sm font-semibold">1</div>
+                                        <div class="flex-shrink-0 w-8 h-8 bg-gray-100 text-orange-600 flex items-center justify-center text-sm font-semibold">1</div>
                                         <div>
                                             <h3 class="font-semibold text-gray-900">Submit Application</h3>
                                             <p class="text-gray-600 text-sm">Officers submit renewal application with required documents</p>
@@ -430,13 +430,13 @@
                                     </div>
                                     
                                 <div class="flex items-start space-x-4">
-                                    <div class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-semibold">2</div>
+                                    <div class="flex-shrink-0 w-8 h-8 bg-gray-100 text-blue-600 flex items-center justify-center text-sm font-semibold">2</div>
                                     <div>
                                         <h3 class="font-semibold text-gray-900">President/Vice President Preparation</h3>
                                         <p class="text-gray-600 text-sm">President or Vice President reviews and prepares the application for adviser certification</p>
                                     </div>
                                 </div>                                    <div class="flex items-start space-x-4">
-                                        <div class="flex-shrink-0 w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-sm font-semibold">3</div>
+                                        <div class="flex-shrink-0 w-8 h-8 bg-gray-100 text-green-600 flex items-center justify-center text-sm font-semibold">3</div>
                                         <div>
                                             <h3 class="font-semibold text-gray-900">Adviser Certification</h3>
                                             <p class="text-gray-600 text-sm">Faculty adviser certifies and submits to administration</p>
@@ -444,7 +444,7 @@
                                     </div>
                                     
                                     <div class="flex items-start space-x-4">
-                                        <div class="flex-shrink-0 w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-sm font-semibold">4</div>
+                                        <div class="flex-shrink-0 w-8 h-8 bg-gray-100 text-purple-600 flex items-center justify-center text-sm font-semibold">4</div>
                                         <div>
                                             <h3 class="font-semibold text-gray-900">Admin Approval</h3>
                                             <p class="text-gray-600 text-sm">Administration reviews and provides final approval</p>
@@ -455,8 +455,8 @@
                         </div>
 
                         <!-- Quick Actions -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                            <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+                        <div class="bg-white border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                                 <h2 class="text-xl font-bold text-gray-900">Quick Actions</h2>
                                 <p class="text-gray-600 mt-1">Common renewal-related actions</p>
                             </div>
@@ -464,7 +464,7 @@
                             <div class="p-6">
                                 <div class="space-y-4">
                                     <a href="{{ route('club.officer.renewal') }}" 
-                                       class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                       class="flex items-center p-4 border border-gray-200 hover:bg-gray-50 transition-colors">
                                         <svg class="w-8 h-8 text-orange-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                         </svg>
@@ -475,7 +475,7 @@
                                     </a>
                                     
                                     <a href="{{ route('club.officer.dashboard') }}" 
-                                       class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                       class="flex items-center p-4 border border-gray-200 hover:bg-gray-50 transition-colors">
                                         <svg class="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
                                         </svg>
@@ -494,46 +494,44 @@
     </div>
 
     <!-- Action Confirmation Modal -->
-    <div id="actionModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-medium text-gray-900" id="modalTitle">Confirm Action</h3>
-                    <button onclick="closeActionModal()" class="text-gray-400 hover:text-gray-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
+    <div id="actionModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto w-96 bg-white overflow-hidden">
+            <div class="bg-gray-900 px-5 py-4 flex items-center justify-between">
+                <h3 class="text-lg font-medium text-white" id="modalTitle">Confirm Action</h3>
+                <button onclick="closeActionModal()" class="text-gray-400 hover:text-gray-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+                
+            <div class="p-5">
+                <p class="text-sm text-gray-600 mb-4" id="modalMessage">
+                    <!-- Dynamic message will be inserted here -->
+                </p>
                 
                 <div class="mb-4">
-                    <p class="text-sm text-gray-600 mb-4" id="modalMessage">
-                        <!-- Dynamic message will be inserted here -->
-                    </p>
-                    
-                    <div class="mb-4">
-                        <label for="actionPassword" class="block text-sm font-medium text-gray-700 mb-2">
-                            Enter your password to confirm:
-                        </label>
-                        <input type="password" 
-                               id="actionPassword" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                               placeholder="Your password">
-                        <div id="actionPasswordError" class="text-red-600 text-xs mt-1 hidden"></div>
-                    </div>
+                    <label for="actionPassword" class="block text-sm font-medium text-gray-700 mb-2">
+                        Enter your password to confirm:
+                    </label>
+                    <input type="password" 
+                           id="actionPassword" 
+                           class="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-gray-900"
+                           placeholder="Your password">
+                    <div id="actionPasswordError" class="text-red-600 text-xs mt-1 hidden"></div>
                 </div>
+            </div>
 
-                <div class="flex justify-end space-x-3">
-                    <button onclick="closeActionModal()" 
-                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
-                        Cancel
-                    </button>
-                    <button onclick="executeAction()" 
-                            id="actionButton"
-                            class="px-4 py-2 rounded-md transition-colors">
-                        <!-- Dynamic button text will be inserted here -->
-                    </button>
-                </div>
+            <div class="flex justify-end space-x-3 bg-gray-50 border-t border-gray-200 px-5 py-4">
+                <button onclick="closeActionModal()" 
+                        class="px-4 py-2 bg-gray-300 text-gray-700 hover:bg-gray-400 transition-colors">
+                    Cancel
+                </button>
+                <button onclick="executeAction()" 
+                        id="actionButton"
+                        class="px-4 py-2 transition-colors">
+                    <!-- Dynamic button text will be inserted here -->
+                </button>
             </div>
         </div>
     </div>
@@ -561,19 +559,19 @@
                     title.textContent = 'Remove Application';
                     message.innerHTML = `Are you sure you want to remove the <strong>${academicYear}</strong> renewal application? This action cannot be undone and will permanently delete all associated files.`;
                     button.textContent = 'Remove Application';
-                    button.className = 'px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors';
+                    button.className = 'px-4 py-2 bg-red-600 text-white hover:bg-red-700 transition-colors';
                     break;
                 case 'prepare':
                     title.textContent = 'Prepare Application';
                     message.innerHTML = `Are you sure you want to prepare the <strong>${academicYear}</strong> renewal application? This will mark it as ready for adviser certification.`;
                     button.textContent = 'Prepare Application';
-                    button.className = 'px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors';
+                    button.className = 'px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors';
                     break;
                 case 'certify':
                     title.textContent = 'Certify Application';
                     message.innerHTML = `Are you sure you want to certify the <strong>${academicYear}</strong> renewal application? This will submit it to the administration for approval.`;
                     button.textContent = 'Certify Application';
-                    button.className = 'px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors';
+                    button.className = 'px-4 py-2 bg-green-600 text-white hover:bg-green-700 transition-colors';
                     break;
             }
             

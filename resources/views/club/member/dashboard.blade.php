@@ -13,7 +13,7 @@
 <body class="bg-gray-50 font-sans">
     <div class="min-h-screen">
         <!-- Header -->
-        <header class="p-4 bg-gradient-to-r from-[#29553c] to-[#031a0a] shadow-lg">
+        <header class="p-4 bg-gradient-to-r from-[#29553c] to-[#031a0a]">
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-2xl font-bold text-white">{{ $club->name }}</h1>
@@ -155,18 +155,18 @@
                             });
                         }
                     }">
-                        <button @click="togglePanel()" class="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-white/30 shadow-lg relative">
+                        <button @click="togglePanel()" class="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-white px-3 py-2 text-sm font-medium transition-colors border border-white/30 relative">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                             </svg>
                             <span>Mailbox</span>
-                            <span x-show="unreadCount > 0" x-text="unreadCount" class="absolute -top-2 -right-2 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center"></span>
+                            <span x-show="unreadCount > 0" x-text="unreadCount" class="absolute -top-2 -right-2 h-5 w-5 bg-red-500 text-white text-xs flex items-center justify-center"></span>
                             <span x-show="hasError && !loading" class="absolute -top-1 -right-1 h-3 w-3 bg-yellow-500 rounded-full" title="Connection issue"></span>
                         </button>
                         
-                        <div x-show="open" @click.outside="closePanel()" x-transition class="absolute right-0 top-full mt-2 w-96 bg-white rounded-lg shadow-xl border z-50">
+                        <div x-show="open" @click.outside="closePanel()" x-transition class="absolute right-0 top-full mt-2 w-96 bg-white border z-50">
                             <!-- Mailbox Header -->
-                            <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-t-lg">
+                            <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4">
                                 <div class="flex justify-between items-center">
                                     <div class="flex items-center space-x-2">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -205,15 +205,15 @@
                                     </svg>
                                     <h4 class="text-lg font-medium text-gray-900 mb-1">Connection Issue</h4>
                                     <p class="text-sm text-gray-500">Unable to load messages. Check your internet connection and try again.</p>
-                                    <button @click="fetchNotifications()" class="mt-3 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+                                    <button @click="fetchNotifications()" class="mt-3 px-4 py-2 bg-blue-600 text-white text-sm hover:bg-blue-700">
                                         Retry
                                     </button>
                                 </div>
                                 
                                 <div x-show="!loading && notifications.length > 0" class="max-h-80 overflow-y-auto space-y-3">
                                     <template x-for="notification in notifications" :key="notification.id">
-                                        <div class="border rounded-lg overflow-hidden transition-all duration-200"
-                                             :class="notification.is_read ? 'bg-gray-50 border-gray-200' : 'bg-blue-50 border-blue-300 shadow-sm'">
+                                        <div class="border overflow-hidden transition-all duration-200"
+                                             :class="notification.is_read ? 'bg-gray-50 border-gray-200' : 'bg-blue-50 border-blue-300'">
                                             <!-- Mail Header -->
                                             <div class="p-3 border-b" :class="notification.is_read ? 'border-gray-200' : 'border-blue-200'">
                                                 <div class="flex items-start justify-between">
@@ -249,7 +249,7 @@
                                 </div>
                                 
                                 <div x-show="!loading && notifications.length > 0 && unreadCount > 0" class="mt-4 pt-4 border-t">
-                                    <button @click="markAllAsRead()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+                                    <button @click="markAllAsRead()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 text-sm font-medium transition-colors">
                                         Mark All Messages as Read
                                     </button>
                                 </div>
@@ -259,7 +259,7 @@
 
                     <!-- Profile Dropdown -->
                     <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-white/30 shadow-lg">
+                        <button @click="open = !open" class="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-white px-3 py-2 text-sm font-medium transition-colors border border-white/30">
                             <div class="w-8 h-8 bg-white/30 rounded-full flex items-center justify-center">
                                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -282,7 +282,7 @@
                              x-transition:leave="transition ease-in duration-75"
                              x-transition:leave-start="opacity-100 scale-100"
                              x-transition:leave-end="opacity-0 scale-95"
-                             class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                             class="absolute right-0 mt-2 w-56 bg-white border border-gray-200 py-2 z-50">
 
                             <!-- Profile Info -->
                             <div class="px-4 py-3 border-b border-gray-100">
@@ -319,7 +319,7 @@
                 
                 <!-- Club Suspension Warning -->
                 @if($club->status === 'suspended')
-                    <div class="bg-red-50 border-2 border-red-200 rounded-lg p-6">
+                    <div class="bg-red-50 border border-red-200 p-6">
                         <div class="flex items-start">
                             <div class="flex-shrink-0">
                                 <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -342,56 +342,56 @@
 
                 <!-- Statistics Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div class="bg-white border border-gray-200 p-6">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Members</p>
-                                <p class="text-3xl font-bold text-green-700 mt-2">{{ $totalMembers }}</p>
+                                <p class="text-3xl font-bold text-gray-900 mt-2">{{ $totalMembers }}</p>
                             </div>
-                            <div class="bg-green-50 p-3 rounded-full">
-                                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="bg-gray-100 p-3">
+                                <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                                 </svg>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div class="bg-white border border-gray-200 p-6">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Officers</p>
-                                <p class="text-3xl font-bold text-green-800 mt-2">{{ $totalOfficers }}</p>
+                                <p class="text-3xl font-bold text-gray-900 mt-2">{{ $totalOfficers }}</p>
                             </div>
-                            <div class="bg-green-50 p-3 rounded-full">
-                                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="bg-gray-100 p-3">
+                                <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
                                 </svg>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div class="bg-white border border-gray-200 p-6">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Online Members</p>
-                                <p class="text-3xl font-bold text-green-600 mt-2">{{ $onlineMembersCount }}</p>
+                                <p class="text-3xl font-bold text-gray-900 mt-2">{{ $onlineMembersCount }}</p>
                             </div>
-                            <div class="bg-green-50 p-3 rounded-full">
-                                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="bg-gray-100 p-3">
+                                <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z"></path>
                                 </svg>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div class="bg-white border border-gray-200 p-6">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Online Officers</p>
-                                <p class="text-3xl font-bold text-green-600 mt-2">{{ $onlineOfficersCount }}</p>
+                                <p class="text-3xl font-bold text-gray-900 mt-2">{{ $onlineOfficersCount }}</p>
                             </div>
-                            <div class="bg-green-50 p-3 rounded-full">
-                                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="bg-gray-100 p-3">
+                                <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                             </div>
@@ -406,8 +406,8 @@
                     <div class="lg:col-span-2 space-y-8">
                         
                         <!-- Club News Section -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                            <div class="bg-gradient-to-r from-green-50 to-green-100 px-6 py-4 border-b border-gray-200">
+                        <div class="bg-white border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                                 <h2 class="text-xl font-bold text-gray-900">Club News</h2>
                                 <p class="text-gray-600 mt-1">Latest updates and announcements</p>
                             </div>
@@ -424,8 +424,8 @@
                         </div>
 
                         <!-- Club Activities Section -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                            <div class="bg-gradient-to-r from-green-50 to-green-100 px-6 py-4 border-b border-gray-200">
+                        <div class="bg-white border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                                 <h2 class="text-xl font-bold text-gray-900">Club Activities</h2>
                                 <p class="text-gray-600 mt-1">Upcoming events and activities</p>
                             </div>
@@ -446,23 +446,22 @@
                     <div class="space-y-8">
 
                         <!-- Member Actions -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+                        <div class="bg-white border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                                 <h2 class="text-xl font-bold text-gray-900">Member Actions</h2>
                                 <p class="text-gray-600 mt-1">What you can do</p>
                             </div>
 
                             <div class="p-6 space-y-3">
-                            <div class="p-6 space-y-3">
                                 <a href="{{ route('club.member.view-members') }}"
-                                   class="block w-full bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-center">
+                                   class="block w-full bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-3 text-sm font-medium transition-colors text-center">
                                     <div class="flex items-center justify-center space-x-2">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM9 9a2 2 0 11-4 0 2 2 0 014 0z"></path>
                                         </svg>
                                         <span>View Members</span>
                                     </div>
-                                </a>                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                </a>                                <div class="bg-gray-50 border border-gray-200 p-3">
                                     <div class="flex items-center">
                                         <svg class="w-4 h-4 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -477,8 +476,8 @@
                         </div>
 
                         <!-- Online Officers -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-4 border-b border-gray-200">
+                        <div class="bg-white border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                                 <h2 class="text-xl font-bold text-gray-900">Online Officers</h2>
                                 <p class="text-gray-600 mt-1">{{ $onlineOfficersCount }} online</p>
                             </div>
@@ -487,7 +486,7 @@
                                 @if($onlineOfficers->count() > 0)
                                     <div class="space-y-3">
                                         @foreach($onlineOfficers as $officer)
-                                            <div class="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
+                                            <div class="flex items-center space-x-3 p-3 bg-gray-50">
                                                 <div class="w-3 h-3 bg-green-500 rounded-full"></div>
                                                 <div class="flex-1">
                                                     <p class="font-medium text-gray-900">{{ $officer->name }}</p>
@@ -503,8 +502,8 @@
                         </div>
                         
                         <!-- Online Members -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+                        <div class="bg-white border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                                 <h2 class="text-xl font-bold text-gray-900">Online Members</h2>
                                 <p class="text-gray-600 mt-1">{{ $onlineMembersCount }} online</p>
                             </div>
@@ -513,7 +512,7 @@
                                 @if($onlineMembers->count() > 0)
                                     <div class="space-y-3">
                                         @foreach($onlineMembers as $member)
-                                            <div class="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
+                                            <div class="flex items-center space-x-3 p-3 bg-gray-50">
                                                 <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
                                                 <div class="flex-1">
                                                     <p class="font-medium text-gray-900">{{ $member->name }}</p>

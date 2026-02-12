@@ -13,13 +13,13 @@
 <body class="bg-gray-50 font-sans">
     <div class="min-h-screen">
         <!-- Header -->
-        <header class="p-4 bg-gradient-to-r from-[#29553c] to-[#031a0a] shadow-lg">
+        <header class="p-4 bg-gradient-to-r from-[#29553c] to-[#031a0a]">
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-2xl font-bold text-white">Application Details</h1>
                     <p class="text-white opacity-90">{{ $club->name }} • {{ $club->department }}</p>
                 </div>
-                <a href="{{ route('club.officer.applicants') }}" class="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors">
+                <a href="{{ route('club.officer.applicants') }}" class="px-4 py-2 bg-white/20 hover:bg-white/30 text-white transition-colors">
                     ← Back to Applications
                 </a>
             </div>
@@ -40,7 +40,7 @@
     </div>
 
     <!-- Application Status -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+    <div class="bg-white border border-gray-200 p-6 mb-6">
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="text-2xl font-bold text-gray-900">
@@ -53,15 +53,15 @@
             </div>
             <div>
                 @if($application->status === 'pending')
-                    <span class="px-4 py-2 inline-flex text-sm leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                    <span class="px-4 py-2 inline-flex text-sm leading-5 font-semibold bg-yellow-100 text-yellow-800">
                         Pending Review
                     </span>
                 @elseif($application->status === 'approved')
-                    <span class="px-4 py-2 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    <span class="px-4 py-2 inline-flex text-sm leading-5 font-semibold bg-green-100 text-green-800">
                         Approved
                     </span>
                 @else
-                    <span class="px-4 py-2 inline-flex text-sm leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                    <span class="px-4 py-2 inline-flex text-sm leading-5 font-semibold bg-red-100 text-red-800">
                         Rejected
                     </span>
                 @endif
@@ -70,8 +70,8 @@
     </div>
 
     <!-- Application Details -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="bg-gradient-to-r from-teal-50 to-cyan-50 px-6 py-4 border-b border-gray-200">
+    <div class="bg-white border border-gray-200 overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-900">Personal Information</h3>
         </div>
 
@@ -141,7 +141,7 @@
                 <div>
                     <label class="text-sm font-medium text-gray-500">Position Applying For</label>
                     <p class="mt-1">
-                        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full 
+                        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold 
                             @if($application->position === 'officer') bg-blue-100 text-blue-800
                             @elseif($application->position === 'adviser') bg-purple-100 text-purple-800
                             @else bg-gray-100 text-gray-800
@@ -155,15 +155,15 @@
                     <label class="text-sm font-medium text-gray-500">Application Status</label>
                     <p class="mt-1">
                         @if($application->status === 'pending')
-                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold bg-yellow-100 text-yellow-800">
                                 Pending
                             </span>
                         @elseif($application->status === 'approved')
-                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold bg-green-100 text-green-800">
                                 Approved on {{ $application->approved_at->format('M d, Y') }}
                             </span>
                         @else
-                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold bg-red-100 text-red-800">
                                 Rejected on {{ $application->rejected_at->format('M d, Y') }}
                             </span>
                         @endif
@@ -172,7 +172,7 @@
             </div>
 
             @if($application->status === 'rejected' && $application->rejection_reason)
-                <div class="mt-6 bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="mt-6 bg-red-50 border border-red-200 p-4">
                     <label class="text-sm font-medium text-red-800">Rejection Reason</label>
                     <p class="mt-1 text-sm text-red-700">{{ $application->rejection_reason }}</p>
                 </div>
@@ -182,11 +182,11 @@
 
     <!-- Actions -->
     @if($application->status === 'pending')
-        <div class="mt-6 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="mt-6 bg-white border border-gray-200 p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Review Application</h3>
             <div class="flex items-center space-x-4">
                 <button onclick="approveApplication({{ $application->id }})"
-                        class="flex-1 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 font-medium">
+                        class="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 transition-all duration-200 font-medium">
                     <div class="flex items-center justify-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -195,7 +195,7 @@
                     </div>
                 </button>
                 <button onclick="showRejectModal()"
-                        class="flex-1 bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-3 rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-200 font-medium">
+                        class="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 transition-all duration-200 font-medium">
                     <div class="flex items-center justify-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -209,22 +209,24 @@
 </div>
 
 <!-- Reject Modal -->
-<div id="rejectModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-lg bg-white">
-        <div class="mt-3">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Reject Application</h3>
+<div id="rejectModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto w-96 border border-gray-200 bg-white">
+        <div class="bg-gray-900 px-6 py-4">
+            <h3 class="text-lg font-semibold text-white">Reject Application</h3>
+        </div>
+        <div class="p-6">
             <p class="text-sm text-gray-600 mb-4">Please provide a reason for rejecting this application:</p>
             <textarea id="rejectionReason" 
                       rows="4" 
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      class="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-gray-900"
                       placeholder="Enter rejection reason..."></textarea>
             <div class="flex items-center space-x-3 mt-4">
                 <button onclick="hideRejectModal()" 
-                        class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors">
+                        class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 transition-colors">
                     Cancel
                 </button>
                 <button onclick="confirmReject({{ $application->id }})" 
-                        class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 transition-colors">
                     Reject
                 </button>
             </div>

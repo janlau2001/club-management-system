@@ -10,7 +10,7 @@
 <body class="bg-gray-50">
     <div class="min-h-screen">
         <!-- Header -->
-        <header class="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg">
+        <header class="bg-gradient-to-r from-[#29553c] to-[#031a0a]">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 <div class="flex items-center justify-between">
                     <div>
@@ -20,7 +20,7 @@
                     </div>
                     <div class="flex items-center space-x-4">
                         <a href="{{ route('club.officer.manage-members') }}" 
-                           class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-white/30">
+                           class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 text-sm font-medium transition-colors border border-white/30">
                             ← Back to Members
                         </a>
                     </div>
@@ -32,20 +32,20 @@
         <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <!-- Success/Error Messages -->
             @if(session('success'))
-                <div class="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+                <div class="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3">
                     {{ session('success') }}
                 </div>
             @endif
 
             @if(session('error'))
-                <div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                <div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3">
                     {{ session('error') }}
                 </div>
             @endif
 
             <!-- Edit Form -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+            <div class="bg-white border border-gray-200 overflow-hidden">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                     <h2 class="text-xl font-bold text-gray-900">Edit Member Information</h2>
                     <p class="text-gray-600 mt-1">Update member details and role information</p>
                 </div>
@@ -54,11 +54,11 @@
                     @csrf
                     
                     <!-- Current Member Info -->
-                    <div class="mb-8 p-4 @if($clubUser->id === $currentUser->id) bg-blue-50 border border-blue-200 @else bg-gray-50 @endif rounded-lg">
+                    <div class="mb-8 p-4 @if($clubUser->id === $currentUser->id) bg-blue-50 border border-blue-200 @else bg-gray-50 @endif">
                         <h3 class="text-lg font-medium text-gray-900 mb-2 flex items-center">
                             Current Information
                             @if($clubUser->id === $currentUser->id)
-                                <span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                                <span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium">
                                     This is you
                                 </span>
                             @endif
@@ -86,7 +86,7 @@
                             </div>
                             <div>
                                 <span class="font-medium text-gray-700">Role:</span> 
-                                <span class="px-2 py-1 rounded-full text-xs font-medium
+                                <span class="px-2 py-1 text-xs font-medium
                                     @if($clubUser->role === 'officer') bg-purple-100 text-purple-800
                                     @elseif($clubUser->role === 'adviser') bg-green-100 text-green-800
                                     @else bg-blue-100 text-blue-800 @endif">
@@ -104,7 +104,7 @@
                                 <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Full Name <span class="text-red-500">*</span></label>
                                 <input type="text" name="name" id="name" required 
                                        value="{{ old('name', $clubUser->name) }}"
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors @error('name') border-red-500 @enderror"
+                                       class="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors @error('name') border-red-500 @enderror"
                                        placeholder="Enter full name">
                                 @error('name')
                                     <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
@@ -115,7 +115,7 @@
                                 <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address <span class="text-red-500">*</span></label>
                                 <input type="email" name="email" id="email" required 
                                        value="{{ old('email', $clubUser->email) }}"
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors @error('email') border-red-500 @enderror"
+                                       class="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors @error('email') border-red-500 @enderror"
                                        placeholder="Enter email address">
                                 @error('email')
                                     <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
@@ -126,7 +126,7 @@
                                 <label for="student_id" class="block text-sm font-medium text-gray-700 mb-2">Student ID <span class="text-red-500">*</span></label>
                                 <input type="text" name="student_id" id="student_id"
                                        value="{{ old('student_id', $clubUser->student_id) }}"
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors @error('student_id') border-red-500 @enderror"
+                                       class="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors @error('student_id') border-red-500 @enderror"
                                        placeholder="Enter student ID"
                                        :required="role !== 'adviser'">
                                 @error('student_id')
@@ -138,7 +138,7 @@
                                 <label for="professor_id" class="block text-sm font-medium text-gray-700 mb-2">Professor ID <span class="text-red-500">*</span></label>
                                 <input type="text" name="professor_id" id="professor_id"
                                        value="{{ old('professor_id', $clubUser->professor_id) }}"
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors @error('professor_id') border-red-500 @enderror"
+                                       class="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors @error('professor_id') border-red-500 @enderror"
                                        placeholder="Enter professor ID"
                                        :required="role === 'adviser'">
                                 @error('professor_id')
@@ -152,7 +152,7 @@
                     <div class="mb-8">
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Role Information</h3>
                         @if($clubUser->id === $currentUser->id)
-                            <div class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <div class="mb-4 p-3 bg-yellow-50 border border-yellow-200">
                                 <div class="flex items-center">
                                     <svg class="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
@@ -166,7 +166,7 @@
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-3">Role in Club <span class="text-red-500">*</span></label>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <label class="relative flex items-center p-4 border border-gray-300 rounded-lg @if($clubUser->id === $currentUser->id) cursor-not-allowed opacity-50 @else cursor-pointer hover:bg-gray-50 @endif transition-colors">
+                                <label class="relative flex items-center p-4 border border-gray-300 @if($clubUser->id === $currentUser->id) cursor-not-allowed opacity-50 @else cursor-pointer hover:bg-gray-50 @endif transition-colors">
                                     <input type="radio" name="role" value="member" x-model="role"
                                            class="sr-only" {{ old('role', $clubUser->role) === 'member' ? 'checked' : '' }}
                                            @if($clubUser->id === $currentUser->id) disabled @endif>
@@ -186,7 +186,7 @@
                                     </div>
                                 </label>
 
-                                <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                <label class="relative flex items-center p-4 border border-gray-300 cursor-pointer hover:bg-gray-50 transition-colors">
                                     <input type="radio" name="role" value="officer" x-model="role"
                                            class="sr-only" {{ old('role', $clubUser->role) === 'officer' ? 'checked' : '' }}>
                                     <div class="flex items-center">
@@ -201,7 +201,7 @@
                                     </div>
                                 </label>
 
-                                <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                <label class="relative flex items-center p-4 border border-gray-300 cursor-pointer hover:bg-gray-50 transition-colors">
                                     <input type="radio" name="role" value="adviser" x-model="role"
                                            class="sr-only" {{ old('role', $clubUser->role) === 'adviser' ? 'checked' : '' }}>
                                     <div class="flex items-center">
@@ -222,7 +222,7 @@
                         <div x-show="role === 'officer'" x-transition>
                             <label for="position" class="block text-sm font-medium text-gray-700 mb-2">Officer Position <span class="text-red-500">*</span></label>
                             <select name="position" id="position" 
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                                    class="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors"
                                     :required="role === 'officer'">
                                 <option value="">Select Position</option>
                                 <option value="President" {{ old('position', $clubUser->position) === 'President' ? 'selected' : '' }}>President</option>
@@ -244,7 +244,7 @@
                         <div x-show="role === 'adviser'" x-transition>
                             <label for="adviser_position" class="block text-sm font-medium text-gray-700 mb-2">Adviser Type <span class="text-red-500">*</span></label>
                             <select name="position" id="adviser_position"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+                                    class="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors"
                                     :required="role === 'adviser'">
                                 <option value="">Select Adviser Type</option>
                                 <option value="Faculty Adviser" {{ old('position', $clubUser->position) === 'Faculty Adviser' ? 'selected' : '' }}>Faculty Adviser</option>
@@ -265,7 +265,7 @@
                             <div x-show="role !== 'adviser'" x-transition>
                                 <label for="department" class="block text-sm font-medium text-gray-700 mb-2">Department <span class="text-red-500">*</span></label>
                                 <select name="department" id="department"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                                        class="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors"
                                         :required="role !== 'adviser'">
                                     <option value="">Select Department</option>
                                     <option value="SASTE" {{ old('department', $clubUser->department) === 'SASTE' ? 'selected' : '' }}>SASTE</option>
@@ -284,7 +284,7 @@
                             <div x-show="role === 'adviser'" x-transition>
                                 <label for="department_office" class="block text-sm font-medium text-gray-700 mb-2">Department Office <span class="text-red-500">*</span></label>
                                 <select name="department_office" id="department_office"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+                                        class="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors"
                                         :required="role === 'adviser'">
                                     <option value="">Select Department Office</option>
                                     <option value="SASTE" {{ old('department_office', $clubUser->department_office) === 'SASTE' ? 'selected' : '' }}>SASTE</option>
@@ -303,7 +303,7 @@
                             <div x-show="role !== 'adviser'" x-transition>
                                 <label for="year_level" class="block text-sm font-medium text-gray-700 mb-2">Year Level <span class="text-red-500">*</span></label>
                                 <select name="year_level" id="year_level"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                                        class="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors"
                                         :required="role !== 'adviser'">
                                     <option value="">Select Year Level</option>
                                     <option value="1st Year" {{ old('year_level', $clubUser->year_level) === '1st Year' ? 'selected' : '' }}>1st Year</option>
@@ -321,7 +321,7 @@
                     </div>
 
                     <!-- Security Verification -->
-                    <div class="mb-8 p-6 bg-red-50 border border-red-200 rounded-lg">
+                    <div class="mb-8 p-6 bg-red-50 border border-red-200">
                         <h3 class="text-lg font-medium text-red-800 mb-4 flex items-center">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
@@ -336,7 +336,7 @@
                                 Your Current Password <span class="text-red-600">*</span>
                             </label>
                             <input type="password" name="current_password" id="current_password" required 
-                                   class="w-full px-4 py-3 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors @error('current_password') border-red-500 @enderror"
+                                   class="w-full px-4 py-3 border border-red-300 focus:outline-none focus:border-gray-900 transition-colors @error('current_password') border-red-500 @enderror"
                                    placeholder="Enter your current password">
                             @error('current_password')
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
@@ -347,11 +347,11 @@
                     <!-- Form Actions -->
                     <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
                         <a href="{{ route('club.officer.manage-members') }}" 
-                           class="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-medium">
+                           class="px-6 py-3 bg-gray-300 text-gray-700 hover:bg-gray-400 transition-colors font-medium">
                             Cancel
                         </a>
                         <button type="submit" 
-                                class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                                class="px-6 py-3 bg-gray-900 text-white hover:bg-gray-800 transition-colors font-medium">
                             Update Member
                         </button>
                     </div>

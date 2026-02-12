@@ -81,6 +81,9 @@ class DirectorController extends Controller
         if (session('admin_role') !== 'director_student_affairs') {
             return redirect()->route('dashboard.index')->with('error', 'Access denied.');
         }
+
+        // Mark last visit for sidebar badge tracking
+        session(['sidebar_last_visited.approvals' => now()]);
         
         // Get status filter from request, default to 'pending'
         $status = $request->get('status', 'pending');
@@ -201,6 +204,9 @@ class DirectorController extends Controller
         if (session('admin_role') !== 'director_student_affairs') {
             return redirect()->route('login')->with('error', 'Access denied.');
         }
+
+        // Mark last visit for sidebar badge tracking
+        session(['sidebar_last_visited.renewals' => now()]);
 
         // Get renewals ready for Director approval (parallel approval system)
         $renewals = ClubRenewal::with('club')

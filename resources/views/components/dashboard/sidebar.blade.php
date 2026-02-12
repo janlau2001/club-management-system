@@ -129,6 +129,9 @@
                 </div>
 
             @elseif(session('admin_role') === 'director_student_affairs')
+                @php
+                    $badges = $sidebarBadges ?? [];
+                @endphp
                 <!-- Director Navigation -->
                 <a href="{{ route('director.dashboard') }}"
                    class="flex items-center px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('director.dashboard') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
@@ -139,22 +142,35 @@
                 </a>
 
                 <a href="{{ route('director.approvals') }}"
-                   class="flex items-center px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('director.approvals*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Registration Approvals
+                   class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('director.approvals*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Registration Approvals
+                    </div>
+                    @if(($badges['approvals'] ?? 0) > 0)
+                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $badges['approvals'] }}</span>
+                    @endif
                 </a>
 
                 <a href="{{ route('director.renewal-approvals') }}"
-                   class="flex items-center px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('director.renewal-approvals*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    Renewal Approvals
+                   class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('director.renewal-approvals*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        Renewal Approvals
+                    </div>
+                    @if(($badges['renewals'] ?? 0) > 0)
+                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $badges['renewals'] }}</span>
+                    @endif
                 </a>
 
             @elseif(session('admin_role') === 'vp_academics')
+                @php
+                    $badges = $sidebarBadges ?? [];
+                @endphp
                 <!-- VP Academics Navigation -->
                 <a href="{{ route('vp.dashboard') }}"
                    class="flex items-center px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('vp.dashboard') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
@@ -165,22 +181,35 @@
                 </a>
 
                 <a href="{{ route('vp.approvals') }}"
-                   class="flex items-center px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('vp.approvals*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Registration Approvals
+                   class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('vp.approvals*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Registration Approvals
+                    </div>
+                    @if(($badges['approvals'] ?? 0) > 0)
+                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $badges['approvals'] }}</span>
+                    @endif
                 </a>
 
                 <a href="{{ route('vp.renewal-approvals') }}"
-                   class="flex items-center px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('vp.renewal-approvals*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    Renewal Approvals
+                   class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('vp.renewal-approvals*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        Renewal Approvals
+                    </div>
+                    @if(($badges['renewals'] ?? 0) > 0)
+                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $badges['renewals'] }}</span>
+                    @endif
                 </a>
 
             @elseif(session('admin_role') === 'dean')
+                @php
+                    $badges = $sidebarBadges ?? [];
+                @endphp
                 <!-- Dean Navigation -->
                 <a href="{{ route('dean.dashboard') }}"
                    class="flex items-center px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('dean.dashboard') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
@@ -191,21 +220,34 @@
                 </a>
 
                 <a href="{{ route('dean.approvals') }}"
-                   class="flex items-center px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('dean.approvals*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Registration Approvals
+                   class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('dean.approvals*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Registration Approvals
+                    </div>
+                    @if(($badges['approvals'] ?? 0) > 0)
+                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $badges['approvals'] }}</span>
+                    @endif
                 </a>
 
                 <a href="{{ route('dean.renewal-approvals') }}"
-                   class="flex items-center px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('dean.renewal-approvals*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    Renewal Approvals
+                   class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('dean.renewal-approvals*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        Renewal Approvals
+                    </div>
+                    @if(($badges['renewals'] ?? 0) > 0)
+                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $badges['renewals'] }}</span>
+                    @endif
                 </a>
             @elseif(session('admin_role') === 'psg_council_adviser')
+                @php
+                    $badges = $sidebarBadges ?? [];
+                @endphp
                 <!-- PSG Council Adviser Navigation -->
                 <a href="{{ route('psg-council.dashboard') }}"
                    class="flex items-center px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('psg-council.dashboard') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
@@ -216,19 +258,29 @@
                 </a>
 
                 <a href="{{ route('psg-council.approvals') }}"
-                   class="flex items-center px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('psg-council.approvals*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Registration Approvals
+                   class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('psg-council.approvals*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Registration Approvals
+                    </div>
+                    @if(($badges['approvals'] ?? 0) > 0)
+                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $badges['approvals'] }}</span>
+                    @endif
                 </a>
 
                 <a href="{{ route('psg-council.renewal-approvals') }}"
-                   class="flex items-center px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('psg-council.renewal-approvals*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    Renewal Approvals
+                   class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('psg-council.renewal-approvals*') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        Renewal Approvals
+                    </div>
+                    @if(($badges['renewals'] ?? 0) > 0)
+                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $badges['renewals'] }}</span>
+                    @endif
                 </a>
             @endif
         </div>

@@ -13,13 +13,13 @@
 <body class="bg-gray-50 font-sans">
     <div class="min-h-screen">
         <!-- Header -->
-        <header class="p-4 bg-gradient-to-r from-[#29553c] to-[#031a0a] shadow-lg">
+        <header class="p-4 bg-gradient-to-r from-[#29553c] to-[#031a0a]">
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-2xl font-bold text-white">Review Club Applicants</h1>
                     <p class="text-white opacity-90">{{ $club->name }} • {{ $club->department }}</p>
                 </div>
-                <a href="{{ route('club.officer.dashboard') }}" class="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors">
+                <a href="{{ route('club.officer.dashboard') }}" class="px-4 py-2 bg-white/20 hover:bg-white/30 text-white transition-colors">
                     ← Back to Dashboard
                 </a>
             </div>
@@ -30,7 +30,7 @@
             <div class="max-w-7xl mx-auto">
     <!-- Success/Error Messages -->
     @if(session('success'))
-        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+        <div class="bg-green-50 border border-green-200 p-4 mb-6">
             <div class="flex">
                 <svg class="w-5 h-5 text-green-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -43,7 +43,7 @@
     @endif
 
     @if(session('error'))
-        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+        <div class="bg-red-50 border border-red-200 p-4 mb-6">
             <div class="flex">
                 <svg class="w-5 h-5 text-red-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -57,9 +57,9 @@
 
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="bg-white border border-gray-200 p-6">
             <div class="flex items-center">
-                <div class="flex-shrink-0 bg-yellow-100 rounded-lg p-3">
+                <div class="flex-shrink-0 bg-gray-100 p-3">
                     <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
@@ -71,9 +71,9 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="bg-white border border-gray-200 p-6">
             <div class="flex items-center">
-                <div class="flex-shrink-0 bg-green-100 rounded-lg p-3">
+                <div class="flex-shrink-0 bg-gray-100 p-3">
                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
@@ -85,9 +85,9 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="bg-white border border-gray-200 p-6">
             <div class="flex items-center">
-                <div class="flex-shrink-0 bg-red-100 rounded-lg p-3">
+                <div class="flex-shrink-0 bg-gray-100 p-3">
                     <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -101,8 +101,8 @@
     </div>
 
     <!-- Applications List -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="bg-gradient-to-r from-teal-50 to-cyan-50 px-6 py-4 border-b border-gray-200">
+    <div class="bg-white border border-gray-200 overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
             <h2 class="text-xl font-bold text-gray-900">Applications</h2>
             <p class="text-gray-600 mt-1">Manage club membership applications</p>
         </div>
@@ -202,7 +202,7 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold 
                                         @if($application->position === 'officer') bg-blue-100 text-blue-800
                                         @elseif($application->position === 'adviser') bg-purple-100 text-purple-800
                                         @else bg-gray-100 text-gray-800
@@ -215,15 +215,15 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($application->status === 'pending')
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold bg-yellow-100 text-yellow-800">
                                             Pending
                                         </span>
                                     @elseif($application->status === 'approved')
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold bg-green-100 text-green-800">
                                             Approved
                                         </span>
                                     @else
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold bg-red-100 text-red-800">
                                             Rejected
                                         </span>
                                     @endif

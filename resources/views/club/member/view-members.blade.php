@@ -13,7 +13,7 @@
 <body class="bg-gray-50 font-sans">
     <div class="min-h-screen">
         <!-- Header -->
-        <header class="p-4 bg-gradient-to-r from-[#29553c] to-[#031a0a] shadow-lg">
+        <header class="p-4 bg-gradient-to-r from-[#29553c] to-[#031a0a]">
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-2xl font-bold text-white">{{ $club->name }} - Members</h1>
@@ -21,7 +21,7 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <a href="{{ route('club.member.dashboard') }}"
-                       class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-white/30">
+                       class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 text-sm font-medium transition-colors border border-white/30">
                         ← Back to Dashboard
                     </a>
                 </div>
@@ -31,8 +31,8 @@
         <!-- Main Content -->
         <main class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <!-- Member List -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+            <div class="bg-white border border-gray-200 overflow-hidden">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                     <h2 class="text-xl font-bold text-gray-900">Club Members</h2>
                     <p class="text-gray-600 mt-1">All members and officers of {{ $club->name }}</p>
                 </div>
@@ -69,7 +69,7 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                        <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium 
                                             {{ $member->role === 'adviser' ? 'bg-purple-100 text-purple-800' : 
                                                ($member->role === 'officer' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800') }}">
                                             {{ ucfirst($member->role) }}

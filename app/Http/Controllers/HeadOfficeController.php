@@ -8,6 +8,7 @@ use App\Models\ClubRenewal;
 use App\Models\ClubUser;
 use App\Models\Notification;
 use App\Models\Violation;
+use App\Models\ViolationAppeal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -22,74 +23,151 @@ class HeadOfficeController extends Controller
             return redirect()->route('login')->with('error', 'Access denied.');
         }
 
-        // Dashboard statistics
+        // ── Core counts ────────────────────────────────
         $totalOrganizations = Club::count();
         $activeOrganizations = Club::where('status', 'active')->count();
         $suspendedOrganizations = Club::where('status', 'suspended')->count();
         $pendingRenewalOrganizations = Club::where('status', 'pending_renewal')->count();
         $totalMembers = Club::sum('member_count');
 
-        // Registration statistics
+        // ── Registration pipeline ──────────────────────
         $newRegistrations = ClubRegistrationRequest::where('status', 'pending')->count();
         $pendingVerifications = ClubRegistrationRequest::where('status', 'pending')
             ->where('verified_by_osa', false)->count();
         $verifiedApplications = ClubRegistrationRequest::where('verified_by_osa', true)->count();
+        $totalRegistrations = ClubRegistrationRequest::count();
+        $approvedRegistrations = ClubRegistrationRequest::where('status', 'approved')->count();
+        $rejectedRegistrations = ClubRegistrationRequest::where('status', 'rejected')->count();
 
-        // Organization types breakdown
+        // ── Club types ─────────────────────────────────
         $academicClubs = Club::where('club_type', 'Academic')->count();
         $interestClubs = Club::where('club_type', 'Interest')->count();
 
-        // Recent activities (last 10 activities)
-        $recentActivities = collect();
+        // ── Violations ─────────────────────────────────
+        $totalViolations = Violation::count();
+        $confirmedViolations = Violation::where('status', 'confirmed')->count();
+        $appealedViolations = Violation::where('status', 'appealed')->count();
+        $dismissedViolations = Violation::where('status', 'dismissed')->count();
 
-        // Recent registrations
-        $recentRegistrations = ClubRegistrationRequest::with('officer')
-            ->orderBy('created_at', 'desc')
-            ->take(3)
+        // Severity breakdown
+        $minorViolations = Violation::where('severity', 'minor')->count();
+        $moderateViolations = Violation::where('severity', 'moderate')->count();
+        $majorViolations = Violation::where('severity', 'major')->count();
+
+        // ── Appeals ────────────────────────────────────
+        $pendingAppeals = ViolationAppeal::where('status', 'pending')->count();
+        $totalAppeals = ViolationAppeal::count();
+        $approvedAppeals = ViolationAppeal::where('status', 'approved')->count();
+        $rejectedAppeals = ViolationAppeal::where('status', 'rejected')->count();
+
+        // ── Renewals ───────────────────────────────────
+        $pendingRenewals = ClubRenewal::where('status', 'pending_admin')->count();
+        $approvedRenewals = ClubRenewal::where('status', 'approved')->count();
+
+        // ── Actionable items count ─────────────────────
+        $actionableItems = $newRegistrations + $pendingAppeals + $pendingRenewals;
+
+        // ── All clubs with relationships for the table ─
+        $allClubs = Club::withCount(['violations as confirmed_violations_count' => function ($q) {
+            $q->where('status', 'confirmed');
+        }, 'violations as total_violations_count'])
+            ->with(['violations' => function ($q) {
+                $q->where('status', 'confirmed');
+            }])
+            ->orderByDesc('updated_at')
             ->get();
 
-        foreach ($recentRegistrations as $registration) {
+        // ── Clubs needing attention ────────────────────
+        $clubsNeedingAttention = $allClubs->filter(function ($club) {
+            return $club->status === 'suspended' || $club->confirmed_violations_count > 0;
+        })->take(5);
+
+        // ── Pending registrations ──────────────────────
+        $pendingRegistrations = ClubRegistrationRequest::with('officer')
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        // ── Recent appeals ─────────────────────────────
+        $recentAppeals = ViolationAppeal::with(['violation', 'club'])
+            ->where('status', 'pending')
+            ->orderBy('submitted_at', 'desc')
+            ->take(5)
+            ->get();
+
+        // ── Department distribution ────────────────────
+        $departmentDistribution = Club::select('department', DB::raw('count(*) as count'))
+            ->groupBy('department')
+            ->orderByDesc('count')
+            ->get();
+
+        // ── Activity stream ────────────────────────────
+        $recentActivities = collect();
+
+        $recentRegistrationsActivity = ClubRegistrationRequest::with('officer')
+            ->orderBy('created_at', 'desc')->take(4)->get();
+        foreach ($recentRegistrationsActivity as $registration) {
             $recentActivities->push([
                 'type' => 'registration',
                 'title' => $registration->club_name . ' registered',
                 'description' => 'New club registration from ' . $registration->department,
                 'time' => $registration->created_at,
-                'icon' => 'plus',
                 'color' => 'green'
             ]);
         }
 
-        // Recent club updates (recently updated clubs)
-        $recentClubUpdates = Club::orderBy('updated_at', 'desc')
-            ->take(3)
-            ->get();
-
+        $recentClubUpdates = Club::orderBy('updated_at', 'desc')->take(4)->get();
         foreach ($recentClubUpdates as $club) {
             $recentActivities->push([
                 'type' => 'update',
                 'title' => $club->name . ' updated',
                 'description' => 'Organization information updated',
                 'time' => $club->updated_at,
-                'icon' => 'edit',
                 'color' => 'blue'
             ]);
         }
 
-        // Sort activities by time (most recent first)
-        $recentActivities = $recentActivities->sortByDesc('time')->take(5);
+        $recentViolationEntries = Violation::with('club')
+            ->orderBy('created_at', 'desc')->take(4)->get();
+        foreach ($recentViolationEntries as $violation) {
+            $recentActivities->push([
+                'type' => 'violation',
+                'title' => 'Violation: ' . $violation->title,
+                'description' => ($violation->club ? $violation->club->name : 'Unknown') . ' — ' . ucfirst($violation->severity),
+                'time' => $violation->created_at,
+                'color' => 'red'
+            ]);
+        }
+
+        $recentAppealEntries = ViolationAppeal::with(['violation', 'club'])
+            ->orderBy('created_at', 'desc')->take(4)->get();
+        foreach ($recentAppealEntries as $appeal) {
+            $recentActivities->push([
+                'type' => 'appeal',
+                'title' => 'Appeal submitted',
+                'description' => ($appeal->club ? $appeal->club->name : 'Unknown') . ' — ' . ($appeal->violation ? $appeal->violation->title : ''),
+                'time' => $appeal->created_at,
+                'color' => 'yellow'
+            ]);
+        }
+
+        $recentActivities = $recentActivities->sortByDesc('time')->take(10);
 
         return view('head-office.dashboard', compact(
-            'totalOrganizations',
-            'activeOrganizations',
-            'suspendedOrganizations',
-            'pendingRenewalOrganizations',
-            'totalMembers',
-            'newRegistrations',
-            'pendingVerifications',
-            'verifiedApplications',
-            'academicClubs',
-            'interestClubs',
-            'recentActivities'
+            'totalOrganizations', 'activeOrganizations', 'suspendedOrganizations',
+            'pendingRenewalOrganizations', 'totalMembers',
+            'newRegistrations', 'pendingVerifications', 'verifiedApplications',
+            'totalRegistrations', 'approvedRegistrations', 'rejectedRegistrations',
+            'academicClubs', 'interestClubs',
+            'totalViolations', 'confirmedViolations', 'appealedViolations', 'dismissedViolations',
+            'minorViolations', 'moderateViolations', 'majorViolations',
+            'pendingAppeals', 'totalAppeals', 'approvedAppeals', 'rejectedAppeals',
+            'pendingRenewals', 'approvedRenewals',
+            'actionableItems',
+            'allClubs', 'clubsNeedingAttention',
+            'pendingRegistrations', 'recentAppeals',
+            'departmentDistribution', 'recentActivities'
         ));
     }
 

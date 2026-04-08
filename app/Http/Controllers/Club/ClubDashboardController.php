@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Club;
 
 use App\Http\Controllers\Controller;
 use App\Models\ClubUser;
+use App\Models\ClubNews;
+use App\Models\ClubActivity;
 use App\Models\ClubRenewal;
 use App\Models\Violation;
 use App\Models\ViolationAppeal;
@@ -39,13 +41,38 @@ class ClubDashboardController extends Controller
         return $freshClub;
     }
 
+    /**
+     * Get fresh club user data from database
+     * This ensures we always have the latest role/position (e.g. after role changes)
+     */
+    private function getFreshClubUser()
+    {
+        $sessionUser = session('club_user');
+        if (!$sessionUser) {
+            return null;
+        }
+
+        $freshUser = ClubUser::with('club')->find($sessionUser->id);
+
+        if ($freshUser) {
+            session(['club_user' => $freshUser]);
+        }
+
+        return $freshUser;
+    }
+
     public function memberDashboard()
     {
-        $clubUser = session('club_user');
+        $clubUser = $this->getFreshClubUser();
         $club = $this->getFreshClub();
         
         if (!$clubUser || !$club) {
             return redirect()->route('club.login')->with('error', 'Please login first.');
+        }
+
+        // If user's role was changed to officer/adviser, redirect them to the officer dashboard
+        if ($clubUser->hasManagementAccess()) {
+            return redirect()->route('club.officer.dashboard');
         }
         
         // Check if club is suspended and user doesn't have privileged access
@@ -85,7 +112,19 @@ class ClubDashboardController extends Controller
         $totalMembers = $club->clubUsers()->count(); // Count ALL users: members, officers, and advisers
         $totalOfficers = $club->clubUsers()->whereIn('role', ['officer', 'adviser'])->count();
         $onlineMembersCount = $onlineMembers->count();
-        $onlineOfficersCount = $onlineOfficers->count();        return view('club.member.dashboard', compact(
+        $onlineOfficersCount = $onlineOfficers->count();
+
+        // Get club news and activities for member view
+        $clubNews = ClubNews::where('club_id', $club->id)
+            ->with('author')
+            ->orderBy('published_at', 'desc')
+            ->get();
+
+        $clubActivities = ClubActivity::where('club_id', $club->id)
+            ->orderBy('scheduled_at', 'desc')
+            ->get();
+
+        return view('club.member.dashboard', compact(
             'clubUser',
             'club',
             'onlineMembers',
@@ -95,7 +134,9 @@ class ClubDashboardController extends Controller
             'totalMembers',
             'totalOfficers',
             'onlineMembersCount',
-            'onlineOfficersCount'
+            'onlineOfficersCount',
+            'clubNews',
+            'clubActivities'
         ));
     }
 
@@ -230,11 +271,16 @@ class ClubDashboardController extends Controller
     
     public function officerDashboard()
     {
-        $clubUser = session('club_user');
+        $clubUser = $this->getFreshClubUser();
         $club = $this->getFreshClub();
         
-        if (!$clubUser || !$club || !$clubUser->hasManagementAccess()) {
-            return redirect()->route('club.login')->with('error', 'Officer or Adviser access required.');
+        if (!$clubUser || !$club) {
+            return redirect()->route('club.login')->with('error', 'Please login first.');
+        }
+
+        // If user's role was changed to member, redirect them to the member dashboard
+        if (!$clubUser->hasManagementAccess()) {
+            return redirect()->route('club.member.dashboard');
         }
         
         // Enforce auto-suspension: if club has 2+ confirmed violations, suspend it
@@ -290,6 +336,16 @@ class ClubDashboardController extends Controller
             ->where('status', 'pending')
             ->whereNull('viewed_at')
             ->count();
+
+        // Get club news and activities
+        $clubNews = ClubNews::where('club_id', $club->id)
+            ->with('author')
+            ->orderBy('published_at', 'desc')
+            ->get();
+
+        $clubActivities = ClubActivity::where('club_id', $club->id)
+            ->orderBy('scheduled_at', 'desc')
+            ->get();
         
         return view('club.officer.dashboard', compact(
             'clubUser',
@@ -302,7 +358,9 @@ class ClubDashboardController extends Controller
             'totalOfficers',
             'onlineMembersCount',
             'onlineOfficersCount',
-            'newApplicationsCount'
+            'newApplicationsCount',
+            'clubNews',
+            'clubActivities'
         ));
     }
 
@@ -1545,6 +1603,170 @@ class ClubDashboardController extends Controller
                 'message' => 'An error occurred while rejecting the application. Please try again.'
             ], 500);
         }
+    }
+
+    // ==========================================
+    // Club News CRUD
+    // ==========================================
+
+    public function storeNews(Request $request)
+    {
+        $clubUser = $this->getFreshClubUser();
+        $club = $this->getFreshClub();
+
+        if (!$clubUser || !$club || !$clubUser->hasManagementAccess()) {
+            return redirect()->route('club.login')->with('error', 'Officer access required.');
+        }
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|max:5000',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+            'published_at' => 'required|date',
+        ]);
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('club-news/' . $club->id, 'public');
+        }
+
+        ClubNews::create([
+            'club_id' => $club->id,
+            'author_id' => $clubUser->id,
+            'title' => $request->title,
+            'description' => $request->description,
+            'image' => $imagePath,
+            'published_at' => $request->published_at,
+        ]);
+
+        return redirect()->route('club.officer.dashboard')->with('success', 'News posted successfully.');
+    }
+
+    public function updateNews(Request $request, ClubNews $news)
+    {
+        $clubUser = $this->getFreshClubUser();
+        $club = $this->getFreshClub();
+
+        if (!$clubUser || !$club || !$clubUser->hasManagementAccess() || $news->club_id !== $club->id) {
+            return redirect()->route('club.login')->with('error', 'Access denied.');
+        }
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|max:5000',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+            'published_at' => 'required|date',
+        ]);
+
+        $data = [
+            'title' => $request->title,
+            'description' => $request->description,
+            'published_at' => $request->published_at,
+        ];
+
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($news->image) {
+                Storage::disk('public')->delete($news->image);
+            }
+            $data['image'] = $request->file('image')->store('club-news/' . $club->id, 'public');
+        }
+
+        if ($request->has('remove_image') && $request->remove_image) {
+            if ($news->image) {
+                Storage::disk('public')->delete($news->image);
+            }
+            $data['image'] = null;
+        }
+
+        $news->update($data);
+
+        return redirect()->route('club.officer.dashboard')->with('success', 'News updated successfully.');
+    }
+
+    public function deleteNews(ClubNews $news)
+    {
+        $clubUser = $this->getFreshClubUser();
+        $club = $this->getFreshClub();
+
+        if (!$clubUser || !$club || !$clubUser->hasManagementAccess() || $news->club_id !== $club->id) {
+            return redirect()->route('club.login')->with('error', 'Access denied.');
+        }
+
+        if ($news->image) {
+            Storage::disk('public')->delete($news->image);
+        }
+
+        $news->delete();
+
+        return redirect()->route('club.officer.dashboard')->with('success', 'News deleted successfully.');
+    }
+
+    // ==========================================
+    // Club Activities CRUD
+    // ==========================================
+
+    public function storeActivity(Request $request)
+    {
+        $clubUser = $this->getFreshClubUser();
+        $club = $this->getFreshClub();
+
+        if (!$clubUser || !$club || !$clubUser->hasManagementAccess()) {
+            return redirect()->route('club.login')->with('error', 'Officer access required.');
+        }
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|max:5000',
+            'scheduled_at' => 'required|date',
+        ]);
+
+        ClubActivity::create([
+            'club_id' => $club->id,
+            'title' => $request->title,
+            'description' => $request->description,
+            'scheduled_at' => $request->scheduled_at,
+        ]);
+
+        return redirect()->route('club.officer.dashboard')->with('success', 'Activity scheduled successfully.');
+    }
+
+    public function updateActivity(Request $request, ClubActivity $activity)
+    {
+        $clubUser = $this->getFreshClubUser();
+        $club = $this->getFreshClub();
+
+        if (!$clubUser || !$club || !$clubUser->hasManagementAccess() || $activity->club_id !== $club->id) {
+            return redirect()->route('club.login')->with('error', 'Access denied.');
+        }
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|max:5000',
+            'scheduled_at' => 'required|date',
+        ]);
+
+        $activity->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'scheduled_at' => $request->scheduled_at,
+        ]);
+
+        return redirect()->route('club.officer.dashboard')->with('success', 'Activity updated successfully.');
+    }
+
+    public function deleteActivity(ClubActivity $activity)
+    {
+        $clubUser = $this->getFreshClubUser();
+        $club = $this->getFreshClub();
+
+        if (!$clubUser || !$club || !$clubUser->hasManagementAccess() || $activity->club_id !== $club->id) {
+            return redirect()->route('club.login')->with('error', 'Access denied.');
+        }
+
+        $activity->delete();
+
+        return redirect()->route('club.officer.dashboard')->with('success', 'Activity deleted successfully.');
     }
 }
 

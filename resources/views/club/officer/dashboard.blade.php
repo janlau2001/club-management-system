@@ -238,57 +238,289 @@
                     <div class="lg:col-span-2 space-y-8">
                         
                         <!-- Club News Section -->
-                        <div class="bg-white border border-gray-200 overflow-hidden">
+                        <div class="bg-white border border-gray-200 overflow-hidden" x-data="{ showNewsModal: false, editingNews: null, showDeleteConfirm: null }">
                             <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <h2 class="text-xl font-bold text-gray-900">Club News & Announcements</h2>
                                         <p class="text-gray-600 mt-1">Manage club updates and announcements</p>
                                     </div>
-                                    <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-sm font-medium transition-colors">
+                                    <button @click="showNewsModal = true; editingNews = null" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-sm font-medium transition-colors">
                                         Add News
                                     </button>
                                 </div>
                             </div>
                             
                             <div class="p-6">
-                                <div class="text-center py-12">
-                                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
-                                    </svg>
-                                    <h3 class="text-lg font-medium text-gray-900 mb-2">No News Yet</h3>
-                                    <p class="text-gray-500 mb-4">Start sharing updates with your club members.</p>
-                                    <button class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 font-medium transition-colors">
-                                        Create First News Post
-                                    </button>
+                                @if($clubNews->count() > 0)
+                                    <div class="space-y-4">
+                                        @foreach($clubNews as $news)
+                                            <div class="border border-gray-200 overflow-hidden">
+                                                @if($news->image)
+                                                    <img src="{{ asset('storage/' . $news->image) }}" alt="{{ $news->title }}" class="w-full h-48 object-cover">
+                                                @endif
+                                                <div class="p-4">
+                                                    <div class="flex items-start justify-between">
+                                                        <div class="flex-1">
+                                                            <h3 class="text-lg font-semibold text-gray-900">{{ $news->title }}</h3>
+                                                            <p class="text-sm text-gray-500 mt-1">
+                                                                By {{ $news->author->name ?? 'Unknown' }} &bull; {{ $news->published_at->format('M d, Y') }}
+                                                            </p>
+                                                        </div>
+                                                        <div class="flex items-center space-x-2 ml-4">
+                                                            <button @click="editingNews = {{ $news->id }}; showNewsModal = true" class="text-gray-500 hover:text-gray-700">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                                            </button>
+                                                            <button @click="showDeleteConfirm = {{ $news->id }}" class="text-red-400 hover:text-red-600">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <p class="text-gray-700 mt-2 text-sm">{{ Str::limit($news->description, 200) }}</p>
+                                                </div>
+                                                <!-- Delete Confirmation -->
+                                                <div x-show="showDeleteConfirm === {{ $news->id }}" x-transition class="bg-red-50 border-t border-red-200 p-4">
+                                                    <p class="text-sm text-red-700 mb-3">Are you sure you want to delete this news?</p>
+                                                    <div class="flex space-x-2">
+                                                        <form method="POST" action="{{ route('club.officer.news.delete', $news) }}">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 text-sm font-medium transition-colors">Delete</button>
+                                                        </form>
+                                                        <button @click="showDeleteConfirm = null" class="bg-white border border-gray-300 text-gray-700 px-4 py-1.5 text-sm font-medium hover:bg-gray-50 transition-colors">Cancel</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="text-center py-12">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
+                                        </svg>
+                                        <h3 class="text-lg font-medium text-gray-900 mb-2">No News Yet</h3>
+                                        <p class="text-gray-500 mb-4">Start sharing updates with your club members.</p>
+                                        <button @click="showNewsModal = true; editingNews = null" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 font-medium transition-colors">
+                                            Create First News Post
+                                        </button>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Add/Edit News Modal -->
+                            <div x-show="showNewsModal" x-transition class="fixed inset-0 bg-black/40 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-start justify-center pt-10">
+                                <div class="w-[550px] bg-white border" @click.outside="showNewsModal = false">
+                                    <div class="bg-gray-900 px-6 py-4 flex items-center justify-between">
+                                        <div>
+                                            <h3 class="text-lg font-semibold text-white" x-text="editingNews ? 'Edit News' : 'Add News'"></h3>
+                                            <p class="text-sm text-gray-300">Share updates with your club members</p>
+                                        </div>
+                                        <button @click="showNewsModal = false" class="text-gray-400 hover:text-white">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        </button>
+                                    </div>
+
+                                    <!-- Add Form (shown when editingNews is null) -->
+                                    <form x-show="!editingNews" method="POST" action="{{ route('club.officer.news.store') }}" enctype="multipart/form-data">
+                                        @csrf
+                                        <div class="p-6 space-y-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Title <span class="text-red-500">*</span></label>
+                                                <input type="text" name="title" required class="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors" placeholder="News title">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Description <span class="text-red-500">*</span></label>
+                                                <textarea name="description" required rows="4" class="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors resize-none" placeholder="What's the news about?"></textarea>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Image <span class="text-gray-400">(optional)</span></label>
+                                                <input type="file" name="image" accept="image/jpg,image/jpeg,image/png,image/webp" class="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors text-sm">
+                                                <p class="text-xs text-gray-500 mt-1">JPG, PNG, or WebP. Max 5MB.</p>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Date <span class="text-red-500">*</span></label>
+                                                <input type="date" name="published_at" required value="{{ date('Y-m-d') }}" class="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors">
+                                            </div>
+                                        </div>
+                                        <div class="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end space-x-3">
+                                            <button type="button" @click="showNewsModal = false" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium">Cancel</button>
+                                            <button type="submit" class="px-6 py-2 bg-gray-900 text-white hover:bg-gray-800 transition-colors font-medium">Publish</button>
+                                        </div>
+                                    </form>
+
+                                    <!-- Edit Forms (one per news item, shown when editingNews matches) -->
+                                    @foreach($clubNews as $news)
+                                        <form x-show="editingNews === {{ $news->id }}" method="POST" action="{{ route('club.officer.news.update', $news) }}" enctype="multipart/form-data">
+                                            @csrf
+                                            @method('PUT')
+                                            <div class="p-6 space-y-4">
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Title <span class="text-red-500">*</span></label>
+                                                    <input type="text" name="title" required value="{{ $news->title }}" class="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Description <span class="text-red-500">*</span></label>
+                                                    <textarea name="description" required rows="4" class="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors resize-none">{{ $news->description }}</textarea>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Image <span class="text-gray-400">(optional)</span></label>
+                                                    @if($news->image)
+                                                        <div class="mb-2 flex items-center space-x-2">
+                                                            <img src="{{ asset('storage/' . $news->image) }}" class="w-16 h-16 object-cover border">
+                                                            <label class="flex items-center text-sm text-gray-600">
+                                                                <input type="checkbox" name="remove_image" value="1" class="mr-1"> Remove image
+                                                            </label>
+                                                        </div>
+                                                    @endif
+                                                    <input type="file" name="image" accept="image/jpg,image/jpeg,image/png,image/webp" class="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors text-sm">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Date <span class="text-red-500">*</span></label>
+                                                    <input type="date" name="published_at" required value="{{ $news->published_at->format('Y-m-d') }}" class="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors">
+                                                </div>
+                                            </div>
+                                            <div class="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end space-x-3">
+                                                <button type="button" @click="showNewsModal = false" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium">Cancel</button>
+                                                <button type="submit" class="px-6 py-2 bg-gray-900 text-white hover:bg-gray-800 transition-colors font-medium">Update</button>
+                                            </div>
+                                        </form>
+                                    @endforeach
                                 </div>
                             </div>
                         </div>
 
                         <!-- Club Activities Section -->
-                        <div class="bg-white border border-gray-200 overflow-hidden">
+                        <div class="bg-white border border-gray-200 overflow-hidden" x-data="{ showActivityModal: false, editingActivity: null, showDeleteConfirm: null }">
                             <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <h2 class="text-xl font-bold text-gray-900">Club Activities & Events</h2>
                                         <p class="text-gray-600 mt-1">Plan and manage club activities</p>
                                     </div>
-                                    <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-sm font-medium transition-colors">
+                                    <button @click="showActivityModal = true; editingActivity = null" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-sm font-medium transition-colors">
                                         Add Activity
                                     </button>
                                 </div>
                             </div>
                             
                             <div class="p-6">
-                                <div class="text-center py-12">
-                                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                    <h3 class="text-lg font-medium text-gray-900 mb-2">No Activities Scheduled</h3>
-                                    <p class="text-gray-500 mb-4">Start planning activities for your club members.</p>
-                                    <button class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 font-medium transition-colors">
-                                        Schedule First Activity
-                                    </button>
+                                @if($clubActivities->count() > 0)
+                                    <div class="space-y-4">
+                                        @foreach($clubActivities as $activity)
+                                            <div class="border border-gray-200 p-4">
+                                                <div class="flex items-start justify-between">
+                                                    <div class="flex-1">
+                                                        <h3 class="text-lg font-semibold text-gray-900">{{ $activity->title }}</h3>
+                                                        <p class="text-sm text-gray-500 mt-1">
+                                                            <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                                            {{ $activity->scheduled_at->format('M d, Y \a\t g:i A') }}
+                                                        </p>
+                                                    </div>
+                                                    <div class="flex items-center space-x-2 ml-4">
+                                                        <button @click="editingActivity = {{ $activity->id }}; showActivityModal = true" class="text-gray-500 hover:text-gray-700">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                                        </button>
+                                                        <button @click="showDeleteConfirm = {{ $activity->id }}" class="text-red-400 hover:text-red-600">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <p class="text-gray-700 mt-2 text-sm">{{ Str::limit($activity->description, 200) }}</p>
+                                                @if($activity->scheduled_at->isFuture())
+                                                    <span class="inline-block mt-2 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700">Upcoming</span>
+                                                @else
+                                                    <span class="inline-block mt-2 px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600">Past</span>
+                                                @endif
+                                                <!-- Delete Confirmation -->
+                                                <div x-show="showDeleteConfirm === {{ $activity->id }}" x-transition class="bg-red-50 border border-red-200 p-4 mt-3">
+                                                    <p class="text-sm text-red-700 mb-3">Are you sure you want to delete this activity?</p>
+                                                    <div class="flex space-x-2">
+                                                        <form method="POST" action="{{ route('club.officer.activities.delete', $activity) }}">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 text-sm font-medium transition-colors">Delete</button>
+                                                        </form>
+                                                        <button @click="showDeleteConfirm = null" class="bg-white border border-gray-300 text-gray-700 px-4 py-1.5 text-sm font-medium hover:bg-gray-50 transition-colors">Cancel</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="text-center py-12">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Activities Scheduled</h3>
+                                        <p class="text-gray-500 mb-4">Start planning activities for your club members.</p>
+                                        <button @click="showActivityModal = true; editingActivity = null" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 font-medium transition-colors">
+                                            Schedule First Activity
+                                        </button>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Add/Edit Activity Modal -->
+                            <div x-show="showActivityModal" x-transition class="fixed inset-0 bg-black/40 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-start justify-center pt-10">
+                                <div class="w-[550px] bg-white border" @click.outside="showActivityModal = false">
+                                    <div class="bg-gray-900 px-6 py-4 flex items-center justify-between">
+                                        <div>
+                                            <h3 class="text-lg font-semibold text-white" x-text="editingActivity ? 'Edit Activity' : 'Add Activity'"></h3>
+                                            <p class="text-sm text-gray-300">Plan an event for your club</p>
+                                        </div>
+                                        <button @click="showActivityModal = false" class="text-gray-400 hover:text-white">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        </button>
+                                    </div>
+
+                                    <!-- Add Form -->
+                                    <form x-show="!editingActivity" method="POST" action="{{ route('club.officer.activities.store') }}">
+                                        @csrf
+                                        <div class="p-6 space-y-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Title <span class="text-red-500">*</span></label>
+                                                <input type="text" name="title" required class="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors" placeholder="Activity title">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Description <span class="text-red-500">*</span></label>
+                                                <textarea name="description" required rows="4" class="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors resize-none" placeholder="Describe the activity..."></textarea>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Date & Time <span class="text-red-500">*</span></label>
+                                                <input type="datetime-local" name="scheduled_at" required class="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors">
+                                            </div>
+                                        </div>
+                                        <div class="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end space-x-3">
+                                            <button type="button" @click="showActivityModal = false" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium">Cancel</button>
+                                            <button type="submit" class="px-6 py-2 bg-gray-900 text-white hover:bg-gray-800 transition-colors font-medium">Schedule</button>
+                                        </div>
+                                    </form>
+
+                                    <!-- Edit Forms -->
+                                    @foreach($clubActivities as $activity)
+                                        <form x-show="editingActivity === {{ $activity->id }}" method="POST" action="{{ route('club.officer.activities.update', $activity) }}">
+                                            @csrf
+                                            @method('PUT')
+                                            <div class="p-6 space-y-4">
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Title <span class="text-red-500">*</span></label>
+                                                    <input type="text" name="title" required value="{{ $activity->title }}" class="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Description <span class="text-red-500">*</span></label>
+                                                    <textarea name="description" required rows="4" class="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors resize-none">{{ $activity->description }}</textarea>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Date & Time <span class="text-red-500">*</span></label>
+                                                    <input type="datetime-local" name="scheduled_at" required value="{{ $activity->scheduled_at->format('Y-m-d\TH:i') }}" class="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-gray-900 transition-colors">
+                                                </div>
+                                            </div>
+                                            <div class="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end space-x-3">
+                                                <button type="button" @click="showActivityModal = false" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium">Cancel</button>
+                                                <button type="submit" class="px-6 py-2 bg-gray-900 text-white hover:bg-gray-800 transition-colors font-medium">Update</button>
+                                            </div>
+                                        </form>
+                                    @endforeach
                                 </div>
                             </div>
                         </div>

@@ -413,13 +413,32 @@
                             </div>
                             
                             <div class="p-6">
-                                <div class="text-center py-12">
-                                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
-                                    </svg>
-                                    <h3 class="text-lg font-medium text-gray-900 mb-2">No News Yet</h3>
-                                    <p class="text-gray-500">Club news and announcements will appear here.</p>
-                                </div>
+                                @if($clubNews->count() > 0)
+                                    <div class="space-y-4">
+                                        @foreach($clubNews as $news)
+                                            <div class="border border-gray-200 overflow-hidden">
+                                                @if($news->image)
+                                                    <img src="{{ asset('storage/' . $news->image) }}" alt="{{ $news->title }}" class="w-full h-48 object-cover">
+                                                @endif
+                                                <div class="p-4">
+                                                    <h3 class="text-lg font-semibold text-gray-900">{{ $news->title }}</h3>
+                                                    <p class="text-sm text-gray-500 mt-1">
+                                                        By {{ $news->author->name ?? 'Unknown' }} &bull; {{ $news->published_at->format('M d, Y') }}
+                                                    </p>
+                                                    <p class="text-gray-700 mt-2 text-sm">{{ $news->description }}</p>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="text-center py-12">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
+                                        </svg>
+                                        <h3 class="text-lg font-medium text-gray-900 mb-2">No News Yet</h3>
+                                        <p class="text-gray-500">Club news and announcements will appear here.</p>
+                                    </div>
+                                @endif
                             </div>
                         </div>
 
@@ -431,13 +450,33 @@
                             </div>
                             
                             <div class="p-6">
-                                <div class="text-center py-12">
-                                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                    <h3 class="text-lg font-medium text-gray-900 mb-2">No Activities Scheduled</h3>
-                                    <p class="text-gray-500">Club activities and events will be displayed here.</p>
-                                </div>
+                                @if($clubActivities->count() > 0)
+                                    <div class="space-y-4">
+                                        @foreach($clubActivities as $activity)
+                                            <div class="border border-gray-200 p-4">
+                                                <h3 class="text-lg font-semibold text-gray-900">{{ $activity->title }}</h3>
+                                                <p class="text-sm text-gray-500 mt-1">
+                                                    <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                                    {{ $activity->scheduled_at->format('M d, Y \a\t g:i A') }}
+                                                </p>
+                                                <p class="text-gray-700 mt-2 text-sm">{{ $activity->description }}</p>
+                                                @if($activity->scheduled_at->isFuture())
+                                                    <span class="inline-block mt-2 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700">Upcoming</span>
+                                                @else
+                                                    <span class="inline-block mt-2 px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600">Past</span>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="text-center py-12">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Activities Scheduled</h3>
+                                        <p class="text-gray-500">Club activities and events will be displayed here.</p>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>

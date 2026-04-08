@@ -368,6 +368,21 @@ Route::prefix('club')->name('club.')->group(function () {
     Route::get('/officer/violations/data', [ClubDashboardController::class, 'getClubViolations'])->name('officer.violations.data');
     Route::get('/officer/appeal-form/{violation}', [ClubDashboardController::class, 'showAppealForm'])->name('officer.appeal-form');
     Route::post('/officer/submit-appeal', [ClubDashboardController::class, 'submitViolationAppeal'])->name('officer.submit-appeal');
+
+    // Club Notifications Routes
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+
+    // Club News Routes (Officers/Advisers only)
+    Route::post('/officer/news', [ClubDashboardController::class, 'storeNews'])->name('officer.news.store');
+    Route::put('/officer/news/{news}', [ClubDashboardController::class, 'updateNews'])->name('officer.news.update');
+    Route::delete('/officer/news/{news}', [ClubDashboardController::class, 'deleteNews'])->name('officer.news.delete');
+
+    // Club Activities Routes (Officers/Advisers only)
+    Route::post('/officer/activities', [ClubDashboardController::class, 'storeActivity'])->name('officer.activities.store');
+    Route::put('/officer/activities/{activity}', [ClubDashboardController::class, 'updateActivity'])->name('officer.activities.update');
+    Route::delete('/officer/activities/{activity}', [ClubDashboardController::class, 'deleteActivity'])->name('officer.activities.delete');
     
     // Debug route removed for production security
     // If needed for development, protect with authentication middleware

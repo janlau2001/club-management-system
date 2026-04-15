@@ -241,7 +241,7 @@
                     </div>
 
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Gmail Address *</label>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
                         <input type="email" 
                                id="email" 
                                name="email" 

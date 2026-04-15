@@ -59,7 +59,7 @@ class AuthController extends Controller
             // Redirect based on role
             switch ($admin->role) {
                 case 'head_student_affairs':
-                    return redirect()->route('head-office.dashboard')->with('success', 'Head of Student Affairs login successful!');
+                    return redirect()->route('head-office.dashboard')->with('success', 'SAASS login successful!');
                 case 'director_student_affairs':
                     return redirect()->route('director.dashboard')->with('success', 'Director login successful!');
                 case 'vp_academics':

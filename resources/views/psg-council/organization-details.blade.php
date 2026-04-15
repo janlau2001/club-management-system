@@ -4,7 +4,13 @@
     <div class="space-y-6">
         <div class="flex items-center justify-between">
             <h1 class="text-2xl font-bold text-gray-900">{{ $club->name }}</h1>
-            <a href="{{ route('psg-council.dashboard') }}" class="text-green-600 hover:text-green-800">← Back to Dashboard</a>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('psg-council.organization.export-pdf', $club->id) }}"
+                   class="inline-flex items-center gap-1.5 bg-[#29553c] hover:bg-[#1e3d2c] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-file-pdf text-xs"></i> Export PDF
+                </a>
+                <a href="{{ route('psg-council.dashboard') }}" class="text-green-600 hover:text-green-800">← Back to Dashboard</a>
+            </div>
         </div>
 
         <!-- Club Details -->

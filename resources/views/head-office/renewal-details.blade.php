@@ -359,7 +359,7 @@
                             <!-- Head Office Final Approval (only show if all admin approvals are complete) -->
                             @if($renewal->approved_by_vp && $renewal->endorsed_by_osa && $renewal->noted_by_dean && $renewal->reviewed_by_psg)
                                 <div class="pt-4 border-t border-gray-100">
-                                    <p class="text-sm font-medium text-gray-700 mb-4">Head of Student Affairs Final Approval</p>
+                                    <p class="text-sm font-medium text-gray-700 mb-4">SAASS Final Approval</p>
                                 </div>
 
                                 <div class="flex items-center space-x-3">
@@ -375,7 +375,7 @@
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center justify-between">
-                                            <p class="text-sm font-medium text-gray-900">Head Office Final Approval</p>
+                                            <p class="text-sm font-medium text-gray-900">SAASS Final Approval</p>
                                             @if($renewal->status === 'approved')
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">✅ APPROVED</span>
                                             @else
@@ -485,7 +485,7 @@
                                     ✅ All Administrative Approvals Complete
                                 </p>
                                 <p class="text-xs text-green-600 text-center mt-1">
-                                    Ready for Head of Student Affairs final approval
+                                    Ready for SAASS final approval
                                 </p>
                             </div>
                         @endif

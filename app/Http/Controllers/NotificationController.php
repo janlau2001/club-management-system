@@ -93,31 +93,100 @@ class NotificationController extends Controller
         ]);
 
         $club = Club::findOrFail($request->club_id);
-        
-        // Calculate renewal due date
-        $renewalDueDate = $club->date_registered ? $club->date_registered->copy()->addYear() : null;
-        
-        // Get all club members (officers, members, and advisers)
+        $deadline = Club::renewalDeadlineForYear(now()->year)->format('F j, Y');
+
         $clubUsers = ClubUser::where('club_id', $club->id)->get();
-        
+
         foreach ($clubUsers as $clubUser) {
             Notification::create([
-                'type' => 'renewal_reminder',
-                'title' => 'Club Renewal Due',
-                'message' => "Your club '{$club->name}' is due for renewal. Please submit your renewal application as soon as possible to avoid suspension.",
+                'type'    => 'renewal_reminder',
+                'title'   => 'Club Renewal Reminder',
+                'message' => "Your club \"{$club->name}\" has not yet renewed for this year. "
+                           . "The renewal deadline is {$deadline}. "
+                           . "Please submit your renewal application to continue club operations.",
                 'club_id' => $club->id,
                 'user_id' => $clubUser->id,
-                'data' => [
-                    'club_name' => $club->name,
-                    'renewal_due_date' => $renewalDueDate ? $renewalDueDate->format('Y-m-d') : null,
-                    'action_url' => route('club.officer.renewal'),
-                ]
+                'is_read' => false,
+                'data'    => ['club_name' => $club->name],
             ]);
         }
 
         return response()->json([
             'success' => true,
-            'message' => "Renewal reminder sent to all {$clubUsers->count()} members of {$club->name}."
+            'message' => "Renewal reminder sent to {$clubUsers->count()} member(s) of {$club->name}.",
         ]);
+    }
+
+    /**
+     * Send bulk renewal reminders to all unrenewed active clubs.
+     * Called from the SAASS renewals page header button.
+     */
+    public function sendBulkRenewalReminder(Request $request)
+    {
+        $currentYear  = now()->year;
+        $deadline     = Club::renewalDeadlineForYear($currentYear)->format('F j, Y');
+
+        $renewedIds = \App\Models\ClubRenewal::where('status', 'approved')
+            ->whereYear('created_at', $currentYear)
+            ->pluck('club_id')
+            ->toArray();
+
+        $clubs = Club::where('status', 'active')
+            ->whereNotIn('id', $renewedIds)
+            ->get();
+
+        if ($clubs->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'All active clubs have already renewed this year. No reminders sent.',
+            ]);
+        }
+
+        $clubCount  = 0;
+        $totalUsers = 0;
+
+        foreach ($clubs as $club) {
+            $clubUsers = ClubUser::where('club_id', $club->id)->get();
+
+            foreach ($clubUsers as $clubUser) {
+                Notification::create([
+                    'type'    => 'renewal_reminder',
+                    'title'   => 'Club Renewal Reminder',
+                    'message' => "Your club \"{$club->name}\" has not yet renewed for this year. "
+                               . "The renewal deadline is {$deadline}. "
+                               . "Please submit your renewal application to continue club operations.",
+                    'club_id' => $club->id,
+                    'user_id' => $clubUser->id,
+                    'is_read' => false,
+                    'data'    => ['club_name' => $club->name],
+                ]);
+            }
+
+            $clubCount++;
+            $totalUsers += $clubUsers->count();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Sent reminders to {$clubCount} club(s), notifying {$totalUsers} member(s) total.",
+            'clubs_notified' => $clubCount,
+            'users_notified' => $totalUsers,
+        ]);
+    }
+
+    /**
+     * Delete all notifications for the authenticated club user.
+     */
+    public function clearAll()
+    {
+        $user = session('club_user');
+
+        if (!$user) {
+            return response()->json(['error' => 'Not authenticated'], 401);
+        }
+
+        Notification::where('user_id', $user->id)->delete();
+
+        return response()->json(['success' => true]);
     }
 }

@@ -64,7 +64,7 @@
                         <div class="bg-white border border-gray-200">
                             <div class="px-6 py-4 border-b border-gray-200">
                                 <h2 class="text-xl font-semibold text-gray-900">Violation History</h2>
-                                <p class="text-sm text-gray-600 mt-1">Review violations issued by Head Office and submit appeals</p>
+                                <p class="text-sm text-gray-600 mt-1">Review violations issued by SAASS and submit appeals</p>
                             </div>
 
                             <!-- Tab Navigation -->
@@ -276,7 +276,7 @@
                                     <h3 class="ml-2 text-sm font-semibold text-blue-900">Appeals Pending</h3>
                                 </div>
                                 <p class="text-xs text-blue-800 mb-3">
-                                    Your appeals are being reviewed by the Head Office. You'll be notified of the decision.
+                                    Your appeals are being reviewed by SAASS. You'll be notified of the decision.
                                 </p>
                                 <div class="bg-white rounded p-3 border border-blue-200">
                                     <p class="text-xs text-blue-900">

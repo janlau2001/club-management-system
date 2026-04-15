@@ -18,9 +18,9 @@ Route::get('/', [App\Http\Controllers\Club\ClubAuthController::class, 'showLogin
 
 // Authentication Routes (with rate limiting for security)
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1'); // 5 attempts per minute
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:30,1'); // 30 attempts per minute
 Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:3,1'); // 3 attempts per minute
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1'); // 10 attempts per minute
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Session refresh route (for AJAX requests)
@@ -157,6 +157,7 @@ Route::middleware(['check.auth:admin'])->prefix('director')->name('director.')->
     Route::get('/dashboard', [DirectorController::class, 'dashboard'])->name('dashboard');
     Route::get('/organizations', function() { return redirect()->route('director.dashboard'); }); // Redirect old route
     Route::get('/organizations/{club}', [DirectorController::class, 'showOrganization'])->name('organization.show');
+    Route::get('/organizations/{club}/export-pdf', [DirectorController::class, 'exportOrganizationPdf'])->name('organization.export-pdf');
     Route::get('/approvals', [DirectorController::class, 'approvals'])->name('approvals');
     Route::get('/approvals/{registration}', [DirectorController::class, 'showApproval'])->name('approvals.show');
     Route::get('/approvals/{registration}/document/{type}', [DirectorController::class, 'downloadDocument'])->name('approvals.document');
@@ -175,6 +176,7 @@ Route::middleware(['check.auth:admin'])->prefix('vp')->name('vp.')->group(functi
     Route::get('/dashboard', [VpController::class, 'dashboard'])->name('dashboard');
     Route::get('/organizations', function() { return redirect()->route('vp.dashboard'); }); // Redirect old route
     Route::get('/organizations/{club}', [VpController::class, 'showOrganization'])->name('organization.show');
+    Route::get('/organizations/{club}/export-pdf', [VpController::class, 'exportOrganizationPdf'])->name('organization.export-pdf');
     Route::get('/approvals', [VpController::class, 'approvals'])->name('approvals');
     Route::get('/approvals/{registration}', [VpController::class, 'showApproval'])->name('approvals.show');
     Route::get('/approvals/{registration}/document/{type}', [VpController::class, 'downloadDocument'])->name('approvals.document');
@@ -192,6 +194,7 @@ Route::middleware(['check.auth:admin'])->prefix('vp')->name('vp.')->group(functi
 Route::middleware(['check.auth:admin'])->prefix('psg-council')->name('psg-council.')->group(function () {
     Route::get('/dashboard', [PsgCouncilController::class, 'dashboard'])->name('dashboard');
     Route::get('/organizations/{club}', [PsgCouncilController::class, 'showOrganization'])->name('organization.show');
+    Route::get('/organizations/{club}/export-pdf', [PsgCouncilController::class, 'exportOrganizationPdf'])->name('organization.export-pdf');
 
     // Approvals (Club Registrations)
     Route::get('/approvals', [PsgCouncilController::class, 'approvals'])->name('approvals');
@@ -213,6 +216,7 @@ Route::middleware(['check.auth:admin'])->prefix('dean')->name('dean.')->group(fu
     Route::get('/dashboard', [DeanController::class, 'dashboard'])->name('dashboard');
     Route::get('/organizations', function() { return redirect()->route('dean.dashboard'); }); // Redirect old route
     Route::get('/organizations/{club}', [DeanController::class, 'showOrganization'])->name('organization.show');
+    Route::get('/organizations/{club}/export-pdf', [DeanController::class, 'exportOrganizationPdf'])->name('organization.export-pdf');
     Route::get('/approvals', [DeanController::class, 'approvals'])->name('approvals');
     Route::get('/approvals/{registration}', [DeanController::class, 'showApproval'])->name('approvals.show');
     Route::get('/approvals/{registration}/document/{type}', [DeanController::class, 'viewDocument'])->name('approvals.document');
@@ -248,6 +252,7 @@ Route::middleware(['check.auth:admin'])->prefix('head-office')->name('head-offic
     Route::post('/renewals/{renewal}/approve', [HeadOfficeController::class, 'approveRenewal'])->name('renewals.approve');
     Route::post('/renewals/{renewal}/reject', [HeadOfficeController::class, 'rejectRenewal'])->name('renewals.reject');
     Route::post('/renewals/send-reminder', [NotificationController::class, 'sendRenewalReminder'])->name('renewals.send-reminder');
+    Route::post('/renewals/send-bulk-reminder', [NotificationController::class, 'sendBulkRenewalReminder'])->name('renewals.send-bulk-reminder');
 
     // Members & Reports
     Route::get('/members', [HeadOfficeController::class, 'members'])->name('members');
@@ -280,7 +285,7 @@ Route::middleware(['check.auth:admin'])->prefix('head-office')->name('head-offic
 Route::prefix('club')->name('club.')->group(function () {
     // Club Authentication (with rate limiting for security)
     Route::get('/login', [ClubAuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [ClubAuthController::class, 'login'])->middleware('throttle:5,1'); // 5 attempts per minute
+    Route::post('/login', [ClubAuthController::class, 'login'])->middleware('throttle:30,1'); // 30 attempts per minute
     Route::post('/logout', [ClubAuthController::class, 'logout'])->name('logout');
 
     // Email Verification Routes
@@ -298,10 +303,6 @@ Route::prefix('club')->name('club.')->group(function () {
     // Club Registration Routes (Multi-step)
     Route::get('/register', [ClubAuthController::class, 'showOfficerRegistration'])->name('register');
     Route::post('/email-registration', [ClubAuthController::class, 'storeEmailRegistration'])->name('email-registration.store');
-    
-    // Google OAuth Routes
-    Route::get('/auth/google', [ClubAuthController::class, 'redirectToGoogle'])->name('auth.google');
-    Route::get('/auth/google/callback', [ClubAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
     
     Route::post('/officer-registration', [ClubAuthController::class, 'storeOfficerRegistration'])->name('officer-registration.store');
     Route::get('/club-registration/{officer}', [ClubAuthController::class, 'showClubRegistration'])->name('club-registration.show');
@@ -373,6 +374,7 @@ Route::prefix('club')->name('club.')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+    Route::delete('/notifications/clear-all', [NotificationController::class, 'clearAll'])->name('notifications.clear-all');
 
     // Club News Routes (Officers/Advisers only)
     Route::post('/officer/news', [ClubDashboardController::class, 'storeNews'])->name('officer.news.store');

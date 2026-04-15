@@ -72,7 +72,7 @@
                                 <h3 class="text-sm font-semibold text-yellow-900 mb-1">Multiple Violations Require Appeals</h3>
                                 <p class="text-xs text-yellow-800">
                                     Your club currently has <strong>{{ $confirmedViolationsCount }} confirmed violations</strong>. 
-                                    All violations must be appealed and approved by the Head Office before your club's suspension can be lifted.
+                                    All violations must be appealed and approved by SAASS before your club's suspension can be lifted.
                                 </p>
                             </div>
                         </div>
@@ -201,7 +201,7 @@
                                         <h3 class="text-sm font-medium text-blue-800">Important Information</h3>
                                         <div class="mt-2 text-sm text-blue-700">
                                             <ul class="list-disc list-inside space-y-1">
-                                                <li>Your appeal will be reviewed by the Head Office</li>
+                                                <li>Your appeal will be reviewed by SAASS</li>
                                                 <li>The review process may take 3-5 business days</li>
                                                 <li>You will be notified of the decision via email</li>
                                                 <li>Supporting documents can strengthen your appeal</li>

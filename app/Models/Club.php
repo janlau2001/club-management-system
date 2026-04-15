@@ -88,40 +88,124 @@ class Club extends Model
         };
     }
 
+    // ──────────────────────────────────────────────────────────────
+    //  Fixed annual renewal window: August 1 – August 31
+    //  Warning period : August 21 – August 31  (10 days before close)
+    //  Grace / appeal : September 1 – September 10
+    //  Closed         : September 11 onward (until next August 1)
+    // ──────────────────────────────────────────────────────────────
+
     /**
-     * Get the date when the next renewal is due (1 year from last renewal or registration)
+     * Return the closing date of the renewal window for a given year.
+     * The window is Aug 1 – Aug 31; so the deadline is August 31.
      */
-    public function getRenewalDueDateAttribute()
+    public static function renewalDeadlineForYear(int $year): \Carbon\Carbon
     {
-        $baseDate = $this->last_renewal_date ?? $this->date_registered;
-        return $baseDate->addYear();
+        return \Carbon\Carbon::create($year, 8, 31, 23, 59, 59);
     }
 
     /**
-     * Get the number of days until renewal is due
+     * Return the opening date of the renewal window for a given year.
      */
-    public function getDaysUntilRenewalAttribute()
+    public static function renewalOpenDateForYear(int $year): \Carbon\Carbon
     {
-        $dueDate = $this->renewal_due_date;
+        return \Carbon\Carbon::create($year, 8, 1, 0, 0, 0);
+    }
+
+    /**
+     * Return the last day clubs can submit an appeal/late renewal (Sep 10).
+     */
+    public static function renewalGraceEndForYear(int $year): \Carbon\Carbon
+    {
+        return \Carbon\Carbon::create($year, 9, 10, 23, 59, 59);
+    }
+
+    /**
+     * Get the August 31 deadline for the current renewal cycle year.
+     * If today is before Aug 1 of the current year we still use the current year
+     * (the window hasn't opened yet). If we're past Sep 10 we already use next year
+     * so the countdown is toward the next cycle.
+     */
+    public function getRenewalDueDateAttribute(): \Carbon\Carbon
+    {
         $today = now();
-        
-        return $today->diffInDays($dueDate, false); // false means it can be negative (overdue)
+        $year  = (int) $today->format('Y');
+
+        $graceEnd = static::renewalGraceEndForYear($year);
+
+        // If we are past Sep 10 of this year, show the next year's deadline
+        if ($today->gt($graceEnd)) {
+            $year++;
+        }
+
+        return static::renewalDeadlineForYear($year);
     }
 
     /**
-     * Check if the club's renewal is overdue
+     * Days until August 31 (negative = overdue / past deadline).
      */
-    public function isRenewalOverdue()
+    public function getDaysUntilRenewalAttribute(): int
+    {
+        return (int) now()->diffInDays($this->renewal_due_date, false);
+    }
+
+    /**
+     * Whether the renewal window is currently open (Aug 1 – Aug 31).
+     */
+    public static function isRenewalWindowOpen(): bool
+    {
+        $today = now();
+        $year  = (int) $today->format('Y');
+        return $today->between(
+            static::renewalOpenDateForYear($year),
+            static::renewalDeadlineForYear($year)
+        );
+    }
+
+    /**
+     * Whether we are in the grace/appeal period (Sep 1 – Sep 10).
+     */
+    public static function isRenewalGracePeriod(): bool
+    {
+        $today = now();
+        $year  = (int) $today->format('Y');
+        $graceStart = static::renewalDeadlineForYear($year)->addSecond();
+        return $today->between($graceStart, static::renewalGraceEndForYear($year));
+    }
+
+    /**
+     * Whether the renewal period is closed (after Sep 10).
+     */
+    public static function isRenewalClosed(): bool
+    {
+        return !static::isRenewalWindowOpen() && !static::isRenewalGracePeriod();
+    }
+
+    /**
+     * Check if the club's renewal is overdue (past Aug 31 and not yet renewed this year).
+     */
+    public function isRenewalOverdue(): bool
     {
         return $this->days_until_renewal < 0;
     }
 
     /**
-     * Check if the club's renewal is due soon (within 30 days)
+     * Check if we are in the 10-day warning period (Aug 21 – Aug 31).
      */
-    public function isRenewalDueSoon()
+    public static function isRenewalWarningSoon(): bool
     {
-        return $this->days_until_renewal <= 30 && $this->days_until_renewal >= 0;
+        $today = now();
+        $year  = (int) $today->format('Y');
+        $warnStart = \Carbon\Carbon::create($year, 8, 21, 0, 0, 0);
+        return $today->between($warnStart, static::renewalDeadlineForYear($year));
+    }
+
+    /**
+     * Check if the club's renewal is due soon (within 10-day warning window).
+     */
+    public function isRenewalDueSoon(): bool
+    {
+        return static::isRenewalWarningSoon();
     }
 
     /**

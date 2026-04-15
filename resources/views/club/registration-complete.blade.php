@@ -98,7 +98,7 @@
 
                 <!-- Email Address -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Gmail Address</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
                     <div class="flex items-center space-x-2">
                         <input type="text" 
                                value="{{ $info['email'] }}" 

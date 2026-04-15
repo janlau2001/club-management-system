@@ -847,7 +847,7 @@ class ClubDashboardController extends Controller
      */
     public function showRenewal()
     {
-        $clubUser = session('club_user');
+        $clubUser = $this->getFreshClubUser();
         $club = $this->getFreshClub();
 
         if (!$clubUser || !$club) {
@@ -861,13 +861,22 @@ class ClubDashboardController extends Controller
         }
 
         try {
-            // Get last renewal date (placeholder - you can implement this based on your renewal model)
-            $lastRenewalDate = null; // This would come from your renewal records
-            
-            // Add empty renewal variable to prevent undefined variable errors
-            $renewal = null;
+            $lastRenewalDate = null;
+            $renewal = ClubRenewal::where('club_id', $club->id)
+                ->whereYear('created_at', now()->year)
+                ->latest()
+                ->first();
 
-            return view('club.officer.renewal', compact('clubUser', 'club', 'lastRenewalDate', 'renewal'));
+            // Determine window state
+            $isWindowOpen  = \App\Models\Club::isRenewalWindowOpen();
+            $isGracePeriod = \App\Models\Club::isRenewalGracePeriod();
+            $isClosed      = \App\Models\Club::isRenewalClosed();
+            $isWarningSoon = \App\Models\Club::isRenewalWarningSoon();
+
+            return view('club.officer.renewal', compact(
+                'clubUser', 'club', 'lastRenewalDate', 'renewal',
+                'isWindowOpen', 'isGracePeriod', 'isClosed', 'isWarningSoon'
+            ));
         } catch (\Exception $e) {
             Log::error('Error in showRenewal: ' . $e->getMessage());
             return redirect()->route('club.officer.dashboard')
@@ -880,17 +889,22 @@ class ClubDashboardController extends Controller
      */
     public function submitRenewal(Request $request)
     {
-        $clubUser = session('club_user');
+        $clubUser = $this->getFreshClubUser();
         $club = $this->getFreshClub();
 
         if (!$clubUser || !$club) {
             return redirect()->route('club.login')->with('error', 'Please login first.');
         }
 
-        // Check if user has permission to submit renewal (All Officers and Advisers)
         if ($clubUser->role === 'member') {
             return redirect()->route('club.officer.dashboard')
                 ->with('error', 'Access denied. Only Officers and Advisers can submit renewal applications.');
+        }
+
+        // Block submission when the renewal window is fully closed (past Sep 10)
+        if (\App\Models\Club::isRenewalClosed()) {
+            return redirect()->route('club.officer.renewal')
+                ->with('error', 'The renewal window is closed. Renewals are accepted from August 1 to August 31, with a grace period until September 10.');
         }
 
         // Validate the renewal form

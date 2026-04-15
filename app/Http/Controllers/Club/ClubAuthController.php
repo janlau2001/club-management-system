@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Laravel\Socialite\Facades\Socialite;
 
 class ClubAuthController extends Controller
 {
@@ -131,16 +130,38 @@ class ClubAuthController extends Controller
             'email' => [
                 'required',
                 'email',
-                'unique:officers,email',
                 function ($attribute, $value, $fail) {
-                    // Validate Gmail domain
-                    if (!str_ends_with(strtolower($value), '@gmail.com')) {
-                        $fail('Please use a Gmail address (@gmail.com).');
+                    $allowedDomains = ['@gmail.com', '@yahoo.com'];
+                    $emailLower = strtolower($value);
+                    $domainAllowed = collect($allowedDomains)->contains(fn($d) => str_ends_with($emailLower, $d));
+                    if (!$domainAllowed) {
+                        $fail('Please use a Gmail (@gmail.com) or Yahoo (@yahoo.com) email address.');
+                    }
+                    // Block only if an officer record exists AND has an active club_users entry.
+                    // This prevents orphaned records (from deleted clubs or abandoned signups) from blocking re-registration.
+                    $existing = \App\Models\Officer::where('email', $value)
+                        ->whereIn('registration_status', ['approved', 'submitted', 'email_verified'])
+                        ->first();
+                    if ($existing) {
+                        $hasActiveClub = \App\Models\ClubUser::where('email', $value)->exists();
+                        if ($hasActiveClub) {
+                            $fail('An account with this email already exists. Please log in instead.');
+                        }
                     }
                 },
             ],
             'password' => 'required|string|min:8|confirmed',
         ]);
+
+        // Clean up any stale/orphaned officer records for this email before creating a fresh one
+        \App\Models\Officer::where('email', $request->email)
+            ->whereNotIn('registration_status', ['approved'])
+            ->delete();
+
+        // Also purge globally any pending_email_verification records older than 3 minutes
+        \App\Models\Officer::where('registration_status', 'pending_email_verification')
+            ->where('created_at', '<', now()->subMinutes(3))
+            ->delete();
 
         // Create officer with email only, pending verification
         $officer = Officer::create([
@@ -155,83 +176,6 @@ class ClubAuthController extends Controller
         return redirect()->route('club.verification.notice')
             ->with('success', 'Verification email sent! Please check your inbox.')
             ->with('officer_id', $officer->id);
-    }
-
-    /**
-     * Redirect to Google OAuth
-     */
-    public function redirectToGoogle()
-    {
-        return Socialite::driver('google')
-            ->scopes(['openid', 'profile', 'email'])
-            ->redirect();
-    }
-
-    /**
-     * Handle Google OAuth callback
-     */
-    public function handleGoogleCallback()
-    {
-        try {
-            $googleUser = Socialite::driver('google')->user();
-            
-            // Validate email domain
-            if (!str_ends_with(strtolower($googleUser->getEmail()), '@gmail.com')) {
-                return redirect()->route('club.register')
-                    ->with('error', 'Please use a Gmail address (@gmail.com).');
-            }
-
-            // Check if officer already exists
-            $officer = Officer::where('email', $googleUser->getEmail())->first();
-
-            if (!$officer) {
-                // Create new officer with verified email
-                $officer = Officer::create([
-                    'email' => $googleUser->getEmail(),
-                    'name' => $googleUser->getName(),
-                    'password' => Hash::make(Str::random(32)), // Random password since using OAuth
-                    'email_verified_at' => now(),
-                    'registration_status' => 'email_verified',
-                ]);
-            } else {
-                // Update verification status if not verified
-                if (!$officer->hasVerifiedEmail()) {
-                    $officer->update([
-                        'email_verified_at' => now(),
-                        'registration_status' => 'email_verified',
-                    ]);
-                }
-            }
-
-            // If registration is complete, log them in
-            if ($officer->registration_status === 'submitted' || $officer->registration_status === 'approved') {
-                // Check if they have a ClubUser record
-                $clubUser = ClubUser::where('email', $officer->email)->first();
-                
-                if ($clubUser) {
-                    session([
-                        'club_user' => $clubUser,
-                        'club' => $clubUser->club,
-                        'user_type' => 'club_user',
-                        'authenticated' => true,
-                        'session_token' => Str::random(60),
-                        'last_activity' => time()
-                    ]);
-
-                    return redirect()->route($clubUser->hasManagementAccess() ? 'club.officer.dashboard' : 'club.member.dashboard')
-                        ->with('success', 'Welcome back, ' . $clubUser->name . '!');
-                }
-            }
-
-            // Otherwise, continue to registration
-            return redirect()->route('club.register', ['officer_id' => $officer->id])
-                ->with('success', 'Google account verified! Please complete your registration and set your password.');
-
-        } catch (\Exception $e) {
-            \Log::error('Google OAuth error: ' . $e->getMessage());
-            return redirect()->route('club.register')
-                ->with('error', 'Failed to authenticate with Google. Please try again or use email registration.');
-        }
     }
 
     public function storeOfficerRegistration(Request $request)

@@ -8,6 +8,7 @@ use App\Models\ClubRenewal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class VpController extends Controller
 {
@@ -75,6 +76,30 @@ class VpController extends Controller
         
         $club->load(['clubUsers']);
         return view('vp.organization-details', compact('club'));
+    }
+
+    public function exportOrganizationPdf(Club $club)
+    {
+        if (session('admin_role') !== 'vp_academics') {
+            return redirect()->route('dashboard.index')->with('error', 'Access denied.');
+        }
+
+        $club->load(['officers', 'members', 'advisers']);
+
+        $data = [
+            'club'          => $club,
+            'generatedDate' => now()->format('F j, Y'),
+            'generatedTime' => now()->format('g:i A'),
+            'adminName'     => session('user')->name ?? 'Administrator',
+            'adminRole'     => 'Vice President for Academics',
+        ];
+
+        $pdf = Pdf::loadView('reports.single-club-report', $data);
+        $pdf->setPaper('A4', 'portrait');
+
+        $filename = 'club-report-' . str_replace(' ', '-', strtolower($club->name)) . '-' . now()->format('Y-m-d') . '.pdf';
+
+        return $pdf->download($filename);
     }
 
     public function approvals(Request $request)

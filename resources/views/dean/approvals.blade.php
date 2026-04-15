@@ -61,7 +61,7 @@
             <div class="flex items-center justify-between">
                 <p class="text-sm text-gray-600">
                     @if($status === 'pending')
-                        <span class="font-medium text-gray-900">{{ $registrations->count() }}</span> pending registration(s) - You can only endorse after Head Office verification
+                        <span class="font-medium text-gray-900">{{ $registrations->count() }}</span> pending registration(s) - You can only endorse after SAASS verification
                     @else
                         <span class="font-medium text-gray-900">{{ $registrations->count() }}</span> registration(s) endorsed by you
                     @endif
@@ -115,13 +115,9 @@
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                             Rejected
                                         </span>
-                                    @elseif($registration->verified_by_osa)
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                            Ready for Dean Endorsement
-                                        </span>
                                     @else
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                                            ⏳ Awaiting Head Office
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            ⏳ Awaiting Dean Endorsement
                                         </span>
                                     @endif
                                 </td>
@@ -131,18 +127,16 @@
                                         View Details
                                     </a>
                                     @if(!$registration->endorsed_by_dean && $registration->status !== 'rejected')
-                                        @if($registration->verified_by_osa)
-                                            <button type="button"
-                                                    class="text-green-600 hover:text-green-900 mr-3"
-                                                    onclick="openApproveModal('{{ $registration->club_name }}', '{{ route('dean.approvals.approve', $registration) }}')">
-                                                Endorse
-                                            </button>
-                                            <button type="button"
-                                                    class="text-red-600 hover:text-red-900"
-                                                    onclick="openRejectModal('{{ $registration->club_name }}', '{{ route('dean.approvals.reject', $registration) }}')">
-                                                Reject
-                                            </button>
-                                        @endif
+                                        <button type="button"
+                                                class="text-green-600 hover:text-green-900 mr-3"
+                                                onclick="openApproveModal('{{ $registration->club_name }}', '{{ route('dean.approvals.approve', $registration) }}')">
+                                            Endorse
+                                        </button>
+                                        <button type="button"
+                                                class="text-red-600 hover:text-red-900"
+                                                onclick="openRejectModal('{{ $registration->club_name }}', '{{ route('dean.approvals.reject', $registration) }}')">
+                                            Reject
+                                        </button>
                                     @elseif($registration->endorsed_by_dean)
                                         <span class="text-green-600 text-sm">✓ Already Endorsed</span>
                                     @endif

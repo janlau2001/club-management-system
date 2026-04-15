@@ -144,7 +144,7 @@ class DashboardController extends Controller
             $allActivities->push([
                 'type' => 'approved',
                 'title' => $registration->club_name . ' approved',
-                'description' => 'Registration approved by ' . (session('admin_role') === 'head_student_affairs' ? 'Head Office' : 'Admin') . ' • ' . $registration->updated_at->diffForHumans(),
+                'description' => 'Registration approved by ' . (session('admin_role') === 'head_student_affairs' ? 'SAASS' : 'Admin') . ' • ' . $registration->updated_at->diffForHumans(),
                 'time' => $registration->updated_at,
                 'color' => 'green',
                 'details' => [
@@ -562,7 +562,7 @@ class DashboardController extends Controller
             ], 400);
         }
 
-        // Final approval by Head of Student Affairs
+        // Final approval by SAASS
         $renewal->update([
             'status' => 'approved',
             'approved_at' => now(),
@@ -795,7 +795,7 @@ class DashboardController extends Controller
         $roleName = '';
         switch ($adminRole) {
             case 'head_student_affairs':
-                $roleName = 'Head of Student Affairs';
+                $roleName = 'SAASS';
                 break;
             case 'director_student_affairs':
                 $roleName = 'Director';
@@ -825,7 +825,7 @@ class DashboardController extends Controller
 
         // Get role display name
         $roleNames = [
-            'head_student_affairs' => 'Head of Student Affairs',
+            'head_student_affairs' => 'SAASS',
             'director_student_affairs' => 'Director of Student Affairs',
             'vp_academics' => 'VP for Academics',
             'dean' => 'Dean'
@@ -1093,7 +1093,7 @@ class DashboardController extends Controller
     private function getAdminRoleTitle($role)
     {
         return match($role) {
-            'head_student_affairs' => 'Head of Student Affairs',
+            'head_student_affairs' => 'SAASS',
             'director_student_affairs' => 'Director of Student Affairs',
             'vp_academics' => 'Vice President for Academics',
             'dean' => 'Dean',

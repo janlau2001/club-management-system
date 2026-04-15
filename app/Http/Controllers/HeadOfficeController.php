@@ -603,37 +603,48 @@ class HeadOfficeController extends Controller
         // Calculate renewal information for each club
         $renewalData = $clubs->map(function($club) {
             $now = now();
-            
-            $daysUntilDue = $club->days_until_renewal;
-            $renewalDueDate = $club->renewal_due_date;
-            
-            if ($daysUntilDue > 30) {
-                $renewalStatus = 'not_due';
-                $statusLabel = 'Not Due Yet';
-                $statusBadge = 'bg-gray-100 text-gray-800';
-            } elseif ($daysUntilDue > 0 && $daysUntilDue <= 30) {
-                $renewalStatus = 'upcoming';
-                $statusLabel = "Due in {$daysUntilDue} days";
-                $statusBadge = 'bg-yellow-100 text-yellow-800';
-            } elseif ($daysUntilDue >= -30 && $daysUntilDue <= 0) {
-                $renewalStatus = 'due';
-                $statusLabel = $daysUntilDue === 0 ? 'Due Today' : 'Due ' . abs($daysUntilDue) . ' days ago';
-                $statusBadge = 'bg-orange-100 text-orange-800';
-            } else {
-                $renewalStatus = 'overdue';
-                $statusLabel = 'Overdue by ' . abs($daysUntilDue) . ' days';
-                $statusBadge = 'bg-red-100 text-red-800';
-            }
+            $year = (int) $now->format('Y');
+
+            $isWindowOpen   = \App\Models\Club::isRenewalWindowOpen();
+            $isGracePeriod  = \App\Models\Club::isRenewalGracePeriod();
+            $isWarningSoon  = \App\Models\Club::isRenewalWarningSoon();
+            $isClosed       = \App\Models\Club::isRenewalClosed();
+
+            $renewalDueDate  = $club->renewal_due_date;
+            $daysUntilDue    = $club->days_until_renewal;
 
             $submittedRenewal = ClubRenewal::where('club_id', $club->id)
-                ->whereYear('created_at', now()->year)
+                ->whereYear('created_at', $year)
                 ->latest()
                 ->first();
 
-            if ($submittedRenewal && $submittedRenewal->status === 'approved' && $club->last_renewal_date) {
+            $alreadyRenewed = $submittedRenewal && $submittedRenewal->status === 'approved' && $club->last_renewal_date;
+
+            if ($alreadyRenewed) {
+                $renewalStatus = 'renewed';
+                $statusLabel   = 'Renewed';
+                $statusBadge   = 'bg-green-100 text-green-800';
+            } elseif ($isClosed) {
+                $renewalStatus = 'overdue';
+                $statusLabel   = 'Window Closed';
+                $statusBadge   = 'bg-red-100 text-red-800';
+            } elseif ($isGracePeriod) {
+                $renewalStatus = 'due';
+                $statusLabel   = 'Grace Period (ends Sep 10)';
+                $statusBadge   = 'bg-orange-100 text-orange-800';
+            } elseif ($isWarningSoon) {
+                $renewalStatus = 'upcoming';
+                $statusLabel   = "Due in {$daysUntilDue} days (Aug 31)";
+                $statusBadge   = 'bg-yellow-100 text-yellow-800';
+            } elseif ($isWindowOpen) {
+                $renewalStatus = 'upcoming';
+                $statusLabel   = 'Renewal Open (Aug 1–31)';
+                $statusBadge   = 'bg-blue-100 text-blue-800';
+            } else {
+                // Before August of this year
                 $renewalStatus = 'not_due';
-                $statusLabel = 'Not Due Yet';
-                $statusBadge = 'bg-gray-100 text-gray-800';
+                $statusLabel   = 'Not Due Yet';
+                $statusBadge   = 'bg-gray-100 text-gray-800';
             }
 
             $submissionStatus = 'Not Submitted';
@@ -658,21 +669,21 @@ class HeadOfficeController extends Controller
             }
 
             return (object) [
-                'id' => $club->id,
-                'club' => $club,
-                'club_name' => $club->name,
-                'department' => $club->department,
-                'date_registered' => $club->date_registered,
+                'id'                => $club->id,
+                'club'              => $club,
+                'club_name'         => $club->name,
+                'department'        => $club->department,
+                'date_registered'   => $club->date_registered,
                 'last_renewal_date' => $club->last_renewal_date,
-                'renewal_due_date' => $renewalDueDate,
-                'days_until_due' => $daysUntilDue,
-                'renewal_status' => $renewalStatus,
-                'status_label' => $statusLabel,
-                'status_badge' => $statusBadge,
+                'renewal_due_date'  => $renewalDueDate,
+                'days_until_due'    => $daysUntilDue,
+                'renewal_status'    => $renewalStatus,
+                'status_label'      => $statusLabel,
+                'status_badge'      => $statusBadge,
                 'submitted_renewal' => $submittedRenewal,
-                'has_submitted' => $submittedRenewal !== null,
+                'has_submitted'     => $submittedRenewal !== null,
                 'submission_status' => $submissionStatus,
-                'member_count' => $club->clubUsers()->count(),
+                'member_count'      => $club->clubUsers()->count(),
             ];
         });
 
@@ -695,21 +706,20 @@ class HeadOfficeController extends Controller
             });
         }
 
-        // Calculate statistics
+        // Calculate statistics based on fixed August window
         $allClubs = Club::all();
-        
-        $upcomingRenewals = $allClubs->filter(function($club) {
-            return $club->isRenewalDueSoon();
-        })->count();
 
-        $dueRenewals = $allClubs->filter(function($club) {
-            $daysUntil = $club->days_until_renewal;
-            return $daysUntil >= -30 && $daysUntil <= 0;
-        })->count();
+        $upcomingRenewals = Club::isRenewalWarningSoon()
+            ? $allClubs->filter(fn($c) => !ClubRenewal::where('club_id', $c->id)->whereYear('created_at', now()->year)->where('status', 'approved')->exists())->count()
+            : 0;
 
-        $overdueRenewals = $allClubs->filter(function($club) {
-            return $club->isRenewalOverdue() && $club->days_until_renewal < -30;
-        })->count();
+        $dueRenewals = Club::isRenewalWindowOpen()
+            ? $allClubs->filter(fn($c) => !ClubRenewal::where('club_id', $c->id)->whereYear('created_at', now()->year)->where('status', 'approved')->exists())->count()
+            : 0;
+
+        $overdueRenewals = (Club::isRenewalGracePeriod() || Club::isRenewalClosed())
+            ? $allClubs->filter(fn($c) => !ClubRenewal::where('club_id', $c->id)->whereYear('created_at', now()->year)->where('status', 'approved')->exists())->count()
+            : 0;
 
         $submittedRenewals = ClubRenewal::whereYear('created_at', now()->year)
             ->whereIn('status', ['pending_internal', 'pending_admin', 'approved'])

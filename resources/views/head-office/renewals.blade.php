@@ -8,15 +8,9 @@
             <p class="text-gray-600 mt-1">Manage organization renewal applications and track renewal status</p>
         </div>
         <div class="flex items-center space-x-3">
-            <button class="bg-gray-900 hover:bg-gray-800 text-white px-5 py-2 rounded font-medium flex items-center space-x-2">
+            <button id="bulkReminderBtn" onclick="sendBulkReminders()" class="bg-gray-600 hover:bg-gray-700 text-white px-5 py-2 font-medium flex items-center space-x-2 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                <span>Export Report</span>
-            </button>
-            <button onclick="sendBulkReminders()" class="bg-gray-600 hover:bg-gray-700 text-white px-5 py-2 rounded font-medium flex items-center space-x-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                 </svg>
                 <span>Send Reminders</span>
             </button>
@@ -35,7 +29,7 @@
                 <div>
                     <p class="text-xs font-medium text-gray-600 uppercase tracking-wide">Upcoming Renewals</p>
                     <p class="text-2xl font-semibold text-gray-900 mt-0.5">{{ $upcomingRenewals ?? 0 }}</p>
-                    <p class="text-xs text-gray-500 mt-0.5">Due in 30 days</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Aug 21–31 warning window</p>
                 </div>
             </div>
         </div>
@@ -50,7 +44,7 @@
                 <div>
                     <p class="text-xs font-medium text-gray-600 uppercase tracking-wide">Due Now</p>
                     <p class="text-2xl font-semibold text-gray-900 mt-0.5">{{ $dueRenewals ?? 0 }}</p>
-                    <p class="text-xs text-gray-500 mt-0.5">Due for renewal</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Renewal open (Aug 1–31)</p>
                 </div>
             </div>
         </div>
@@ -65,7 +59,7 @@
                 <div>
                     <p class="text-xs font-medium text-gray-600 uppercase tracking-wide">Overdue</p>
                     <p class="text-2xl font-semibold text-gray-900 mt-0.5">{{ $overdueRenewals ?? 0 }}</p>
-                    <p class="text-xs text-gray-500 mt-0.5">Past due date</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Past Aug 31 / grace Sep 1–10</p>
                 </div>
             </div>
         </div>
@@ -185,12 +179,21 @@
                                 {{ $item->last_renewal_date ? $item->last_renewal_date->format('M j, Y') : 'Never renewed' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                @if($item->days_until_due > 0)
-                                    <span class="text-blue-600 font-medium">Due in {{ (int)$item->days_until_due }} days</span>
-                                @elseif($item->days_until_due === 0)
-                                    <span class="text-orange-600 font-medium">Due Today</span>
+                                @php
+                                    $isWindowOpen  = \App\Models\Club::isRenewalWindowOpen();
+                                    $isGrace       = \App\Models\Club::isRenewalGracePeriod();
+                                    $isClosed      = \App\Models\Club::isRenewalClosed();
+                                @endphp
+                                @if($isClosed)
+                                    <span class="text-red-600 font-medium">Window Closed</span>
+                                @elseif($isGrace)
+                                    <span class="text-orange-600 font-medium">Grace period – ends Sep 10</span>
+                                @elseif($isWindowOpen && $item->days_until_due > 0)
+                                    <span class="text-blue-600 font-medium">Due in {{ (int)$item->days_until_due }} days (Aug 31)</span>
+                                @elseif($isWindowOpen)
+                                    <span class="text-orange-600 font-medium">Due Today (Aug 31)</span>
                                 @else
-                                    <span class="text-red-600 font-medium">Overdue by {{ (int)abs($item->days_until_due) }} days</span>
+                                    <span class="text-gray-500">Opens Aug 1, {{ now()->format('Y') }}</span>
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -359,60 +362,34 @@
     }
 
     function sendBulkReminders() {
-        showConfirm('Send Bulk Reminders', 'Send renewal reminders to all overdue clubs? This will notify all members of overdue clubs.', function() {
-            const button = event.target;
-            const originalText = button.innerHTML;
-            button.innerHTML = '<svg class="w-5 h-5 animate-spin mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Sending...';
-            button.disabled = true;
+        showConfirm('Send Bulk Reminders', 'Send renewal reminders to all clubs that have not yet renewed this year? All members of those clubs will be notified.', function() {
+            const btn = document.getElementById('bulkReminderBtn');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<svg class="w-4 h-4 animate-spin mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg><span>Sending...</span>';
+            btn.disabled = true;
 
-            const overdueClubs = [];
-            document.querySelectorAll('tr').forEach(row => {
-                const statusText = row.textContent;
-                if (statusText.includes('Overdue by') && !statusText.includes('Not Submitted')) {
-                    const clubId = row.querySelector('button[onclick*="sendRenewalReminder"]')?.getAttribute('onclick')?.match(/\d+/)?.[0];
-                    if (clubId) {
-                        overdueClubs.push(clubId);
-                    }
-                }
-            });
-
-            if (overdueClubs.length === 0) {
-                showNotification('warning', 'No Clubs Found', 'No overdue clubs found that need reminders.');
-                button.innerHTML = originalText;
-                button.disabled = false;
-                return;
-            }
-
-            Promise.all(overdueClubs.map(clubId => 
-                fetch('{{ route('head-office.renewals.send-reminder') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({ club_id: clubId })
-                })
-            ))
-            .then(responses => Promise.all(responses.map(r => r.json())))
-            .then(results => {
-                const successCount = results.filter(r => r.success).length;
-                const totalMembers = results.reduce((sum, r) => {
-                    if (r.success) {
-                        const match = r.message.match(/(\d+) members/);
-                        return sum + (match ? parseInt(match[1]) : 0);
-                    }
-                    return sum;
-                }, 0);
-                
-                showNotification('success', 'Reminders Sent', `Sent renewal reminders to ${overdueClubs.length} clubs (${totalMembers} total members).`);
-                button.innerHTML = originalText;
-                button.disabled = false;
+            fetch('{{ route('head-office.renewals.send-bulk-reminder') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({})
             })
-            .catch(error => {
-                console.error('Error:', error);
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('success', 'Reminders Sent', data.message);
+                } else {
+                    showNotification('warning', 'No Reminders Sent', data.message);
+                }
+            })
+            .catch(() => {
                 showNotification('error', 'Error', 'An error occurred while sending bulk reminders.');
-                button.innerHTML = originalText;
-                button.disabled = false;
+            })
+            .finally(() => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
             });
         });
     }

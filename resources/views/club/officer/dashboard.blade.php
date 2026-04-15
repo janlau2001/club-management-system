@@ -21,6 +21,178 @@
                     <p class="text-white opacity-75 text-sm">Welcome, {{ $clubUser->name }} ({{ $clubUser->getDisplayRole() }})</p>
                 </div>
                 <div class="flex items-center space-x-4">
+                    <!-- Notification Bell -->
+                    <div class="relative" x-data="{
+                        open: false,
+                        notifications: [],
+                        unreadCount: 0,
+                        loading: false,
+                        hasError: false,
+
+                        async fetchNotifications() {
+                            if (this.open) return;
+                            this.loading = true;
+                            this.hasError = false;
+                            try {
+                                const ctrl = new AbortController();
+                                const tid  = setTimeout(() => ctrl.abort(), 5000);
+                                const res  = await fetch('{{ route('club.notifications.index') }}', {
+                                    signal: ctrl.signal,
+                                    headers: { 'Accept': 'application/json' }
+                                });
+                                clearTimeout(tid);
+                                if (!res.ok) throw new Error('HTTP ' + res.status);
+                                const data = await res.json();
+                                this.notifications = data.notifications || [];
+                                this.unreadCount   = data.unread_count  || 0;
+                            } catch (e) {
+                                if (e.name !== 'AbortError') this.hasError = true;
+                            }
+                            this.loading = false;
+                        },
+
+                        async markAsRead(id, ev) {
+                            if (ev) ev.stopPropagation();
+                            try {
+                                const res = await fetch('/club/notifications/' + id + '/read', {
+                                    method: 'POST',
+                                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' }
+                                });
+                                if (res.ok) {
+                                    const n = this.notifications.find(x => x.id === id);
+                                    if (n && !n.is_read) { n.is_read = true; this.unreadCount = Math.max(0, this.unreadCount - 1); }
+                                    setTimeout(() => this.fetchNotifications(), 1000);
+                                }
+                            } catch (e) {}
+                        },
+
+                        async markAllAsRead() {
+                            try {
+                                const res = await fetch('/club/notifications/mark-all-read', {
+                                    method: 'POST',
+                                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' }
+                                });
+                                if (res.ok) {
+                                    this.notifications.forEach(n => n.is_read = true);
+                                    this.unreadCount = 0;
+                                }
+                            } catch (e) {}
+                        },
+
+                        async clearAll() {
+                            try {
+                                const res = await fetch('/club/notifications/clear-all', {
+                                    method: 'DELETE',
+                                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' }
+                                });
+                                if (res.ok) {
+                                    this.notifications = [];
+                                    this.unreadCount   = 0;
+                                }
+                            } catch (e) {}
+                        },
+
+                        toggle() {
+                            this.open = !this.open;
+                            if (this.open && this.notifications.length === 0 && !this.hasError) {
+                                this.fetchNotifications();
+                            }
+                        },
+
+                        init() {
+                            setTimeout(() => this.fetchNotifications(), 2000);
+                            setInterval(() => { if (!this.open && !document.hidden) this.fetchNotifications(); }, 60000);
+                            document.addEventListener('visibilitychange', () => {
+                                if (!document.hidden && !this.open) setTimeout(() => this.fetchNotifications(), 1000);
+                            });
+                        }
+                    }">
+                        <!-- Bell button -->
+                        <button @click="toggle()" class="relative flex items-center justify-center w-10 h-10 bg-white/20 hover:bg-white/30 text-white transition-colors border border-white/30">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                            </svg>
+                            <span x-show="unreadCount > 0" x-text="unreadCount > 99 ? '99+' : unreadCount"
+                                  class="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-0.5 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none"></span>
+                        </button>
+
+                        <!-- Notification Panel -->
+                        <div x-show="open" @click.outside="open = false" x-transition
+                             class="absolute right-0 top-full mt-2 w-96 bg-white border border-gray-200 z-50 shadow-lg">
+
+                            <!-- Panel header -->
+                            <div class="bg-gray-900 text-white px-4 py-3 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                    </svg>
+                                    <span class="text-sm font-semibold">Notifications</span>
+                                    <span x-show="unreadCount > 0" x-text="unreadCount + ' unread'"
+                                          class="text-xs bg-red-500 text-white px-1.5 py-0.5 font-medium"></span>
+                                </div>
+                                <button @click="open = false" class="text-white/70 hover:text-white">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Body -->
+                            <div class="p-4">
+                                <!-- Loading -->
+                                <div x-show="loading" class="py-8 flex justify-center">
+                                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+                                </div>
+
+                                <!-- Error -->
+                                <div x-show="!loading && hasError" class="py-8 text-center">
+                                    <p class="text-sm text-gray-500 mb-3">Unable to load notifications.</p>
+                                    <button @click="fetchNotifications()" class="px-4 py-1.5 text-xs bg-gray-900 text-white hover:bg-gray-800">Retry</button>
+                                </div>
+
+                                <!-- Empty -->
+                                <div x-show="!loading && !hasError && notifications.length === 0" class="py-10 text-center">
+                                    <svg class="w-10 h-10 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                                    </svg>
+                                    <p class="text-sm font-medium text-gray-700">No notifications</p>
+                                    <p class="text-xs text-gray-400 mt-1">You'll see reminders and updates here.</p>
+                                </div>
+
+                                <!-- List -->
+                                <div x-show="!loading && notifications.length > 0" class="max-h-80 overflow-y-auto space-y-2">
+                                    <template x-for="n in notifications" :key="n.id">
+                                        <div class="border p-3 transition-colors"
+                                             :class="n.is_read ? 'bg-white border-gray-100' : 'bg-amber-50 border-amber-200'">
+                                            <div class="flex items-start justify-between gap-2 mb-1">
+                                                <p class="text-xs font-semibold text-gray-900" x-text="n.title"></p>
+                                                <div class="flex items-center gap-1.5 shrink-0">
+                                                    <span x-show="!n.is_read" class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                                    <button x-show="!n.is_read" @click="markAsRead(n.id, $event)"
+                                                            class="text-[10px] text-gray-500 hover:text-gray-700 underline">Mark read</button>
+                                                </div>
+                                            </div>
+                                            <p class="text-xs text-gray-600 leading-relaxed" x-text="n.message"></p>
+                                            <p class="text-[10px] text-gray-400 mt-1.5" x-text="new Date(n.created_at).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})"></p>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <!-- Actions -->
+                                <div x-show="!loading && notifications.length > 0" class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                                    <button x-show="unreadCount > 0" @click="markAllAsRead()"
+                                            class="flex-1 text-xs py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium">
+                                        Mark All Read
+                                    </button>
+                                    <button @click="clearAll()"
+                                            class="flex-1 text-xs py-2 bg-red-600 hover:bg-red-700 text-white transition-colors font-medium">
+                                        Clear All
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Profile Dropdown -->
                     <div class="relative" x-data="{ open: false }">
                         <button @click="open = !open" class="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-white px-3 py-2 text-sm font-medium transition-colors border border-white/30">
@@ -631,6 +803,18 @@
                                                         </span>
                                                     @endif
                                                 </a>
+
+                                                @if($clubUser->position === 'President' || $clubUser->role === 'adviser')
+                                                    <a href="{{ route('club.officer.violations') }}"
+                                                       class="block w-full bg-red-50 hover:bg-red-100 text-red-700 px-4 py-3 text-sm font-medium transition-colors text-center mb-3">
+                                                        <div class="flex items-center justify-center space-x-2">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                                            </svg>
+                                                            <span>Violations & Appeals</span>
+                                                        </div>
+                                                    </a>
+                                                @endif
 
                                                 <div class="bg-blue-50 border border-blue-200 p-3">
                                                     <div class="flex items-center">

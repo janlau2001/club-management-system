@@ -1,5 +1,5 @@
 <x-dashboard-layout>
-    <x-slot name="title">Head Office Dashboard</x-slot>
+    <x-slot name="title">SAASS Dashboard</x-slot>
 
     <div class="pb-12 space-y-8">
 
@@ -8,7 +8,7 @@
             ╚══════════════════════════════════════════════╝ --}}
         <div class="bg-gray-900 text-white p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-                <h1 class="text-xl font-semibold tracking-tight">Good {{ now()->hour < 12 ? 'morning' : (now()->hour < 18 ? 'afternoon' : 'evening') }}, Head of Student Affairs</h1>
+                <h1 class="text-xl font-semibold tracking-tight">Good {{ now()->hour < 12 ? 'morning' : (now()->hour < 18 ? 'afternoon' : 'evening') }}, SAASS</h1>
                 <p class="text-gray-400 text-sm mt-1">{{ now()->format('l, F d, Y') }} &mdash; Here's your system overview</p>
             </div>
             @if($actionableItems > 0)

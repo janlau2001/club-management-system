@@ -9,7 +9,7 @@
                 @php
                     $badges = $sidebarBadges ?? [];
                 @endphp
-                <!-- Head of Student Affairs Navigation -->
+                <!-- SAASS Navigation -->
                 <a href="{{ route('head-office.dashboard') }}"
                    class="flex items-center px-4 py-3 rounded-lg hover:bg-[#FFE670] duration-300 {{ request()->routeIs('head-office.dashboard') ? 'bg-[#FFE670] font-bold text-black border-r-8 border-[#FFB726]' : 'text-white hover:text-black' }}">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -296,7 +296,7 @@
                 <div class="flex-1 text-left">
                     <p class="text-sm font-medium text-[#FFE670]">
                         @if(session('admin_role') === 'head_student_affairs')
-                            Head of Student Affairs
+                            SAASS
                         @elseif(session('admin_role') === 'director_student_affairs')
                             Director
                         @elseif(session('admin_role') === 'vp_academics')

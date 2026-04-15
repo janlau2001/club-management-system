@@ -30,7 +30,7 @@
             <div class="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-4">
                 <i class="fas fa-envelope text-green-600 text-3xl"></i>
             </div>
-            <h2 class="text-2xl font-semibold text-gray-900">Verify Your Gmail Address</h2>
+            <h2 class="text-2xl font-semibold text-gray-900">Verify Your Email Address</h2>
             @if(isset($officer))
                 <p class="text-sm text-gray-600 mt-2">{{ $officer->email }}</p>
             @endif
@@ -60,7 +60,7 @@
         <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p class="text-sm text-gray-700 text-center">
                 <i class="fas fa-info-circle text-blue-600 mr-1"></i>
-                We've sent a verification link to your Gmail address. Please check your inbox and click the link to continue with your club registration.
+                We've sent a verification link to your email address. Please check your inbox and click the link to continue with your club registration.
             </p>
         </div>
 

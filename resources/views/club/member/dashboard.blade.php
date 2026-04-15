@@ -106,18 +106,28 @@
                                         'Content-Type': 'application/json'
                                     }
                                 });
-                                
                                 if (response.ok) {
-                                    // Update local state immediately
                                     this.notifications.forEach(n => n.is_read = true);
                                     this.unreadCount = 0;
-                                    
-                                    // Refresh in background
                                     setTimeout(() => this.fetchNotifications(), 1000);
                                 }
-                            } catch (error) {
-                                console.error('Error marking all as read:', error);
-                            }
+                            } catch (error) {}
+                        },
+
+                        async clearAll() {
+                            try {
+                                const response = await fetch('/club/notifications/clear-all', {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                        'Content-Type': 'application/json'
+                                    }
+                                });
+                                if (response.ok) {
+                                    this.notifications = [];
+                                    this.unreadCount   = 0;
+                                }
+                            } catch (error) {}
                         },
                         
                         togglePanel() {
@@ -155,34 +165,31 @@
                             });
                         }
                     }">
-                        <button @click="togglePanel()" class="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-white px-3 py-2 text-sm font-medium transition-colors border border-white/30 relative">
+                        <button @click="togglePanel()" class="relative flex items-center justify-center w-10 h-10 bg-white/20 hover:bg-white/30 text-white transition-colors border border-white/30">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                             </svg>
-                            <span>Mailbox</span>
-                            <span x-show="unreadCount > 0" x-text="unreadCount" class="absolute -top-2 -right-2 h-5 w-5 bg-red-500 text-white text-xs flex items-center justify-center"></span>
-                            <span x-show="hasError && !loading" class="absolute -top-1 -right-1 h-3 w-3 bg-yellow-500 rounded-full" title="Connection issue"></span>
+                            <span x-show="unreadCount > 0" x-text="unreadCount > 99 ? '99+' : unreadCount"
+                                  class="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-0.5 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none"></span>
+                            <span x-show="hasError && !loading" class="absolute -top-1 -right-1 h-3 w-3 bg-yellow-500" title="Connection issue"></span>
                         </button>
                         
                         <div x-show="open" @click.outside="closePanel()" x-transition class="absolute right-0 top-full mt-2 w-96 bg-white border z-50">
-                            <!-- Mailbox Header -->
-                            <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4">
-                                <div class="flex justify-between items-center">
-                                    <div class="flex items-center space-x-2">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                                        </svg>
-                                        <h3 class="text-lg font-semibold">Head Office Mail</h3>
-                                    </div>
-                                    <div class="flex items-center space-x-2">
-                                        <span class="text-sm" x-text="unreadCount > 0 ? unreadCount + ' new messages' : 'No new messages'"></span>
-                                        <button @click="closePanel()" class="text-white/80 hover:text-white">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
+                            <!-- Panel Header -->
+                            <div class="bg-gray-900 text-white px-4 py-3 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                    </svg>
+                                    <span class="text-sm font-semibold">Notifications</span>
+                                    <span x-show="unreadCount > 0" x-text="unreadCount + ' unread'"
+                                          class="text-xs bg-red-500 text-white px-1.5 py-0.5 font-medium"></span>
                                 </div>
+                                <button @click="closePanel()" class="text-white/70 hover:text-white">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
                             </div>
 
                             <!-- Mailbox Content -->
@@ -191,12 +198,12 @@
                                     <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
                                 </div>
                                 
-                                <div x-show="!loading && notifications.length === 0 && !hasError" class="py-8 flex flex-col items-center justify-center text-center">
-                                    <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div x-show="!loading && notifications.length === 0 && !hasError" class="py-10 text-center">
+                                    <svg class="w-10 h-10 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
                                     </svg>
-                                    <h4 class="text-lg font-medium text-gray-900 mb-1">No Mail</h4>
-                                    <p class="text-sm text-gray-500">Your mailbox is empty. You'll receive official messages from the Head Office here.</p>
+                                    <p class="text-sm font-medium text-gray-700">No notifications</p>
+                                    <p class="text-xs text-gray-400 mt-1">You'll see reminders and updates here.</p>
                                 </div>
                                 
                                 <div x-show="!loading && hasError" class="py-8 flex flex-col items-center justify-center text-center">
@@ -210,47 +217,35 @@
                                     </button>
                                 </div>
                                 
-                                <div x-show="!loading && notifications.length > 0" class="max-h-80 overflow-y-auto space-y-3">
+                                <div x-show="!loading && notifications.length > 0" class="max-h-80 overflow-y-auto space-y-2">
                                     <template x-for="notification in notifications" :key="notification.id">
-                                        <div class="border overflow-hidden transition-all duration-200"
-                                             :class="notification.is_read ? 'bg-gray-50 border-gray-200' : 'bg-blue-50 border-blue-300'">
-                                            <!-- Mail Header -->
-                                            <div class="p-3 border-b" :class="notification.is_read ? 'border-gray-200' : 'border-blue-200'">
-                                                <div class="flex items-start justify-between">
-                                                    <div class="flex items-center space-x-2">
-                                                        <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full flex items-center justify-center">
-                                                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                                                            </svg>
-                                                        </div>
-                                                        <div>
-                                                            <p class="text-sm font-semibold text-gray-900">Head Office</p>
-                                                            <p class="text-xs text-gray-500" x-text="new Date(notification.created_at).toLocaleDateString() + ' ' + new Date(notification.created_at).toLocaleTimeString()"></p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="flex items-center space-x-2">
-                                                        <div x-show="!notification.is_read" class="w-3 h-3 bg-blue-600 rounded-full"></div>
-                                                        <button x-show="!notification.is_read" 
-                                                                @click="markAsRead(notification.id, $event)"
-                                                                class="text-xs text-blue-600 hover:text-blue-800 underline">
-                                                            Mark Read
-                                                        </button>
-                                                    </div>
+                                        <div class="border p-3 transition-colors"
+                                             :class="notification.is_read ? 'bg-white border-gray-100' : 'bg-amber-50 border-amber-200'">
+                                            <div class="flex items-start justify-between gap-2 mb-1">
+                                                <p class="text-xs font-semibold text-gray-900" x-text="notification.title"></p>
+                                                <div class="flex items-center gap-1.5 shrink-0">
+                                                    <span x-show="!notification.is_read" class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                                    <button x-show="!notification.is_read"
+                                                            @click="markAsRead(notification.id, $event)"
+                                                            class="text-[10px] text-gray-500 hover:text-gray-700 underline">
+                                                        Mark read
+                                                    </button>
                                                 </div>
                                             </div>
-                                            
-                                            <!-- Mail Content -->
-                                            <div class="p-3">
-                                                <h4 class="text-sm font-semibold text-gray-900 mb-2" x-text="notification.title"></h4>
-                                                <p class="text-sm text-gray-700" x-text="notification.message"></p>
-                                            </div>
+                                            <p class="text-xs text-gray-600 leading-relaxed" x-text="notification.message"></p>
+                                            <p class="text-[10px] text-gray-400 mt-1.5" x-text="new Date(notification.created_at).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})"></p>
                                         </div>
                                     </template>
                                 </div>
                                 
-                                <div x-show="!loading && notifications.length > 0 && unreadCount > 0" class="mt-4 pt-4 border-t">
-                                    <button @click="markAllAsRead()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 text-sm font-medium transition-colors">
-                                        Mark All Messages as Read
+                                <div x-show="!loading && notifications.length > 0" class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                                    <button x-show="unreadCount > 0" @click="markAllAsRead()"
+                                            class="flex-1 text-xs py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium">
+                                        Mark All Read
+                                    </button>
+                                    <button @click="clearAll()"
+                                            class="flex-1 text-xs py-2 bg-red-600 hover:bg-red-700 text-white transition-colors font-medium">
+                                        Clear All
                                     </button>
                                 </div>
                             </div>
